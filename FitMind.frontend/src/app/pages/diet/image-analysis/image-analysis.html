@@ -1,0 +1,225 @@
+<div class="page-layout">
+  <header class="page-header">
+    <button class="back-btn" (click)="goBack()"><span class="mi">arrow_back</span></button>
+    <h1>Análise por Imagem IA</h1>
+    <div style="width:40px"></div>
+  </header>
+
+  <main class="page-content">
+
+    <!-- Step: upload -->
+    @if (step() === 'upload') {
+      <div class="ai-banner">
+        <span class="ai-icon mi mi-lg">photo_camera</span>
+        <div>
+          <strong>IA Nutricional</strong>
+          <p>Envie uma foto da sua refeição e a IA detecta os alimentos e estima os macros automaticamente.</p>
+        </div>
+      </div>
+
+      <!-- Drop zone -->
+      <div
+        class="drop-zone"
+        [class.drag-over]="dragOver()"
+        (dragover)="onDragOver($event)"
+        (dragleave)="dragOver.set(false)"
+        (drop)="onDrop($event)"
+        (click)="triggerUpload()"
+      >
+        <input
+          #fileInput
+          type="file"
+          accept="image/*"
+          style="display:none"
+          (change)="onFileSelected($event)"
+        />
+        <span class="drop-icon mi" style="font-size:48px">image</span>
+        <p class="drop-title">Arraste uma foto aqui</p>
+        <p class="drop-sub">ou clique para selecionar</p>
+        <span class="drop-formats">PNG, JPG, WEBP — até 10MB</span>
+      </div>
+
+      <div class="upload-divider">
+        <span>ou</span>
+      </div>
+
+      <!-- Câmera (mobile) -->
+      <label class="camera-btn">
+        <input
+          type="file"
+          accept="image/*"
+          capture="environment"
+          style="display:none"
+          (change)="onFileSelected($event)"
+        />
+        <span class="mi mi-sm">photo_camera</span> Tirar foto com a câmera
+      </label>
+
+      <div class="upload-tips">
+        <p class="tips-title">Dicas para melhor resultado</p>
+        <ul>
+          <li><span class="mi mi-sm">location_on</span> Fotografe de cima, mostrando todos os alimentos</li>
+          <li><span class="mi mi-sm">lightbulb</span> Use boa iluminação — evite sombras</li>
+          <li><span class="mi mi-sm">dinner_dining</span> Prefira fundo branco ou neutro</li>
+          <li><span class="mi mi-sm">search</span> Mantenha os alimentos separados e visíveis</li>
+        </ul>
+      </div>
+    }
+
+    <!-- Step: analyzing -->
+    @if (step() === 'analyzing') {
+      <div class="analyzing-state">
+        @if (previewUrl()) {
+          <img [src]="previewUrl()!" class="preview-img" alt="Foto da refeição" />
+        }
+        <div class="analyzing-overlay">
+          <div class="scan-line"></div>
+        </div>
+        <div class="analyzing-info">
+          <div class="ai-spinner"></div>
+          <p class="analyzing-title">Analisando sua refeição...</p>
+          <p class="analyzing-sub">A IA está identificando os alimentos e calculando os macronutrientes</p>
+          <div class="analyzing-steps">
+            <span class="astep done"><span class="mi mi-sm">check</span> Imagem recebida</span>
+            <span class="astep done"><span class="mi mi-sm">check</span> Processando pixels</span>
+            <span class="astep active"><span class="mi mi-sm">sync</span> Detectando alimentos</span>
+            <span class="astep"><span class="mi mi-sm">radio_button_unchecked</span> Calculando macros</span>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Step: result -->
+    @if (step() === 'result') {
+
+      @if (savedToCart()) {
+        <div class="alert alert-success" style="margin-bottom:12px">
+          <span class="mi mi-sm">check_circle</span> Refeição salva no diário! Redirecionando...
+        </div>
+      }
+
+      <!-- Preview da foto -->
+      @if (previewUrl()) {
+        <div class="result-photo">
+          <img [src]="previewUrl()!" class="result-img" alt="Foto da refeição" />
+          <div class="result-photo-badge">
+            <span class="mi mi-sm">smart_toy</span> {{ detectedFoods().length }} itens detectados
+          </div>
+        </div>
+      }
+
+      <!-- Totais -->
+      <div class="result-totals-card">
+        <div class="rt-kcal">
+          <span class="rt-val">{{ totals.kcal }}</span>
+          <span class="rt-lbl">kcal estimadas</span>
+        </div>
+        <div class="rt-macros">
+          <div class="rt-macro protein">
+            <span class="rt-mv">{{ totals.protein }}g</span>
+            <span class="rt-ml">Proteína</span>
+          </div>
+          <div class="rt-macro carbs">
+            <span class="rt-mv">{{ totals.carbs }}g</span>
+            <span class="rt-ml">Carbs</span>
+          </div>
+          <div class="rt-macro fat">
+            <span class="rt-mv">{{ totals.fat }}g</span>
+            <span class="rt-ml">Gordura</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alimentos detectados -->
+      <p class="section-label">Alimentos detectados</p>
+
+      @for (food of detectedFoods(); track $index; let i = $index) {
+        <div class="detected-card" [class.editing]="food.editing">
+
+          <div class="detected-header">
+            <div class="detected-name-row">
+              <div class="confidence-dot" [style.background]="food.confidence >= 85 ? '#4caf50' : food.confidence >= 70 ? '#ff9800' : '#f44336'"></div>
+              @if (!food.editing) {
+                <span class="detected-name">{{ food.name }}</span>
+              } @else {
+                <input class="edit-name-input" [value]="food.name" (input)="updateFood(i, 'name', $any($event.target).value)" />
+              }
+              <span class="confidence-badge">{{ food.confidence }}%</span>
+            </div>
+            <div class="detected-actions">
+              <button class="det-btn edit" (click)="toggleEdit(i)" [title]="food.editing ? 'Confirmar' : 'Editar'">
+                <span class="mi mi-sm">{{ food.editing ? 'check' : 'edit' }}</span>
+              </button>
+              <button class="det-btn remove" (click)="removeFood(i)" title="Remover">
+                <span class="mi mi-sm">close</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="detected-body">
+            <div class="det-gram-row">
+              <label>Quantidade:</label>
+              <div class="grams-input-row" style="flex:1; justify-content: flex-end">
+                <button class="qty-btn sm" (click)="decreaseGrams(i, food.grams)">−</button>
+                <input
+                  type="number"
+                  class="grams-input sm"
+                  [value]="food.grams"
+                  (input)="updateFood(i, 'grams', $any($event.target).value)"
+                  min="1" max="2000"
+                />
+                <span class="grams-unit">g</span>
+                <button class="qty-btn sm" (click)="increaseGrams(i, food.grams)">+</button>
+              </div>
+            </div>
+
+            <div class="det-macros">
+              <div class="det-macro">
+                <span class="det-mv">{{ food.kcal }}</span>
+                <span class="det-ml">kcal</span>
+              </div>
+              <div class="det-macro protein">
+                <span class="det-mv">{{ food.protein }}g</span>
+                <span class="det-ml">Prot.</span>
+              </div>
+              <div class="det-macro carbs">
+                <span class="det-mv">{{ food.carbs }}g</span>
+                <span class="det-ml">Carbs</span>
+              </div>
+              <div class="det-macro fat">
+                <span class="det-mv">{{ food.fat }}g</span>
+                <span class="det-ml">Gord.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+      @if (detectedFoods().length === 0) {
+        <div class="empty-state">
+          <span class="mi mi-xl" style="color:var(--text-hint)">sentiment_neutral</span>
+          <p>Todos os itens foram removidos</p>
+        </div>
+      }
+
+      <!-- Ações -->
+      <div class="result-actions" style="padding-bottom: 24px">
+        <button class="btn btn-outline" (click)="retake()">
+          <span class="mi mi-sm">photo_camera</span> Nova foto
+        </button>
+        <button
+          class="btn btn-primary"
+          [disabled]="detectedFoods().length === 0 || savedToCart()"
+          (click)="saveToMeal()"
+        >
+          @if (savedToCart()) {
+            <span class="mi mi-sm">check_circle</span> Salvo!
+          } @else {
+            Salvar no diário
+          }
+        </button>
+      </div>
+    }
+
+  </main>
+</div>

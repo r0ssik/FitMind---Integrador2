@@ -1,0 +1,145 @@
+<div class="page-layout">
+
+  <header class="page-header">
+    <button class="back-btn" (click)="goBack()"><span class="mi">arrow_back</span></button>
+    <h1>Criar Desafio</h1>
+    <span style="width:40px"></span>
+  </header>
+
+  <main class="page-content">
+
+    @if (created()) {
+      <div class="create-success">
+        <span class="cs-icon mi mi-xl">emoji_events</span>
+        <h2>Desafio criado!</h2>
+        <p>Redirecionando para o desafio...</p>
+      </div>
+    } @else {
+
+      <!-- AI banner -->
+      <div class="ai-banner">
+        <span class="ai-icon mi mi-lg">emoji_events</span>
+        <div>
+          <strong>Criar novo desafio</strong>
+          <p>Defina uma meta, prazo e convide amigos para competir!</p>
+        </div>
+      </div>
+
+      <!-- Título -->
+      <div class="form-group">
+        <label>Título do desafio <span class="req">*</span></label>
+        <input type="text" placeholder="ex: 30 dias sem faltar treino"
+               [value]="title()"
+               (input)="title.set($any($event.target).value)">
+        @if (errors()['title']) {
+          <span class="field-error">{{ errors()['title'] }}</span>
+        }
+      </div>
+
+      <!-- Meta + Unidade -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Meta <span class="req">*</span></label>
+          <input type="number" placeholder="ex: 30" min="1"
+                 [value]="goal()"
+                 (input)="goal.set($any($event.target).value)">
+          @if (errors()['goal']) {
+            <span class="field-error">{{ errors()['goal'] }}</span>
+          }
+        </div>
+        <div class="form-group">
+          <label>Unidade</label>
+          <select [value]="unit()"
+                  (change)="unit.set($any($event.target).value)">
+            @for (u of units; track u) {
+              <option [value]="u">{{ u }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <!-- Prazo -->
+      <div class="form-group">
+        <label>Prazo <span class="req">*</span></label>
+        <input type="date" [min]="minDate()"
+               [value]="deadline()"
+               (input)="deadline.set($any($event.target).value)">
+        @if (errors()['deadline']) {
+          <span class="field-error">{{ errors()['deadline'] }}</span>
+        }
+      </div>
+
+      <!-- Tipo -->
+      <div class="form-group">
+        <label>Tipo de desafio</label>
+        <div class="radio-cards">
+          <label class="radio-card" [class.selected]="type() === 'individual'">
+            <input type="radio" value="individual"
+                   [checked]="type() === 'individual'"
+                   (change)="type.set('individual')">
+            <div class="card-icon mi mi-lg">person</div>
+            <div class="card-label">Individual</div>
+          </label>
+          <label class="radio-card" [class.selected]="type() === 'group'">
+            <input type="radio" value="group"
+                   [checked]="type() === 'group'"
+                   (change)="type.set('group')">
+            <div class="card-icon mi mi-lg">group</div>
+            <div class="card-label">Grupo</div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Tamanho do grupo -->
+      @if (type() === 'group') {
+        <div class="form-group">
+          <label>Limite de participantes
+            <span class="label-hint">(máx. 10)</span>
+          </label>
+          <div class="group-size-row">
+            <button type="button" class="qty-btn"
+                    [disabled]="maxPpl() <= 2"
+                    (click)="maxPpl.update(n => n - 1)">−</button>
+            <span class="group-size-val">{{ maxPpl() }}</span>
+            <button type="button" class="qty-btn"
+                    [disabled]="maxPpl() >= 10"
+                    (click)="maxPpl.update(n => n + 1)">＋</button>
+            <span class="group-size-lbl">pessoas</span>
+          </div>
+          @if (errors()['maxPpl']) {
+            <span class="field-error">{{ errors()['maxPpl'] }}</span>
+          }
+        </div>
+
+        <div class="alert alert-info" style="margin-bottom:16px">
+          <span class="mi mi-sm">lightbulb</span> Após criar, você poderá convidar amigos para participar do grupo.
+        </div>
+      }
+
+      <!-- Preview -->
+      @if (canSubmit()) {
+        <div class="challenge-preview">
+          <div class="cp-header">
+            <span class="cp-icon mi mi-lg">{{ type() === 'group' ? 'group' : 'person' }}</span>
+            <div>
+              <strong class="cp-title">{{ title() }}</strong>
+              <span class="cp-meta">Meta: {{ goal() }} {{ unit() }}</span>
+            </div>
+          </div>
+          <div class="cp-deadline">
+            <span class="mi mi-sm">event</span> Prazo: {{ deadline() | date:'dd/MM/yyyy' }}
+          </div>
+        </div>
+      }
+
+      <button class="btn btn-primary" style="margin-top:8px"
+              [disabled]="!canSubmit() || creating()"
+              (click)="submit()">
+        @if (creating()) { <span class="spinner"></span> Criando... }
+        @else { <span class="mi mi-sm">emoji_events</span> Criar desafio }
+      </button>
+
+    }
+
+  </main>
+</div>

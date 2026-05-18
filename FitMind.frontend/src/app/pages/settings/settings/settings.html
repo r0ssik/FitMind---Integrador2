@@ -1,0 +1,188 @@
+<div class="page-layout">
+
+  <header class="page-header">
+    <button class="back-btn" (click)="goBack()"><span class="mi">arrow_back</span></button>
+    <h1>Configurações</h1>
+    <span style="width:40px"></span>
+  </header>
+
+  <main class="page-content">
+
+    <!-- ── Notifications ──────────────────────────────────────────────────── -->
+    <p class="settings-section-title"><span class="mi mi-sm">notifications</span> Notificações</p>
+    <div class="settings-card">
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-label">Treinos</span>
+          <span class="setting-desc">Lembretes de treino e progresso</span>
+        </div>
+        <label class="toggle" [class.on]="notifWorkout()"
+               (click)="notifWorkout.update(v => !v)">
+          <span class="toggle-knob"></span>
+        </label>
+      </div>
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-label">Dieta</span>
+          <span class="setting-desc">Metas calóricas e horários das refeições</span>
+        </div>
+        <label class="toggle" [class.on]="notifDiet()"
+               (click)="notifDiet.update(v => !v)">
+          <span class="toggle-knob"></span>
+        </label>
+      </div>
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-label">Hidratação</span>
+          <span class="setting-desc">Lembretes para beber água</span>
+        </div>
+        <label class="toggle" [class.on]="notifWater()"
+               (click)="notifWater.update(v => !v)">
+          <span class="toggle-knob"></span>
+        </label>
+      </div>
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-label">Desafios</span>
+          <span class="setting-desc">Atualizações de ranking e prazo</span>
+        </div>
+        <label class="toggle" [class.on]="notifChallenge()"
+               (click)="notifChallenge.update(v => !v)">
+          <span class="toggle-knob"></span>
+        </label>
+      </div>
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-label">Social</span>
+          <span class="setting-desc">Curtidas, comentários e novos seguidores</span>
+        </div>
+        <label class="toggle" [class.on]="notifSocial()"
+               (click)="notifSocial.update(v => !v)">
+          <span class="toggle-knob"></span>
+        </label>
+      </div>
+      <div class="setting-row" style="border:none">
+        <div class="setting-info">
+          <span class="setting-label">Conquistas</span>
+          <span class="setting-desc">Novas medalhas e metas atingidas</span>
+        </div>
+        <label class="toggle" [class.on]="notifAchievement()"
+               (click)="notifAchievement.update(v => !v)">
+          <span class="toggle-knob"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- ── Privacy ───────────────────────────────────────────────────────── -->
+    <p class="settings-section-title"><span class="mi mi-sm">lock</span> Privacidade</p>
+    <div class="settings-card">
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-label">Perfil público</span>
+          <span class="setting-desc">Outros usuários podem encontrar você</span>
+        </div>
+        <label class="toggle" [class.on]="publicProfile()"
+               (click)="publicProfile.update(v => !v)">
+          <span class="toggle-knob"></span>
+        </label>
+      </div>
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-label">Mostrar atividade</span>
+          <span class="setting-desc">Seus treinos aparecem no feed de seguidores</span>
+        </div>
+        <label class="toggle" [class.on]="showActivity()"
+               (click)="showActivity.update(v => !v)">
+          <span class="toggle-knob"></span>
+        </label>
+      </div>
+      <div class="setting-row" style="border:none">
+        <div class="setting-info">
+          <span class="setting-label">Mostrar peso</span>
+          <span class="setting-desc">Exibir peso corporal no perfil</span>
+        </div>
+        <label class="toggle" [class.on]="showWeight()"
+               (click)="showWeight.update(v => !v)">
+          <span class="toggle-knob"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- ── Appearance ─────────────────────────────────────────────────────── -->
+    <p class="settings-section-title"><span class="mi mi-sm">palette</span> Aparência</p>
+    <div class="settings-card">
+      <div class="setting-row" style="border:none; flex-direction:column; align-items:flex-start; gap:10px">
+        <span class="setting-label">Tema</span>
+        <div class="theme-pills">
+          <button class="theme-pill" [class.active]="theme() === 'light'"  (click)="theme.set('light')">Claro</button>
+          <button class="theme-pill" [class.active]="theme() === 'dark'"   (click)="theme.set('dark')">Escuro</button>
+          <button class="theme-pill" [class.active]="theme() === 'system'" (click)="theme.set('system')">Sistema</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Language ────────────────────────────────────────────────────────── -->
+    <p class="settings-section-title"><span class="mi mi-sm">language</span> Idioma</p>
+    <div class="settings-card">
+      <div class="setting-row" style="border:none">
+        <div class="setting-info">
+          <span class="setting-label">Idioma do app</span>
+          <span class="setting-desc">Selecione o idioma de exibição</span>
+        </div>
+        <select class="lang-select" [value]="lang()"
+                (change)="lang.set($any($event.target).value)">
+          <option value="pt">Português</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- ── Account ────────────────────────────────────────────────────────── -->
+    <p class="settings-section-title"><span class="mi mi-sm">person</span> Conta</p>
+    <div class="settings-card">
+      <button class="setting-link" (click)="goProfile()">
+        <span style="display:flex;align-items:center;gap:8px"><span class="mi mi-sm">edit</span> Editar perfil</span>
+        <span class="mi mi-sm" style="color:var(--text-hint)">chevron_right</span>
+      </button>
+      <button class="setting-link" style="color:var(--danger); border:none"
+              (click)="showLogoutConfirm.set(true)">
+        <span style="display:flex;align-items:center;gap:8px"><span class="mi mi-sm">logout</span> Sair da conta</span>
+        <span class="mi mi-sm" style="color:var(--danger);opacity:.6">chevron_right</span>
+      </button>
+    </div>
+
+    <!-- ── Admin ─────────────────────────────────────────────────────────── -->
+    <p class="settings-section-title"><span class="mi mi-sm">admin_panel_settings</span> Administração</p>
+    <div class="settings-card">
+      <button class="setting-link" (click)="goAdmin()">
+        <span style="display:flex;align-items:center;gap:8px"><span class="mi mi-sm">analytics</span> Painel administrativo</span>
+        <span class="mi mi-sm" style="color:var(--text-hint)">chevron_right</span>
+      </button>
+      <button class="setting-link" style="border:none" (click)="goAdminUsers()">
+        <span style="display:flex;align-items:center;gap:8px"><span class="mi mi-sm">group</span> Gestão de usuários</span>
+        <span class="mi mi-sm" style="color:var(--text-hint)">chevron_right</span>
+      </button>
+    </div>
+
+  </main>
+
+  <!-- ── Logout confirm ─────────────────────────────────────────────────────── -->
+  @if (showLogoutConfirm()) {
+    <div class="modal-overlay" (click)="showLogoutConfirm.set(false)">
+      <div class="modal-sheet" (click)="$event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <div style="text-align:center; padding:12px 0 20px">
+          <span class="mi mi-xl" style="color:var(--danger)">logout</span>
+          <h3 style="margin:12px 0 4px; font-size:20px">Sair da conta?</h3>
+          <p style="font-size:14px; color:var(--text-secondary)">Você precisará fazer login novamente.</p>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
+          <button class="btn btn-outline" (click)="showLogoutConfirm.set(false)">Cancelar</button>
+          <button class="btn btn-primary" style="background:var(--danger)"
+                  (click)="confirmLogout()">Sair</button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

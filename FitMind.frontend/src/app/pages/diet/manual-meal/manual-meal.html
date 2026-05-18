@@ -1,0 +1,191 @@
+<div class="page-layout">
+  <header class="page-header">
+    <button class="back-btn" (click)="goBack()">←</button>
+    <h1>Registrar Refeição</h1>
+    <div style="width:40px"></div>
+  </header>
+
+  <main class="page-content">
+
+    <!-- Tipo de refeição -->
+    <div class="form-group">
+      <label>Refeição</label>
+      <div class="meal-type-scroll">
+        @for (opt of mealOptions; track opt) {
+          <button
+            class="meal-type-chip"
+            [class.active]="mealName() === opt"
+            (click)="mealName.set(opt)"
+          >{{ opt }}</button>
+        }
+      </div>
+    </div>
+
+    <!-- Busca de alimento -->
+    <div class="form-group search-group">
+      <label>Buscar alimento</label>
+      <div class="search-input-wrap">
+        <span class="search-icon mi mi-sm">search</span>
+        <input
+          type="text"
+          placeholder="Ex: frango, arroz, ovo..."
+          [ngModel]="query()"
+          (ngModelChange)="query.set($event); selectedFood.set(null)"
+          class="search-input"
+          autocomplete="off"
+        />
+        @if (query()) {
+          <button class="clear-input" (click)="query.set(''); selectedFood.set(null)">×</button>
+        }
+      </div>
+
+      <!-- Resultados da busca -->
+      @if (searchResults().length > 0 && !selectedFood()) {
+        <div class="search-results">
+          @for (food of searchResults(); track food.id) {
+            <button class="search-result-item" (click)="selectFood(food)">
+              <div class="sr-info">
+                <span class="sr-name">{{ food.name }}</span>
+                @if (food.brand) { <span class="sr-brand">{{ food.brand }}</span> }
+              </div>
+              <div class="sr-macros">
+                <span>{{ food.per100g.kcal }} kcal</span>
+                <span class="sr-per">por 100g</span>
+              </div>
+            </button>
+          }
+        </div>
+      }
+
+      @if (query().length >= 2 && searchResults().length === 0 && !selectedFood()) {
+        <div class="no-results">
+          <span>Nenhum resultado para "<strong>{{ query() }}</strong>"</span>
+        </div>
+      }
+    </div>
+
+    <!-- Configuração de porção -->
+    @if (selectedFood()) {
+      <div class="portion-card">
+        <div class="portion-food-header">
+          <div>
+            <span class="portion-food-name">{{ selectedFood()!.name }}</span>
+            @if (selectedFood()!.brand) {
+              <span class="portion-food-brand">{{ selectedFood()!.brand }}</span>
+            }
+          </div>
+          <div class="macros-per100">por 100g: {{ selectedFood()!.per100g.kcal }} kcal</div>
+        </div>
+
+        <!-- Porções comuns -->
+        @if (selectedFood()!.commonPortions.length > 0) {
+          <div class="form-group">
+            <label>Porções comuns</label>
+            <div class="chip-group">
+              @for (p of selectedFood()!.commonPortions; track p.label) {
+                <button
+                  class="chip"
+                  [class.selected]="grams() === p.grams"
+                  (click)="applyPortion(p)"
+                >{{ p.label }}</button>
+              }
+              <button
+                class="chip"
+                [class.selected]="portionLabel() === 'custom'"
+                (click)="portionLabel.set('custom')"
+              >Personalizado</button>
+            </div>
+          </div>
+        }
+
+        <!-- Quantidade em gramas -->
+        <div class="form-group">
+          <label>Quantidade (g)</label>
+          <div class="grams-input-row">
+            <button class="qty-btn" (click)="grams.update(v => v > 5 ? v - 5 : v)">−</button>
+            <input
+              type="number"
+              [ngModel]="grams()"
+              (ngModelChange)="grams.set(+$event); portionLabel.set('custom')"
+              min="1"
+              max="2000"
+              class="grams-input"
+            />
+            <span class="grams-unit">g</span>
+            <button class="qty-btn" (click)="grams.update(v => v + 5)">+</button>
+          </div>
+        </div>
+
+        <!-- Preview nutricional -->
+        @if (macros()) {
+          <div class="nutrition-preview">
+            <div class="np-kcal">
+              <span class="np-kcal-val">{{ macros()!.kcal }}</span>
+              <span class="np-kcal-lbl">kcal</span>
+            </div>
+            <div class="np-macros">
+              <div class="np-macro protein">
+                <span class="np-val">{{ macros()!.protein }}g</span>
+                <span class="np-lbl">Proteína</span>
+              </div>
+              <div class="np-macro carbs">
+                <span class="np-val">{{ macros()!.carbs }}g</span>
+                <span class="np-lbl">Carbs</span>
+              </div>
+              <div class="np-macro fat">
+                <span class="np-val">{{ macros()!.fat }}g</span>
+                <span class="np-lbl">Gordura</span>
+              </div>
+            </div>
+          </div>
+        }
+
+        <button class="btn btn-primary" (click)="addToCart()">
+          + Adicionar à refeição
+        </button>
+      </div>
+    }
+
+    <!-- Carrinho / Lista de alimentos adicionados -->
+    @if (cart().length > 0) {
+      <div class="cart-section">
+        <div class="cart-header">
+          <span class="section-label" style="margin: 0">{{ mealName() }}</span>
+          <span class="cart-count">{{ cart().length }} item(s)</span>
+        </div>
+
+        @for (item of cart(); track $index; let i = $index) {
+          <div class="cart-item">
+            <div class="cart-item-info">
+              <span class="cart-item-name">{{ item.food.name }}</span>
+              <span class="cart-item-portion">{{ item.portionLabel }}</span>
+            </div>
+            <div class="cart-item-macros">
+              <span class="macro-tag p">P {{ itemMacros(item).protein }}g</span>
+              <span class="macro-tag c">C {{ itemMacros(item).carbs }}g</span>
+              <span class="macro-tag f">G {{ itemMacros(item).fat }}g</span>
+              <span class="cart-item-kcal">{{ itemMacros(item).kcal }} kcal</span>
+            </div>
+            <button class="remove-food-btn" (click)="removeFromCart(i)">×</button>
+          </div>
+        }
+
+        <!-- Totais -->
+        <div class="cart-totals">
+          <span>Total:</span>
+          <div class="cart-totals-macros">
+            <span class="macro-tag p">P {{ cartTotals().protein }}g</span>
+            <span class="macro-tag c">C {{ cartTotals().carbs }}g</span>
+            <span class="macro-tag f">G {{ cartTotals().fat }}g</span>
+            <strong>{{ cartTotals().kcal }} kcal</strong>
+          </div>
+        </div>
+
+        <button class="btn btn-primary save-meal-btn" (click)="save()">
+          <span class="mi mi-sm">save</span> Salvar {{ mealName() }}
+        </button>
+      </div>
+    }
+
+  </main>
+</div>

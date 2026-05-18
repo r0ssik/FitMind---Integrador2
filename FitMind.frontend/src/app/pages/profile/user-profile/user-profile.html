@@ -1,0 +1,126 @@
+<div class="page-layout">
+
+  <header class="page-header">
+    <button class="back-btn" (click)="goBack()"><span class="mi">arrow_back</span></button>
+    <h1>Perfil</h1>
+    <span style="width:40px"></span>
+  </header>
+
+  @if (profile(); as p) {
+
+    <!-- ── Cover + Avatar ──────────────────────────────────────────────────── -->
+    <div class="profile-cover">
+      <div class="cover-bg"></div>
+      <div class="profile-avatar-wrap">
+        <div class="profile-avatar">{{ p.initials }}</div>
+      </div>
+    </div>
+
+    <main class="page-content" style="padding-top:56px">
+
+      <!-- Name + bio -->
+      <div style="text-align:center; margin-bottom:14px">
+        <h2 class="profile-name">{{ p.name }}</h2>
+        <p class="profile-bio">{{ p.bio }}</p>
+      </div>
+
+      <!-- Follow button -->
+      @if (!p.isMe) {
+        <div style="display:flex; gap:10px; margin-bottom:16px">
+          <button class="btn" [class.btn-primary]="!p.isFollowing" [class.btn-outline]="p.isFollowing"
+                  (click)="toggleFollow()">
+            @if (p.isFollowing) { <span class="mi mi-sm">check</span> Seguindo }
+            @else { <span class="mi mi-sm">person_add</span> Seguir }
+          </button>
+          <button class="btn btn-outline">
+            <span class="mi mi-sm">chat_bubble_outline</span> Mensagem
+          </button>
+        </div>
+      }
+
+      <!-- Stats row -->
+      <div class="profile-stats">
+        <div class="pstat">
+          <span class="pstat-val">{{ p.followers }}</span>
+          <span class="pstat-lbl">Seguidores</span>
+        </div>
+        <div class="pstat-div"></div>
+        <div class="pstat">
+          <span class="pstat-val">{{ p.following }}</span>
+          <span class="pstat-lbl">Seguindo</span>
+        </div>
+        <div class="pstat-div"></div>
+        <div class="pstat">
+          <span class="pstat-val">{{ p.workouts }}</span>
+          <span class="pstat-lbl">Treinos</span>
+        </div>
+        <div class="pstat-div"></div>
+        <div class="pstat">
+          <span class="pstat-val">{{ p.streak }}</span>
+          <span class="pstat-lbl"><span class="mi mi-sm" style="color:var(--warning)">local_fire_department</span> Dias</span>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs" style="margin: 16px -16px 0">
+        <button class="tab" [class.active]="activeTab() === 'activity'"     (click)="activeTab.set('activity')">Atividade</button>
+        <button class="tab" [class.active]="activeTab() === 'achievements'" (click)="activeTab.set('achievements')">Conquistas</button>
+        <button class="tab" [class.active]="activeTab() === 'stats'"        (click)="activeTab.set('stats')">Estatísticas</button>
+      </div>
+
+      <!-- ── Activity ──────────────────────────────────────────────────────── -->
+      @if (activeTab() === 'activity') {
+        <div style="margin-top:14px">
+          @for (act of p.activity; track act.id) {
+            <div class="act-row">
+              <span class="act-icon mi">{{ act.icon }}</span>
+              <div class="act-body">
+                <p class="act-text">{{ act.text }}</p>
+                <span class="act-meta">
+                  <span class="act-tag">{{ act.tag }}</span>
+                  · {{ act.time }}
+                </span>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- ── Achievements ───────────────────────────────────────────────────── -->
+      @if (activeTab() === 'achievements') {
+        <div class="badges-grid" style="margin-top:14px">
+          @for (b of p.badges; track b.title) {
+            <div class="badge-card" [class.rare]="b.rare">
+              @if (b.rare) { <span class="rare-tag mi mi-sm">auto_awesome</span> }
+              <span class="badge-icon mi mi-lg">{{ b.icon }}</span>
+              <span class="badge-title">{{ b.title }}</span>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- ── Stats ─────────────────────────────────────────────────────────── -->
+      @if (activeTab() === 'stats') {
+        <div class="stats-cards" style="margin-top:14px">
+          <div class="sc"><span class="sc-val">{{ p.workouts }}</span><span class="sc-lbl">Treinos totais</span></div>
+          <div class="sc">
+            <span class="sc-val" style="display:flex;align-items:center;gap:4px">
+              {{ p.streak }}<span class="mi mi-sm" style="color:var(--warning)">local_fire_department</span>
+            </span>
+            <span class="sc-lbl">Sequência atual</span>
+          </div>
+          <div class="sc"><span class="sc-val">{{ p.badges.length }}</span><span class="sc-lbl">Conquistas</span></div>
+          <div class="sc"><span class="sc-val">{{ p.followers }}</span><span class="sc-lbl">Seguidores</span></div>
+        </div>
+      }
+
+    </main>
+
+  } @else {
+    <div class="empty-state">
+      <span class="mi mi-xl" style="color:var(--text-hint)">person</span>
+      <p>Perfil não encontrado.</p>
+    </div>
+  }
+
+</div>

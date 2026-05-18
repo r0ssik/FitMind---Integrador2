@@ -1,0 +1,113 @@
+<div class="page-layout">
+
+  <header class="page-header">
+    <button class="back-btn" (click)="goBack()"><span class="mi">arrow_back</span></button>
+    <h1>Gestão de Usuários</h1>
+    <span style="width:40px"></span>
+  </header>
+
+  <!-- Search bar -->
+  <div style="padding:10px 16px; background:white; border-bottom:1px solid var(--border)">
+    <div class="search-input-wrap">
+      <span class="search-icon mi mi-sm">search</span>
+      <input class="search-input" type="text"
+             placeholder="Buscar por nome ou email..."
+             [value]="search()"
+             (input)="search.set($any($event.target).value)">
+      @if (search()) {
+        <button class="clear-input" (click)="search.set('')"><span class="mi mi-sm">close</span></button>
+      }
+    </div>
+  </div>
+
+  <!-- Status filter -->
+  <div class="filter-scroll">
+    <button class="filter-chip" [class.active]="filterStatus() === 'all'"       (click)="filterStatus.set('all')">Todos</button>
+    <button class="filter-chip" [class.active]="filterStatus() === 'active'"    (click)="filterStatus.set('active')">Ativos</button>
+    <button class="filter-chip" [class.active]="filterStatus() === 'suspended'" (click)="filterStatus.set('suspended')">Suspensos</button>
+    <button class="filter-chip" [class.active]="filterStatus() === 'blocked'"   (click)="filterStatus.set('blocked')">Bloqueados</button>
+  </div>
+
+  <main class="page-content" style="padding-top:12px">
+
+    <p class="section-label">{{ filtered().length }} usuário(s) encontrado(s)</p>
+
+    @for (u of filtered(); track u.id) {
+      <div class="user-card" [class]="'user-' + u.status">
+
+        <div class="user-top">
+          <div class="user-avatar" [class]="'av-' + u.status">{{ u.initials }}</div>
+          <div class="user-info">
+            <span class="user-name">{{ u.name }}</span>
+            <span class="user-email">{{ u.email }}</span>
+            <div class="user-meta">
+              <span class="user-status-chip" [class]="'chip-' + u.status">{{ statusLabel(u.status) }}</span>
+              <span class="user-joined">Desde {{ u.joined }}</span>
+              <span><span class="mi mi-sm">fitness_center</span> {{ u.workouts }} treinos</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="user-actions">
+          @if (u.status !== 'active') {
+            <button class="ua-btn ua-reactivate" (click)="reactivate(u)">
+              <span class="mi mi-sm">check_circle</span> Reativar
+            </button>
+          }
+          @if (u.status === 'active') {
+            <button class="ua-btn ua-suspend" (click)="openConfirm(u, 'suspend')">
+              <span class="mi mi-sm">pause_circle</span> Suspender
+            </button>
+            <button class="ua-btn ua-block" (click)="openConfirm(u, 'block')">
+              <span class="mi mi-sm">block</span> Bloquear
+            </button>
+          }
+          <button class="ua-btn ua-delete" (click)="openConfirm(u, 'delete')">
+            <span class="mi mi-sm">delete</span> Excluir
+          </button>
+        </div>
+
+      </div>
+    }
+
+    @if (!filtered().length) {
+      <div class="empty-state">
+        <span class="mi mi-xl" style="color:var(--text-hint)">person</span>
+        <p>Nenhum usuário encontrado.</p>
+      </div>
+    }
+
+  </main>
+
+  <!-- ── Confirm modal ──────────────────────────────────────────────────────── -->
+  @if (confirmAction()) {
+    <div class="modal-overlay" (click)="closeConfirm()">
+      <div class="modal-sheet" (click)="$event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <div style="text-align:center; padding: 8px 0 16px">
+          <span style="font-size:48px">{{ actionIcon(confirmAction()!.action) }}</span>
+          <h3 style="margin:12px 0 4px; font-size:19px">
+            {{ actionLabel(confirmAction()!.action) }} usuário?
+          </h3>
+          <p style="font-size:14px; color:var(--text-secondary)">
+            <strong>{{ confirmAction()!.user.name }}</strong><br>
+            {{ confirmAction()!.action === 'delete'
+                ? 'Esta ação é irreversível!'
+                : confirmAction()!.action === 'block'
+                  ? 'O usuário não poderá mais acessar a plataforma.'
+                  : 'O usuário ficará temporariamente inativo.' }}
+          </p>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
+          <button class="btn btn-outline" (click)="closeConfirm()">Cancelar</button>
+          <button class="btn btn-primary"
+                  [style.background]="confirmAction()!.action === 'delete' ? 'var(--danger)' : 'var(--warning)'"
+                  (click)="executeAction()">
+            {{ actionLabel(confirmAction()!.action) }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

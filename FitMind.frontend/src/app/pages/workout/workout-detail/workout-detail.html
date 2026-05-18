@@ -1,0 +1,140 @@
+<div class="page-layout">
+  <header class="page-header">
+    <button class="back-btn" (click)="goBack()"><span class="mi">arrow_back</span></button>
+    <div>
+      <h1>{{ workoutName }}</h1>
+      <span class="timer-badge"><span class="mi mi-sm">timer</span> {{ elapsedFormatted }}</span>
+    </div>
+    <div style="width:40px"></div>
+  </header>
+
+  <!-- Progresso geral -->
+  <div class="workout-progress-bar">
+    <div class="workout-progress-fill" [style.width.%]="progress()"></div>
+  </div>
+  <div class="progress-label">
+    {{ completedSets() }}/{{ totalSets() }} séries · {{ progress() }}% concluído
+  </div>
+
+  <!-- Descanso ativo -->
+  @if (restCountdown() !== null) {
+    <div class="rest-banner">
+      <span class="rest-icon mi">bedtime</span>
+      <div>
+        <strong>Descansando — {{ restCountdown() }}s</strong>
+        <div class="rest-mini-bar">
+          <div class="rest-mini-fill"></div>
+        </div>
+      </div>
+      <button class="skip-rest-btn" (click)="skipRest()">Pular</button>
+    </div>
+  }
+
+  <!-- Tela de conclusão -->
+  @if (finished()) {
+    <div class="finish-overlay">
+      <div class="finish-card">
+        <span class="mi mi-xl" style="color:var(--primary)">emoji_events</span>
+        <h2>Treino Concluído!</h2>
+        <p>{{ workoutName }}</p>
+        <div class="finish-stats">
+          <div class="fstat"><span class="fval">{{ elapsedFormatted }}</span><span class="flbl">Duração</span></div>
+          <div class="fstat"><span class="fval">{{ completedSets() }}</span><span class="flbl">Séries</span></div>
+          <div class="fstat"><span class="fval">+120</span><span class="flbl">XP</span></div>
+        </div>
+        <button class="btn btn-primary" (click)="goBack()">Voltar aos planos</button>
+      </div>
+    </div>
+  }
+
+  <main class="page-content">
+    @for (ex of exercises(); track ex.id) {
+      <div class="ex-card" [class.ex-all-done]="ex.sets.every(s => s.done)">
+
+        <!-- Cabeçalho do exercício -->
+        <div class="ex-card-header" (click)="toggleExpand(ex.id)">
+          <div class="ex-card-info">
+            <span class="ex-card-name">{{ ex.name }}</span>
+            <span class="ex-card-muscle">{{ ex.muscle }}</span>
+          </div>
+          <div class="ex-card-right">
+            <span class="ex-sets-done">
+              {{ ex.sets.filter(s => s.done).length }}/{{ ex.sets.length }}
+            </span>
+            <span class="chevron" [class.open]="ex.expanded">›</span>
+          </div>
+        </div>
+
+        @if (ex.expanded) {
+
+          <!-- Dica -->
+          <div class="ex-tip-row">
+            <span class="mi mi-sm" style="color:var(--warning)">lightbulb</span>
+            {{ ex.tip }}
+          </div>
+
+          <!-- Vídeo explicativo -->
+          <a class="video-link" [href]="ex.videoUrl" target="_blank">
+            <div class="video-thumb">
+              <span class="mi" style="font-size:28px">play_circle</span>
+              <span>Ver vídeo explicativo</span>
+            </div>
+          </a>
+
+          <!-- Tabela de séries -->
+          <div class="sets-table">
+            <div class="sets-header">
+              <span>Série</span>
+              <span>Peso (kg)</span>
+              <span>Reps</span>
+              <span><span class="mi mi-sm">check</span></span>
+            </div>
+            @for (set of ex.sets; track set.index) {
+              <div class="set-row" [class.set-done]="set.done">
+                <span class="set-num">{{ set.index }}</span>
+                <span class="set-weight">{{ set.weight ?? '—' }}</span>
+                <span class="set-reps">{{ set.reps }}</span>
+                <button
+                  class="set-check"
+                  [class.checked]="set.done"
+                  (click)="toggleSet(ex.id, set.index - 1)"
+                >
+                  @if (set.done) { <span class="mi mi-sm">check</span> }
+                </button>
+              </div>
+            }
+          </div>
+
+          <!-- Status de esforço -->
+          <div class="effort-section">
+            <p class="effort-label">Como foi esse exercício?</p>
+            <div class="effort-btns">
+              @for (level of ['easy','moderate','hard','max']; track level) {
+                <button
+                  class="effort-btn"
+                  [class.selected]="ex.effortLevel === level"
+                  [style.--effort-color]="effortLabels[level].color"
+                  (click)="setEffort(ex.id, $any(level))"
+                >
+                  <span class="mi mi-sm">{{ effortLabels[level].icon }}</span>
+                  {{ effortLabels[level].label }}
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Botão Concluir -->
+    <button
+      class="btn btn-primary finish-btn"
+      [disabled]="progress() < 100"
+      (click)="finishWorkout()"
+    >
+      <span class="mi mi-sm">{{ progress() < 100 ? 'fitness_center' : 'emoji_events' }}</span>
+      Concluir treino
+      @if (progress() < 100) { ({{ progress() }}%) }
+    </button>
+  </main>
+</div>

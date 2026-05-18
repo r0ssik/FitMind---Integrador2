@@ -1,0 +1,100 @@
+// ── User card ─────────────────────────────────────────────────────────────────
+
+.user-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow);
+  border-left: 3px solid var(--border);
+
+  &.user-active    { border-left-color: var(--primary); }
+  &.user-suspended { border-left-color: var(--warning); opacity: 0.85; }
+  &.user-blocked   { border-left-color: var(--danger);  opacity: 0.75; }
+}
+
+.user-top {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.user-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+
+  &.av-active    { background: var(--primary); }
+  &.av-suspended { background: var(--warning); }
+  &.av-blocked   { background: var(--danger);  }
+}
+
+.user-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.user-name  { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+.user-email { font-size: 12px; color: var(--text-secondary); }
+
+.user-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.user-status-chip {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+
+  &.chip-active    { background: #e8f5e9; color: #2e7d32; }
+  &.chip-suspended { background: #fff3e0; color: #e65100; }
+  &.chip-blocked   { background: #ffebee; color: #c62828; }
+}
+
+.user-joined { color: var(--text-hint); }
+
+// ── Actions ───────────────────────────────────────────────────────────────────
+
+.user-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.ua-btn {
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  background: none;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ua-suspend    { border-color: var(--warning); color: var(--warning);  &:hover { background: #fff3e0; } }
+.ua-block      { border-color: var(--danger);  color: var(--danger);   &:hover { background: #ffebee; } }
+.ua-delete     { border-color: #ef9a9a;        color: #c62828;         &:hover { background: #ffebee; } }
+.ua-reactivate { border-color: var(--primary); color: var(--primary-dark); &:hover { background: var(--primary-light); } }

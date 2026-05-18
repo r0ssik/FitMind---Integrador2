@@ -1,0 +1,135 @@
+<div class="page-layout">
+
+  <!-- Header -->
+  <header class="page-header">
+    <button class="back-btn" (click)="goBack()"><span class="mi">arrow_back</span></button>
+    <h1>Feed Social</h1>
+    <div style="display:flex;gap:6px">
+      <button class="new-post-btn" (click)="goCreateChallenge()" title="Criar desafio"><span class="mi">emoji_events</span></button>
+      <button class="new-post-btn" (click)="showNewPost.set(true)" title="Novo post"><span class="mi">edit</span></button>
+    </div>
+  </header>
+
+  <!-- Filter tabs -->
+  <div class="tabs">
+    <button class="tab" [class.active]="filter() === 'all'"        (click)="filter.set('all')">Todos</button>
+    <button class="tab" [class.active]="filter() === 'following'"  (click)="filter.set('following')">Seguindo</button>
+    <button class="tab" [class.active]="filter() === 'challenges'" (click)="filter.set('challenges')">Desafios</button>
+  </div>
+
+  <main class="page-content" style="padding-top:12px">
+
+    @for (post of filtered(); track post.id) {
+      <div class="social-post">
+
+        <!-- Post header -->
+        <div class="post-header">
+          <div class="post-avatar" (click)="goToProfile(post.userId)">{{ post.initials }}</div>
+          <div class="post-meta">
+            <span class="post-user" (click)="goToProfile(post.userId)">{{ post.user }}</span>
+            <div class="post-sub">
+              <span class="post-tag">{{ post.tag }}</span>
+              <span class="post-time">· {{ post.time }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Post body -->
+        <p class="post-text">{{ post.text }}</p>
+
+        <!-- Actions -->
+        <div class="post-actions">
+          <button class="action-btn" [class.liked]="post.liked" (click)="toggleLike(post)">
+            <span class="mi mi-sm" [class.mi-fill]="post.liked">favorite</span>
+            <span>{{ post.likes }}</span>
+          </button>
+          <button class="action-btn" (click)="toggleComments(post)">
+            <span class="mi mi-sm">chat_bubble_outline</span>
+            <span>{{ post.comments.length }}</span>
+          </button>
+          <button class="action-btn">
+            <span class="mi mi-sm">share</span>
+            <span>Compartilhar</span>
+          </button>
+        </div>
+
+        <!-- Comments section -->
+        @if (post.showComments) {
+          <div class="comments-section">
+
+            @for (c of post.comments; track c.id) {
+              <div class="comment-item">
+                <div class="comment-avatar">{{ c.initials }}</div>
+                <div class="comment-body">
+                  <span class="comment-user">{{ c.user }}</span>
+                  <p class="comment-text">{{ c.text }}</p>
+                </div>
+                <span class="comment-time">{{ c.time }}</span>
+              </div>
+            }
+
+            @if (!post.comments.length) {
+              <p class="no-comments">Seja o primeiro a comentar!</p>
+            }
+
+            <!-- New comment input -->
+            <div class="comment-input-row">
+              <div class="comment-avatar me">{{ userInitials }}</div>
+              <input class="comment-input"
+                     placeholder="Escreva um comentário..."
+                     [value]="newComment()[post.id] ?? ''"
+                     (input)="setComment(post.id, $any($event.target).value)"
+                     (keydown.enter)="submitComment(post)">
+              <button class="comment-send" (click)="submitComment(post)"
+                      [disabled]="!(newComment()[post.id] ?? '').trim()">
+                <span class="mi mi-sm">send</span>
+              </button>
+            </div>
+
+          </div>
+        }
+
+      </div>
+    }
+
+    @if (!filtered().length) {
+      <div class="empty-state">
+        <span class="mi mi-xl" style="color:var(--text-hint)">group</span>
+        <p>Nenhum post aqui ainda.</p>
+      </div>
+    }
+
+  </main>
+
+  <!-- ── New post modal ─────────────────────────────────────────────────────── -->
+  @if (showNewPost()) {
+    <div class="modal-overlay" (click)="showNewPost.set(false)">
+      <div class="modal-sheet" (click)="$event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <p class="modal-title">Novo post</p>
+
+        <div class="new-post-author">
+          <div class="post-avatar me-big">{{ userInitials }}</div>
+          <span class="new-post-name">{{ userName }}</span>
+        </div>
+
+        <textarea class="new-post-textarea"
+                  placeholder="Compartilhe sua conquista, treino ou motivação..."
+                  rows="4"
+                  [value]="newPostText()"
+                  (input)="newPostText.set($any($event.target).value)">
+        </textarea>
+
+        <div style="display:flex; gap:10px; margin-top:10px">
+          <button class="btn btn-outline" (click)="showNewPost.set(false)">Cancelar</button>
+          <button class="btn btn-primary" [disabled]="!newPostText().trim() || posting()"
+                  (click)="submitPost()">
+            @if (posting()) { <span class="spinner"></span> Publicando... }
+            @else { Publicar }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

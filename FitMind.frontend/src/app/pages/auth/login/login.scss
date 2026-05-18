@@ -1,0 +1,36 @@
+.forgot-link {
+  text-align: right;
+  margin-bottom: 16px;
+  margin-top: -4px;
+
+  a {
+    font-size: 13px;
+    color: var(--text-secondary);
+
+    &:hover {
+      color: var(--primary-dark);
+    }
+  }
+}
+
+
+.auth-logo{
+display:flex;
+flex-direction:column;
+align-items:center;
+}
+
+.brand-logo{
+width:250px;
+height:auto;
+}
+
+.subtitle{
+font-size:17px;
+font-weight:500;
+color:#7b8773;
+letter-spacing:1px;
+text-transform:uppercase;
+margin-top:-85px;
+}
+

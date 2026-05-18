@@ -1,0 +1,192 @@
+<div class="auth-layout">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M13.49 5.48c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-3.6 13.9l1-4.4 2.1 2v6h2v-7.5l-2.1-2 .6-3c1.3 1.5 3.3 2.5 5.5 2.5v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1l-5.2 2.2v4.7h2v-3.4l1.8-.7-1.6 8.1-4.9-1-.4 2 7 1.4z"/>
+        </svg>
+      </div>
+      <h1>Criar Conta</h1>
+      <p>Etapa {{ step() }} de 3</p>
+    </div>
+
+    <div class="stepper">
+      <div class="step" [class.active]="step() === 1" [class.done]="step() > 1">
+        <div class="step-circle">@if (step() > 1) { <span class="mi mi-sm">check</span> } @else { 1 }</div>
+        <span class="step-label">Dados</span>
+      </div>
+      <div class="step-line" [class.done]="step() > 1"></div>
+      <div class="step" [class.active]="step() === 2" [class.done]="step() > 2">
+        <div class="step-circle">@if (step() > 2) { <span class="mi mi-sm">check</span> } @else { 2 }</div>
+        <span class="step-label">Físico</span>
+      </div>
+      <div class="step-line" [class.done]="step() > 2"></div>
+      <div class="step" [class.active]="step() === 3">
+        <div class="step-circle">3</div>
+        <span class="step-label">Objetivos</span>
+      </div>
+    </div>
+
+    @if (error()) {
+      <div class="alert alert-error">{{ error() }}</div>
+    }
+
+    <!-- Etapa 1: Dados básicos -->
+    @if (step() === 1) {
+      <form [formGroup]="step1Form" (ngSubmit)="goToStep(2)">
+        <div class="form-group">
+          <label for="name">Nome completo</label>
+          <input id="name" type="text" formControlName="name" placeholder="Seu nome" />
+          @if (step1Form.get('name')!.invalid && step1Form.get('name')!.touched) {
+            <span class="field-error">Nome é obrigatório (mín. 2 caracteres)</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="email">E-mail</label>
+          <input id="email" type="email" formControlName="email" placeholder="seu@email.com" />
+          @if (step1Form.get('email')!.invalid && step1Form.get('email')!.touched) {
+            <span class="field-error">E-mail inválido</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="password">Senha</label>
+          <input id="password" type="password" formControlName="password" placeholder="Mínimo 6 caracteres" />
+          @if (step1Form.get('password')!.invalid && step1Form.get('password')!.touched) {
+            <span class="field-error">Mínimo 6 caracteres</span>
+          }
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="phone">Telefone</label>
+            <input id="phone" type="tel" formControlName="phone" placeholder="(11) 99999-9999" />
+            @if (step1Form.get('phone')!.invalid && step1Form.get('phone')!.touched) {
+              <span class="field-error">Obrigatório</span>
+            }
+          </div>
+          <div class="form-group">
+            <label for="birthDate">Data de nascimento</label>
+            <input id="birthDate" type="date" formControlName="birthDate" />
+            @if (step1Form.get('birthDate')!.invalid && step1Form.get('birthDate')!.touched) {
+              <span class="field-error">Obrigatório</span>
+            }
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Próximo →</button>
+      </form>
+    }
+
+    <!-- Etapa 2: Dados físicos -->
+    @if (step() === 2) {
+      <form [formGroup]="step2Form" (ngSubmit)="goToStep(3)">
+        <div class="form-group">
+          <label>Sexo</label>
+          <div class="radio-cards">
+            <label class="radio-card" [class.selected]="step2Form.value.sex === 'M'" (click)="step2Form.patchValue({sex: 'M'})">
+              <input type="radio" value="M" formControlName="sex" />
+              <div class="card-icon mi mi-lg">man</div>
+              <div class="card-label">Masculino</div>
+            </label>
+            <label class="radio-card" [class.selected]="step2Form.value.sex === 'F'" (click)="step2Form.patchValue({sex: 'F'})">
+              <input type="radio" value="F" formControlName="sex" />
+              <div class="card-icon mi mi-lg">woman</div>
+              <div class="card-label">Feminino</div>
+            </label>
+            <label class="radio-card" [class.selected]="step2Form.value.sex === 'NB'" (click)="step2Form.patchValue({sex: 'NB'})">
+              <input type="radio" value="NB" formControlName="sex" />
+              <div class="card-icon mi mi-lg">transgender</div>
+              <div class="card-label">Não-binário</div>
+            </label>
+            <label class="radio-card" [class.selected]="step2Form.value.sex === 'NI'" (click)="step2Form.patchValue({sex: 'NI'})">
+              <input type="radio" value="NI" formControlName="sex" />
+              <div class="card-icon mi mi-lg">remove</div>
+              <div class="card-label">Prefiro não informar</div>
+            </label>
+          </div>
+          @if (step2Form.get('sex')!.invalid && step2Form.get('sex')!.touched) {
+            <span class="field-error">Selecione uma opção</span>
+          }
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="weight">Peso (kg)</label>
+            <input id="weight" type="number" formControlName="weight" placeholder="70" min="30" max="300" />
+            @if (step2Form.get('weight')!.invalid && step2Form.get('weight')!.touched) {
+              <span class="field-error">Valor inválido</span>
+            }
+          </div>
+          <div class="form-group">
+            <label for="height">Altura (cm)</label>
+            <input id="height" type="number" formControlName="height" placeholder="170" min="100" max="250" />
+            @if (step2Form.get('height')!.invalid && step2Form.get('height')!.touched) {
+              <span class="field-error">Valor inválido</span>
+            }
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Limitações físicas (opcional)</label>
+          <div class="checkbox-group">
+            @for (lim of limitations; track lim) {
+              <label>
+                <input
+                  type="checkbox"
+                  [checked]="hasLimitation(lim)"
+                  (change)="toggleLimitation(lim)"
+                />
+                {{ lim }}
+              </label>
+            }
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button type="button" class="btn btn-outline" (click)="step.set(1)">← Voltar</button>
+          <button type="submit" class="btn btn-primary">Próximo →</button>
+        </div>
+      </form>
+    }
+
+    <!-- Etapa 3: Objetivos -->
+    @if (step() === 3) {
+      <form [formGroup]="step3Form" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label>Quais são seus objetivos?</label>
+          <div class="radio-cards">
+            @for (goal of goals; track goal.value) {
+              <label class="radio-card" [class.selected]="hasGoal(goal.value)" (click)="toggleGoal(goal.value)">
+                <div class="card-icon mi mi-lg">{{ goal.icon }}</div>
+                <div class="card-label">{{ goal.label }}</div>
+              </label>
+            }
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="availability">Disponibilidade semanal</label>
+          <select id="availability" formControlName="weeklyAvailability">
+            @for (opt of availabilityOptions; track opt.value) {
+              <option [value]="opt.value">{{ opt.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="btn-row">
+          <button type="button" class="btn btn-outline" (click)="step.set(2)">← Voltar</button>
+          <button type="submit" class="btn btn-primary" [disabled]="loading()">
+            @if (loading()) { Criando conta... }
+            @else { Criar conta }
+          </button>
+        </div>
+      </form>
+    }
+
+    <div class="auth-footer">
+      Já tem conta? <a routerLink="/login">Entrar</a>
+    </div>
+  </div>
+</div>

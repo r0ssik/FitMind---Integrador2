@@ -1,0 +1,210 @@
+<div class="home-layout">
+
+  <!-- Header usuário -->
+  <header class="user-header">
+
+<div>
+   <span class="greeting">Bom dia,</span>
+   <span class="user-name">
+      {{ userName }} 👋
+   </span>
+</div>
+
+<img src="logo.png" class="home-logo">
+
+<div class="user-actions">
+
+<button class="notif-btn"
+(click)="goNotifications()">
+🔔
+</button>
+
+<button class="avatar"
+(click)="goProfile()">
+{{ userInitials }}
+</button>
+
+</div>
+</header>
+
+
+  <!-- Content -->
+  <main class="home-content" style="padding-bottom: 80px">
+
+    <!-- Resumo treino do dia -->
+    <div class="widget widget-full" style="margin-bottom: 14px">
+      <div class="widget-header">
+        <span class="widget-title">Treino de hoje — Perna</span>
+        <span class="widget-icon mi">fitness_center</span>
+      </div>
+      <div class="workout-summary">
+        <span style="font-size:13px; color: var(--text-secondary); margin-bottom: 8px; display:block">
+          {{ workoutDone }}/{{ workout.length }} exercícios concluídos
+        </span>
+        <div class="progress-bar" style="margin-bottom: 12px">
+          <div class="progress-fill" [style.width.%]="workoutProgress"></div>
+        </div>
+        @for (ex of workout; track ex.name; let i = $index) {
+          <div class="workout-item">
+            <div class="workout-dot" [style.background]="ex.done ? 'var(--primary)' : 'var(--border)'"></div>
+            <span class="workout-name" [style.text-decoration]="ex.done ? 'line-through' : 'none'"
+                  [style.color]="ex.done ? 'var(--text-hint)' : 'var(--text-primary)'">{{ ex.name }}</span>
+            <span class="workout-sets">{{ ex.sets }}</span>
+            <div class="workout-check" [class.done]="ex.done" (click)="toggleExercise(i)">
+              @if (ex.done) { <span class="mi mi-sm">check</span> }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="widget-grid">
+
+      <!-- Dieta do dia -->
+      <div class="widget widget-full">
+        <div class="widget-header">
+          <span class="widget-title">Dieta de hoje</span>
+          <span class="widget-icon mi">restaurant</span>
+        </div>
+        <div style="display:flex; align-items:baseline; gap:6px; margin-bottom:4px">
+          <span class="widget-value">{{ totalCalories }}</span>
+          <span class="widget-sub">/ 2000 kcal</span>
+        </div>
+        <div class="progress-bar" style="margin-bottom: 12px">
+          <div class="progress-fill" [style.width.%]="caloriePct" style="background: var(--warning)"></div>
+        </div>
+        @for (meal of meals; track meal.name) {
+          <div class="meal-item">
+            <div>
+              <div class="meal-name">{{ meal.name }}</div>
+              <div class="meal-time">{{ meal.time }}</div>
+            </div>
+            <span class="meal-cal" [style.color]="meal.calories ? 'var(--primary-dark)' : 'var(--text-hint)'">
+              {{ meal.calories ? meal.calories + ' kcal' : '—' }}
+            </span>
+          </div>
+        }
+      </div>
+
+      <!-- Água -->
+      <div class="widget">
+        <div class="widget-header">
+          <span class="widget-title">Hidratação</span>
+          <span class="widget-icon mi">water_drop</span>
+        </div>
+        <div class="widget-value" style="font-size:22px">{{ waterDone }}/{{ waterGoal }}</div>
+        <div class="widget-sub" style="margin-bottom: 10px">copos (250ml)</div>
+        <div class="water-tracker">
+          <div class="water-cups">
+            @for (cup of waterCups(); track $index; let i = $index) {
+              <div class="cup" [class.filled]="cup" (click)="toggleCup(i)" title="Copo {{ i + 1 }}"></div>
+            }
+          </div>
+        </div>
+        <div class="progress-bar" style="margin-top: 10px">
+          <div class="progress-fill" [style.width.%]="waterProgress" style="background: var(--secondary)"></div>
+        </div>
+      </div>
+
+      <!-- Progresso rápido -->
+      <div class="widget">
+        <div class="widget-header">
+          <span class="widget-title">Progresso</span>
+          <span class="widget-icon mi">show_chart</span>
+        </div>
+        <div class="widget-value" style="font-size: 20px">-2,4 kg</div>
+        <div class="widget-sub">este mês</div>
+        <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px">
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px">
+              <span style="color:var(--text-secondary)">Treinos</span>
+              <span style="font-weight:600">14/20</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 70%"></div>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px">
+              <span style="color:var(--text-secondary)">Meta calorias</span>
+              <span style="font-weight:600">78%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 78%; background: var(--warning)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Desafios ativos -->
+      <div class="widget widget-full">
+        <div class="widget-header">
+          <span class="widget-title">Desafios ativos</span>
+          <span class="widget-icon mi">emoji_events</span>
+        </div>
+        @for (c of challenges; track c.name) {
+          <div class="challenge-item">
+            <span class="challenge-icon mi">{{ c.icon }}</span>
+            <div class="challenge-info">
+              <div class="challenge-name">{{ c.name }}</div>
+              <div class="challenge-progress-text">{{ c.current }}/{{ c.total }} {{ c.unit }}</div>
+              <div class="progress-bar" style="margin-top: 6px">
+                <div class="progress-fill" [style.width.%]="challengeProgress(c)"></div>
+              </div>
+            </div>
+            <span class="challenge-badge">{{ (challengeProgress(c) | number:'1.0-0') }}%</span>
+          </div>
+        }
+      </div>
+
+      <!-- Feed social -->
+      <div class="widget widget-full">
+        <div class="widget-header">
+          <span class="widget-title">Feed social</span>
+          <span class="widget-icon mi">group</span>
+        </div>
+        @for (post of feed; track post.user) {
+          <div class="feed-item">
+            <div class="feed-avatar">{{ post.initials }}</div>
+            <div class="feed-body">
+              <span class="feed-user">{{ post.user }}</span>
+              <p class="feed-text">{{ post.text }}</p>
+              <div class="feed-actions">
+                <button [class.liked]="post.liked" (click)="toggleLike(post)">
+                  <span class="mi mi-sm" [class.mi-fill]="post.liked">favorite</span> {{ post.likes }}
+                </button>
+                <button><span class="mi mi-sm">chat_bubble_outline</span> {{ post.comments }}</button>
+              </div>
+            </div>
+            <span class="feed-time">{{ post.time }}</span>
+          </div>
+        }
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <button class="nav-item" [class.active]="activeNav() === 'home'"     (click)="navigate('home')">
+      <span class="nav-icon mi">home</span>
+      <span>Início</span>
+    </button>
+    <button class="nav-item" [class.active]="activeNav() === 'workout'"  (click)="navigate('workout')">
+      <span class="nav-icon mi">fitness_center</span>
+      <span>Treino</span>
+    </button>
+    <button class="nav-item" [class.active]="activeNav() === 'diet'"     (click)="navigate('diet')">
+      <span class="nav-icon mi">restaurant</span>
+      <span>Dieta</span>
+    </button>
+    <button class="nav-item" [class.active]="activeNav() === 'progress'" (click)="navigate('progress')">
+      <span class="nav-icon mi">show_chart</span>
+      <span>Progresso</span>
+    </button>
+    <button class="nav-item" [class.active]="activeNav() === 'social'"   (click)="navigate('social')">
+      <span class="nav-icon mi">group</span>
+      <span>Social</span>
+    </button>
+  </nav>
+</div>

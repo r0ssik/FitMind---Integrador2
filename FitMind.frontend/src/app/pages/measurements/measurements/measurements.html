@@ -1,0 +1,197 @@
+<div class="page-layout">
+
+  <!-- Header -->
+  <header class="page-header">
+    <button class="back-btn" (click)="goBack()"><span class="mi">arrow_back</span></button>
+    <h1>Medidas Corporais</h1>
+    <button class="add-btn" (click)="openForm()"><span class="mi">add</span></button>
+  </header>
+
+  <main class="page-content">
+
+    <!-- ── Latest snapshot ──────────────────────────────────────────────────── -->
+    @if (latest()) {
+      <div class="snapshot-card">
+        <div class="snap-top">
+          <span class="snap-label">Última medição</span>
+          <span class="snap-date">{{ latest()!.date }}</span>
+        </div>
+
+        <div class="snap-grid">
+
+          <div class="snap-item">
+            <span class="snap-icon mi">monitor_weight</span>
+            <span class="snap-val">{{ latest()!.weight ?? '—' }} <small>kg</small></span>
+            <span class="snap-name">Peso</span>
+            @if (diff('weight')) {
+              <span class="snap-diff" [class]="diffClass('weight')">{{ diff('weight') }} kg</span>
+            }
+          </div>
+
+          <div class="snap-item">
+            <span class="snap-icon mi">science</span>
+            <span class="snap-val">{{ latest()!.bf ?? '—' }} <small>%</small></span>
+            <span class="snap-name">Gordura</span>
+            @if (latest()!.bf) {
+              <span class="snap-tag">{{ bfCategory(latest()!.bf) }}</span>
+            }
+          </div>
+
+          <div class="snap-item">
+            <span class="snap-icon mi">straighten</span>
+            <span class="snap-val">{{ latest()!.waist ?? '—' }} <small>cm</small></span>
+            <span class="snap-name">Cintura</span>
+            @if (diff('waist')) {
+              <span class="snap-diff" [class]="diffClass('waist')">{{ diff('waist') }} cm</span>
+            }
+          </div>
+
+          <div class="snap-item">
+            <span class="snap-icon mi">straighten</span>
+            <span class="snap-val">{{ latest()!.hip ?? '—' }} <small>cm</small></span>
+            <span class="snap-name">Quadril</span>
+            @if (diff('hip')) {
+              <span class="snap-diff" [class]="diffClass('hip')">{{ diff('hip') }} cm</span>
+            }
+          </div>
+
+          <div class="snap-item">
+            <span class="snap-icon mi">accessibility</span>
+            <span class="snap-val">{{ latest()!.chest ?? '—' }} <small>cm</small></span>
+            <span class="snap-name">Peito</span>
+            @if (diff('chest')) {
+              <span class="snap-diff" [class]="diffClass('chest', false)">{{ diff('chest') }} cm</span>
+            }
+          </div>
+
+          <div class="snap-item">
+            <span class="snap-icon mi">sports_gymnastics</span>
+            <span class="snap-val">{{ latest()!.arm ?? '—' }} <small>cm</small></span>
+            <span class="snap-name">Braço</span>
+            @if (diff('arm')) {
+              <span class="snap-diff" [class]="diffClass('arm', false)">{{ diff('arm') }} cm</span>
+            }
+          </div>
+
+          <div class="snap-item">
+            <span class="snap-icon mi">directions_walk</span>
+            <span class="snap-val">{{ latest()!.thigh ?? '—' }} <small>cm</small></span>
+            <span class="snap-name">Coxa</span>
+            @if (diff('thigh')) {
+              <span class="snap-diff" [class]="diffClass('thigh', false)">{{ diff('thigh') }} cm</span>
+            }
+          </div>
+
+        </div>
+      </div>
+    }
+
+    <!-- ── History list ──────────────────────────────────────────────────────── -->
+    <p class="section-label" style="margin-top:8px">Histórico</p>
+
+    @for (rec of records(); track rec.id) {
+      <div class="meas-record">
+        <div class="meas-date-col">
+          <span class="meas-day">{{ rec.date.slice(0,2) }}</span>
+          <span class="meas-month">{{ rec.date.slice(3,10) }}</span>
+        </div>
+        <div class="meas-body">
+          @if (rec.weight) { <span class="meas-chip">{{ rec.weight }} kg</span> }
+          @if (rec.bf)     { <span class="meas-chip">{{ rec.bf }}%</span> }
+          @if (rec.waist)  { <span class="meas-chip">C:{{ rec.waist }}</span> }
+          @if (rec.hip)    { <span class="meas-chip">Q:{{ rec.hip }}</span> }
+          @if (rec.chest)  { <span class="meas-chip">P:{{ rec.chest }}</span> }
+          @if (rec.arm)    { <span class="meas-chip">B:{{ rec.arm }}</span> }
+          @if (rec.thigh)  { <span class="meas-chip">Co:{{ rec.thigh }}</span> }
+        </div>
+      </div>
+    }
+
+    @if (!records().length) {
+      <div class="empty-state">
+        <span class="mi mi-xl" style="color:var(--text-hint)">straighten</span>
+        <p>Nenhuma medida registrada ainda.</p>
+        <button class="btn btn-primary btn-sm" style="width:auto;margin-top:12px" (click)="openForm()">
+          Registrar agora
+        </button>
+      </div>
+    }
+
+  </main>
+
+  <!-- ── New measurement form (bottom sheet) ───────────────────────────────── -->
+  @if (showForm()) {
+    <div class="modal-overlay" (click)="closeForm()">
+      <div class="modal-sheet" (click)="$event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <p class="modal-title">Nova medição</p>
+
+        @if (saved()) {
+          <div class="alert alert-success">Medição registrada com sucesso!</div>
+        }
+
+        <div class="meas-form-grid">
+
+          <div class="form-group">
+            <label>Peso (kg)</label>
+            <input type="number" placeholder="ex: 80.5" step="0.1"
+                   [value]="fWeight()"
+                   (input)="fWeight.set($any($event.target).value)">
+          </div>
+
+          <div class="form-group">
+            <label>Gordura corporal (%)</label>
+            <input type="number" placeholder="ex: 18.5" step="0.1"
+                   [value]="fBf()"
+                   (input)="fBf.set($any($event.target).value)">
+          </div>
+
+          <div class="form-group">
+            <label>Cintura (cm)</label>
+            <input type="number" placeholder="ex: 84" step="0.5"
+                   [value]="fWaist()"
+                   (input)="fWaist.set($any($event.target).value)">
+          </div>
+
+          <div class="form-group">
+            <label>Quadril (cm)</label>
+            <input type="number" placeholder="ex: 95" step="0.5"
+                   [value]="fHip()"
+                   (input)="fHip.set($any($event.target).value)">
+          </div>
+
+          <div class="form-group">
+            <label>Peito (cm)</label>
+            <input type="number" placeholder="ex: 99" step="0.5"
+                   [value]="fChest()"
+                   (input)="fChest.set($any($event.target).value)">
+          </div>
+
+          <div class="form-group">
+            <label>Braço (cm)</label>
+            <input type="number" placeholder="ex: 34" step="0.5"
+                   [value]="fArm()"
+                   (input)="fArm.set($any($event.target).value)">
+          </div>
+
+          <div class="form-group" style="grid-column: 1 / -1">
+            <label>Coxa (cm)</label>
+            <input type="number" placeholder="ex: 56" step="0.5"
+                   [value]="fThigh()"
+                   (input)="fThigh.set($any($event.target).value)">
+          </div>
+
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 2fr; gap:10px; margin-top:8px">
+          <button class="btn btn-outline" (click)="closeForm()">Cancelar</button>
+          <button class="btn btn-primary" [disabled]="!canSave()" (click)="saveRecord()">
+            Salvar medição
+          </button>
+        </div>
+
+      </div>
+    </div>
+  }
+
+</div>

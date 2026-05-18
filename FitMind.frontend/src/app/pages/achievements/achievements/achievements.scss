@@ -1,0 +1,206 @@
+// ── Summary bar ───────────────────────────────────────────────────────────────
+
+.achiev-summary {
+  display: flex;
+  background: white;
+  border-bottom: 1px solid var(--border);
+  padding: 12px 0;
+}
+
+.ach-sum-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.ach-sum-val {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.ach-sum-lbl {
+  font-size: 10px;
+  color: var(--text-hint);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  text-align: center;
+}
+
+.ach-sum-div {
+  width: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}
+
+.achiev-prog-bar {
+  height: 4px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.achiev-prog-fill {
+  height: 100%;
+  background: var(--primary);
+  transition: width 0.6s ease;
+}
+
+// ── Grid ──────────────────────────────────────────────────────────────────────
+
+.achiev-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 4px;
+
+  @media (min-width: 480px) { grid-template-columns: repeat(3, 1fr); }
+}
+
+// ── Card ──────────────────────────────────────────────────────────────────────
+
+.achiev-card {
+  border-radius: var(--radius);
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+  position: relative;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+
+  &.unlocked {
+    background: var(--bg-card);
+    border: 1.5px solid var(--primary-light);
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    &.rare {
+      background: linear-gradient(135deg, #fffde7, #fff8e1);
+      border-color: #ffd600;
+    }
+  }
+
+  &.locked {
+    background: #fafafa;
+    border: 1.5px solid var(--border);
+    cursor: default;
+    opacity: 0.75;
+
+    &.rare { border-color: #ffe082; }
+  }
+}
+
+.rare-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+  background: #fff9c4;
+  color: #f57f17;
+}
+
+.achiev-icon {
+  font-size: 32px;
+  margin-bottom: 4px;
+}
+
+.achiev-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.achiev-desc {
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.35;
+}
+
+.achiev-date {
+  font-size: 10px;
+  color: var(--primary-dark);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.share-hint {
+  font-size: 10px;
+  color: var(--text-hint);
+  font-style: italic;
+  margin-top: 2px;
+}
+
+// locked state
+.locked-icon  { filter: grayscale(1) opacity(0.5); }
+.locked-text  { color: var(--text-hint); }
+.lock-icon    { font-size: 18px; margin-top: 4px; }
+
+.lock-prog-bar {
+  width: 80%;
+  height: 5px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.lock-prog-fill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.lock-prog-pct {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary-dark);
+}
+
+// ── Share card ────────────────────────────────────────────────────────────────
+
+.share-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, var(--primary-light), #e3f2fd);
+  border-radius: var(--radius);
+  padding: 24px 16px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.share-big-icon { font-size: 52px; }
+
+.share-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.share-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.share-rare {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: #fff9c4;
+  color: #f57f17;
+  margin-top: 4px;
+}

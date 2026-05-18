@@ -1,0 +1,165 @@
+<div class="page-layout">
+  <header class="page-header">
+    <button class="back-btn" (click)="goBack()"><span class="mi">arrow_back</span></button>
+    <h1>Plano Alimentar IA</h1>
+    <div style="width:40px"></div>
+  </header>
+
+  <main class="page-content">
+
+    @if (!generated()) {
+      <div class="ai-banner">
+        <span class="ai-icon mi mi-lg">restaurant</span>
+        <div>
+          <strong>Dieta personalizada por IA</strong>
+          <p>A IA cria um plano alimentar completo baseado nos seus objetivos e preferências.</p>
+        </div>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="generate()">
+
+        <!-- Objetivo -->
+        <div class="form-group">
+          <label>Objetivo</label>
+          <div class="radio-cards">
+            @for (g of goals; track g.value) {
+              <label class="radio-card"
+                [class.selected]="form.value.goal === g.value"
+                (click)="form.patchValue({goal: g.value})">
+                <div class="card-icon mi mi-lg">{{ g.icon }}</div>
+                <div class="card-label">{{ g.label }}</div>
+              </label>
+            }
+          </div>
+        </div>
+
+        <!-- Restrições -->
+        <div class="form-group">
+          <label>Restrições alimentares</label>
+          <div class="chip-group">
+            @for (r of restrictions; track r) {
+              <button type="button" class="chip"
+                [class.selected]="selectedRestrictions().includes(r)"
+                (click)="toggleRestriction(r)">{{ r }}</button>
+            }
+          </div>
+        </div>
+
+        <!-- Preferências -->
+        <div class="form-group">
+          <label>Preferências alimentares <span class="label-hint">(opcional)</span></label>
+          <div class="chip-group">
+            @for (p of preferences; track p) {
+              <button type="button" class="chip"
+                [class.selected]="selectedPreferences().includes(p)"
+                (click)="togglePreference(p)">{{ p }}</button>
+            }
+          </div>
+        </div>
+
+        <!-- Refeições por dia -->
+        <div class="form-group">
+          <label>Refeições por dia</label>
+          <div class="days-selector">
+            @for (n of [3,4,5,6]; track n) {
+              <button type="button" class="day-btn"
+                [class.selected]="form.value.mealsPerDay === n"
+                (click)="form.patchValue({mealsPerDay: n})">{{ n }}x</button>
+            }
+          </div>
+        </div>
+
+        <!-- Orçamento -->
+        <div class="form-group">
+          <label>Orçamento mensal</label>
+          <div class="budget-cards">
+            @for (b of budgets; track b.value) {
+              <label class="budget-card"
+                [class.selected]="form.value.budget === b.value"
+                (click)="form.patchValue({budget: b.value})">
+                <span class="budget-icon mi">{{ b.icon }}</span>
+                <span class="budget-label">{{ b.label }}</span>
+                <span class="budget-sub">{{ b.sub }}</span>
+              </label>
+            }
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" [disabled]="loading()">
+          @if (loading()) { <span class="spinner"></span> Gerando plano... }
+          @else { <span class="mi mi-sm">restaurant</span> Gerar plano alimentar }
+        </button>
+      </form>
+    }
+
+    @if (generated() && plan()) {
+      <div class="success-banner">
+        <span class="mi mi-sm">check_circle</span> Plano alimentar gerado com sucesso!
+      </div>
+
+      <!-- Macro resumo -->
+      <div class="macro-summary-card">
+        <div class="macro-kcal">
+          <span class="macro-kcal-val">{{ plan()!.totalKcal }}</span>
+          <span class="macro-kcal-lbl">kcal/dia</span>
+        </div>
+        <div class="macro-bars">
+          <div class="macro-bar-row">
+            <span class="macro-name protein">Proteína</span>
+            <div class="macro-bar"><div class="macro-fill protein" [style.width.%]="(plan()!.protein*4/plan()!.totalKcal)*100"></div></div>
+            <span class="macro-val">{{ plan()!.protein }}g</span>
+          </div>
+          <div class="macro-bar-row">
+            <span class="macro-name carbs">Carbs</span>
+            <div class="macro-bar"><div class="macro-fill carbs" [style.width.%]="(plan()!.carbs*4/plan()!.totalKcal)*100"></div></div>
+            <span class="macro-val">{{ plan()!.carbs }}g</span>
+          </div>
+          <div class="macro-bar-row">
+            <span class="macro-name fat">Gordura</span>
+            <div class="macro-bar"><div class="macro-fill fat" [style.width.%]="(plan()!.fat*9/plan()!.totalKcal)*100"></div></div>
+            <span class="macro-val">{{ plan()!.fat }}g</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Refeições geradas -->
+      @for (meal of plan()!.meals; track meal.name) {
+        <div class="diet-meal-card">
+          <div class="diet-meal-header">
+            <div>
+              <span class="diet-meal-name">{{ meal.name }}</span>
+              <span class="diet-meal-time">{{ meal.time }}</span>
+            </div>
+            <span class="diet-meal-kcal">{{ mealKcal(meal) }} kcal</span>
+          </div>
+          <div class="diet-food-list">
+            @for (food of meal.foods; track food.item) {
+              <div class="diet-food-row">
+                <div class="diet-food-info">
+                  <span class="diet-food-name">{{ food.item }}</span>
+                  <span class="diet-food-amount">{{ food.amount }}</span>
+                </div>
+                <div class="diet-food-macros">
+                  <span class="macro-tag p">P {{ food.p }}g</span>
+                  <span class="macro-tag c">C {{ food.c }}g</span>
+                  <span class="macro-tag f">G {{ food.f }}g</span>
+                  <span class="diet-food-kcal">{{ food.kcal }} kcal</span>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <div class="result-actions">
+        <button class="btn btn-outline" (click)="regenerate()">
+          <span class="mi mi-sm">refresh</span> Regerar
+        </button>
+        <button class="btn btn-primary" (click)="savePlan()">
+          <span class="mi mi-sm">check</span> Usar este plano
+        </button>
+      </div>
+    }
+
+  </main>
+</div>

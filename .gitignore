@@ -1,0 +1,24 @@
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+
+# Backend (C#)
+backend/bin/
+backend/obj/
+backend/*.user
+backend/*.suo
+backend/.vs/
+backend/**/*.user
+backend/**/bin/
+backend/**/obj/
+
+# OS
+.DS_Store
+Thumbs.db
+
+
+# IDE
+.vscode/settings.json
+.idea/
+*.swp

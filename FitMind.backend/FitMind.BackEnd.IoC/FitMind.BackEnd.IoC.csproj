@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>FitMind.BackEnd.IoC</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FitMind.BackEnd.Service\FitMind.BackEnd.Service.csproj" />
+    <ProjectReference Include="..\FitMind.BackEnd.SystemInfra\FitMind.BackEnd.SystemInfra.csproj" />
+  </ItemGroup>
+
+</Project>

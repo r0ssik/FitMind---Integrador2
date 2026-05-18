@@ -1,0 +1,188 @@
+<div class="page-layout">
+  <header class="page-header">
+    <button class="back-btn" (click)="goBack()"><span class="mi">arrow_back</span></button>
+    <h1>Diário Alimentar</h1>
+    <button class="generate-btn" (click)="goDietPlan()" title="Gerar plano IA"><span class="mi">auto_awesome</span></button>
+  </header>
+
+  <!-- Navegador de data -->
+  <div class="date-nav">
+    <button class="date-arrow" (click)="changeDate(-1)">‹</button>
+    <span class="date-label">{{ dateLabel }}</span>
+    <button class="date-arrow" (click)="changeDate(1)" [disabled]="isToday">›</button>
+  </div>
+
+  <!-- Resumo de macros -->
+  <div class="macro-overview">
+    <div class="macro-kcal-block">
+      <span class="macro-kcal-consumed">{{ totals().kcal }}</span>
+      <span class="macro-kcal-sep">/</span>
+      <span class="macro-kcal-goal">{{ kcalGoal }} kcal</span>
+    </div>
+    <div class="macro-kcal-bar">
+      <div class="macro-kcal-fill"
+        [style.width.%]="pct(totals().kcal, kcalGoal)"
+        [style.background]="totals().kcal > kcalGoal ? 'var(--danger)' : 'var(--primary)'">
+      </div>
+    </div>
+    <div class="macro-pills">
+      <div class="macro-pill">
+        <span class="pill-dot protein"></span>
+        <span class="pill-label">Proteína</span>
+        <span class="pill-val">{{ totals().protein }}g</span>
+        <span class="pill-goal">/ {{ proteinGoal }}g</span>
+      </div>
+      <div class="macro-pill">
+        <span class="pill-dot carbs"></span>
+        <span class="pill-label">Carbs</span>
+        <span class="pill-val">{{ totals().carbs }}g</span>
+        <span class="pill-goal">/ {{ carbsGoal }}g</span>
+      </div>
+      <div class="macro-pill">
+        <span class="pill-dot fat"></span>
+        <span class="pill-label">Gordura</span>
+        <span class="pill-val">{{ totals().fat }}g</span>
+        <span class="pill-goal">/ {{ fatGoal }}g</span>
+      </div>
+    </div>
+  </div>
+
+  <main class="page-content">
+
+    @for (meal of meals(); track meal.id) {
+      <div class="diary-meal-card">
+
+        <!-- Header da refeição -->
+        <div class="diary-meal-header" (click)="toggleMeal(meal.id)">
+          <div class="diary-meal-left">
+            <span class="diary-meal-icon mi">{{ meal.icon }}</span>
+            <div>
+              <span class="diary-meal-name">{{ meal.name }}</span>
+              <span class="diary-meal-time">{{ meal.time }}</span>
+            </div>
+          </div>
+          <div class="diary-meal-right">
+            @if (meal.items.length > 0) {
+              <span class="diary-meal-kcal">{{ mealKcal(meal) }} kcal</span>
+            } @else {
+              <span class="diary-meal-empty">Vazio</span>
+            }
+            <span class="chevron" [class.open]="meal.expanded">›</span>
+          </div>
+        </div>
+
+        <!-- Itens da refeição -->
+        @if (meal.expanded) {
+          <div class="diary-food-list">
+            @if (meal.items.length === 0) {
+              <p class="no-foods">Nenhum alimento registrado ainda.</p>
+            }
+
+            @for (food of meal.items; track food.id) {
+              <div class="diary-food-row">
+                <div class="diary-food-info">
+                  <span class="diary-food-name">{{ food.name }}</span>
+                  <span class="diary-food-amount">{{ food.amount }}</span>
+                </div>
+                <div class="diary-food-macros">
+                  <span class="macro-tag p">P {{ food.protein }}g</span>
+                  <span class="macro-tag c">C {{ food.carbs }}g</span>
+                  <span class="macro-tag f">G {{ food.fat }}g</span>
+                  <span class="diary-food-kcal">{{ food.kcal }} kcal</span>
+                </div>
+                <button class="remove-food-btn" (click)="removeFood(meal.id, food.id)"><span class="mi mi-sm">close</span></button>
+              </div>
+            }
+
+            <!-- Macro da refeição -->
+            @if (meal.items.length > 0) {
+              <div class="meal-macro-row">
+                <span>Total: <strong>{{ mealKcal(meal) }} kcal</strong></span>
+                <span>P: <strong>{{ mealMacro(meal, 'protein') }}g</strong></span>
+                <span>C: <strong>{{ mealMacro(meal, 'carbs') }}g</strong></span>
+                <span>G: <strong>{{ mealMacro(meal, 'fat') }}g</strong></span>
+              </div>
+            }
+
+            <button class="add-food-btn" (click)="openAdd(meal.id)">
+              + Adicionar alimento
+            </button>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Resumo do dia -->
+    <div class="day-summary-card">
+      <h3 class="section-label">Resumo do dia</h3>
+      <div class="summary-macros">
+        <div class="summary-macro">
+          <div class="summary-circle kcal">
+            <span class="sc-val">{{ pct(totals().kcal, kcalGoal) }}%</span>
+          </div>
+          <span class="sc-label">Calorias</span>
+          <span class="sc-numbers">{{ totals().kcal }}/{{ kcalGoal }}</span>
+        </div>
+        <div class="summary-macro">
+          <div class="summary-circle protein">
+            <span class="sc-val">{{ pct(totals().protein, proteinGoal) }}%</span>
+          </div>
+          <span class="sc-label">Proteína</span>
+          <span class="sc-numbers">{{ totals().protein }}/{{ proteinGoal }}g</span>
+        </div>
+        <div class="summary-macro">
+          <div class="summary-circle carbs">
+            <span class="sc-val">{{ pct(totals().carbs, carbsGoal) }}%</span>
+          </div>
+          <span class="sc-label">Carbs</span>
+          <span class="sc-numbers">{{ totals().carbs }}/{{ carbsGoal }}g</span>
+        </div>
+        <div class="summary-macro">
+          <div class="summary-circle fat">
+            <span class="sc-val">{{ pct(totals().fat, fatGoal) }}%</span>
+          </div>
+          <span class="sc-label">Gordura</span>
+          <span class="sc-numbers">{{ totals().fat }}/{{ fatGoal }}g</span>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Modal adicionar alimento -->
+  @if (showAddModal()) {
+    <div class="modal-overlay" (click)="closeAdd()">
+      <div class="modal-sheet" (click)="$event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <h3 class="modal-title">Adicionar alimento</h3>
+        <div class="modal-add-actions">
+          <button class="modal-action-btn" (click)="goImageAnalysis()">
+            <span class="mi">photo_camera</span>
+            <span>Analisar por foto</span>
+          </button>
+          <button class="modal-action-btn" (click)="goManualMeal()">
+            <span class="mi">edit</span>
+            <span>Adicionar manualmente</span>
+          </button>
+        </div>
+        <div class="quick-foods">
+          <p class="quick-label">Alimentos rápidos</p>
+          @for (food of [
+            {name:'Frango grelhado (100g)', kcal:165},
+            {name:'Arroz integral (100g)', kcal:110},
+            {name:'Ovo inteiro', kcal:70},
+            {name:'Banana média', kcal:90},
+            {name:'Whey protein (30g)', kcal:120},
+            {name:'Pão integral (fatia)', kcal:70}
+          ]; track food.name) {
+            <button class="quick-food-btn" (click)="addQuickFood(activeMealId()!)">
+              <span class="qf-name">{{ food.name }}</span>
+              <span class="qf-kcal">{{ food.kcal }} kcal</span>
+            </button>
+          }
+        </div>
+        <button class="btn btn-outline" style="margin-top:12px" (click)="closeAdd()">Cancelar</button>
+      </div>
+    </div>
+  }
+</div>

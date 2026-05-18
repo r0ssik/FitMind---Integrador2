@@ -1,0 +1,165 @@
+<div class="page-layout">
+
+  <!-- Header -->
+  <header class="page-header">
+    <button class="back-btn" (click)="goBack()"><span class="mi">arrow_back</span></button>
+    <h1>Progresso</h1>
+    <span style="width:40px"></span>
+  </header>
+
+  <!-- Period selector -->
+  <div class="filter-scroll">
+    <button class="filter-chip" [class.active]="period() === '7d'"  (click)="period.set('7d')">7 dias</button>
+    <button class="filter-chip" [class.active]="period() === '30d'" (click)="period.set('30d')">30 dias</button>
+    <button class="filter-chip" [class.active]="period() === '3m'"  (click)="period.set('3m')">3 meses</button>
+  </div>
+
+  <main class="page-content">
+
+    <!-- ── Summary cards ─────────────────────────────────────────────────────── -->
+    <div class="prog-stats">
+
+      <div class="prog-stat" [class.neg]="weightChange() < 0" [class.pos]="weightChange() > 0">
+        <span class="ps-icon mi">monitor_weight</span>
+        <span class="ps-val">{{ weightChange() > 0 ? '+' : '' }}{{ weightChange() }} kg</span>
+        <span class="ps-lbl">Peso</span>
+      </div>
+
+      <div class="prog-stat neg">
+        <span class="ps-icon mi">straighten</span>
+        <span class="ps-val">{{ waistChange() > 0 ? '+' : '' }}{{ waistChange() }} cm</span>
+        <span class="ps-lbl">Cintura</span>
+      </div>
+
+      <div class="prog-stat pos">
+        <span class="ps-icon mi">fitness_center</span>
+        <span class="ps-val">{{ totalWorkouts() }}</span>
+        <span class="ps-lbl">Treinos</span>
+      </div>
+
+      <div class="prog-stat">
+        <span class="ps-icon mi">timer</span>
+        <span class="ps-val">{{ avgDuration() }}'</span>
+        <span class="ps-lbl">Média/treino</span>
+      </div>
+
+    </div>
+
+    <!-- ── Peso ──────────────────────────────────────────────────────────────── -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <span class="chart-title">Peso corporal</span>
+          <span class="chart-sub">kg</span>
+        </div>
+        <span class="chart-badge" [class.badge-down]="weightChange() < 0" [class.badge-up]="weightChange() > 0">
+          {{ weightChange() > 0 ? '▲' : '▼' }} {{ absVal(weightChange()) }} kg
+        </span>
+      </div>
+
+      @if (weightValues().length > 1) {
+        <svg [attr.viewBox]="'0 0 ' + W + ' ' + H" class="chart-svg">
+          @for (y of yLabels(weightValues()); track y.label) {
+            <line [attr.x1]="PAD.left" [attr.x2]="W - PAD.right"
+                  [attr.y1]="y.y" [attr.y2]="y.y"
+                  stroke="#f0f0f0" stroke-width="1"/>
+            <text [attr.x]="PAD.left - 4" [attr.y]="y.y + 4"
+                  text-anchor="end" font-size="9" fill="#9e9e9e">{{ y.label }}</text>
+          }
+          <path [attr.d]="areaPath(weightValues())" fill="#e8f5e9" opacity="0.7"/>
+          <polyline [attr.points]="linePoints(weightValues())"
+                    fill="none" stroke="#4caf50" stroke-width="2.5" stroke-linejoin="round"/>
+          @for (pt of linePoints(weightValues()).split(' '); track $index) {
+            <circle [attr.cx]="pt.split(',')[0]" [attr.cy]="pt.split(',')[1]"
+                    r="3" fill="white" stroke="#4caf50" stroke-width="2"/>
+          }
+          @for (lbl of xLabels(weightLabels(), xStepFor(weightLabels().length)); track lbl.label) {
+            <text [attr.x]="lbl.x" [attr.y]="H - 4"
+                  text-anchor="middle" font-size="9" fill="#9e9e9e">{{ lbl.label }}</text>
+          }
+        </svg>
+      } @else {
+        <div class="chart-empty">Registre seu peso para ver o gráfico</div>
+      }
+    </div>
+
+    <!-- ── Medidas ────────────────────────────────────────────────────────────── -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <span class="chart-title">Medidas corporais</span>
+          <span class="chart-sub">cm</span>
+        </div>
+        <div class="chart-legend">
+          <span class="leg-dot" style="background:#4caf50"></span><span>Cintura</span>
+          <span class="leg-dot" style="background:#2196f3"></span><span>Quadril</span>
+          <span class="leg-dot" style="background:#ff9800"></span><span>Peito</span>
+        </div>
+      </div>
+
+      @if (waistValues().length > 1) {
+        <svg [attr.viewBox]="'0 0 ' + W + ' ' + H" class="chart-svg">
+          @for (y of yLabels([...waistValues(), ...hipValues(), ...chestValues()]); track y.label) {
+            <line [attr.x1]="PAD.left" [attr.x2]="W - PAD.right"
+                  [attr.y1]="y.y" [attr.y2]="y.y"
+                  stroke="#f0f0f0" stroke-width="1"/>
+            <text [attr.x]="PAD.left - 4" [attr.y]="y.y + 4"
+                  text-anchor="end" font-size="9" fill="#9e9e9e">{{ y.label }}</text>
+          }
+          <polyline [attr.points]="linePoints(waistValues())"
+                    fill="none" stroke="#4caf50" stroke-width="2" stroke-linejoin="round"/>
+          <polyline [attr.points]="linePoints(hipValues())"
+                    fill="none" stroke="#2196f3" stroke-width="2" stroke-linejoin="round" stroke-dasharray="5,3"/>
+          <polyline [attr.points]="linePoints(chestValues())"
+                    fill="none" stroke="#ff9800" stroke-width="2" stroke-linejoin="round" stroke-dasharray="2,3"/>
+          @for (lbl of xLabels(measLabels(), xStepFor(measLabels().length)); track lbl.label) {
+            <text [attr.x]="lbl.x" [attr.y]="H - 4"
+                  text-anchor="middle" font-size="9" fill="#9e9e9e">{{ lbl.label }}</text>
+          }
+        </svg>
+      } @else {
+        <div class="chart-empty">Registre suas medidas para ver o gráfico</div>
+      }
+    </div>
+
+    <!-- ── Evolução dos treinos ───────────────────────────────────────────────── -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <span class="chart-title">Duração dos treinos</span>
+          <span class="chart-sub">minutos</span>
+        </div>
+        <span class="chart-badge badge-up">{{ totalWorkouts() }} treinos</span>
+      </div>
+
+      @if (durationValues().length > 0) {
+        <svg [attr.viewBox]="'0 0 ' + W + ' ' + H" class="chart-svg">
+          @for (y of yLabels(durationValues()); track y.label) {
+            <line [attr.x1]="PAD.left" [attr.x2]="W - PAD.right"
+                  [attr.y1]="y.y" [attr.y2]="y.y"
+                  stroke="#f0f0f0" stroke-width="1"/>
+            <text [attr.x]="PAD.left - 4" [attr.y]="y.y + 4"
+                  text-anchor="end" font-size="9" fill="#9e9e9e">{{ y.label }}</text>
+          }
+          @for (bar of barRects(durationValues()); track $index) {
+            <rect [attr.x]="bar.x" [attr.y]="bar.y"
+                  [attr.width]="bar.w" [attr.height]="bar.h"
+                  rx="2" fill="#4caf50" opacity="0.85"/>
+          }
+          @for (lbl of xLabels(workoutLabels(), xStepFor(workoutLabels().length)); track lbl.label) {
+            <text [attr.x]="lbl.x" [attr.y]="H - 4"
+                  text-anchor="middle" font-size="9" fill="#9e9e9e">{{ lbl.label }}</text>
+          }
+        </svg>
+      } @else {
+        <div class="chart-empty">Nenhum treino registrado no período</div>
+      }
+    </div>
+
+    <!-- ── CTA registro de medidas ───────────────────────────────────────────── -->
+    <button class="btn btn-outline" style="margin-bottom:24px" (click)="goToMeasurements()">
+      <span class="mi mi-sm">straighten</span> Registrar nova medida
+    </button>
+
+  </main>
+</div>

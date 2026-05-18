@@ -1,0 +1,127 @@
+<div class="page-layout">
+
+  <!-- Header -->
+  <header class="page-header">
+    <button class="back-btn" (click)="goBack()"><span class="mi">arrow_back</span></button>
+    <h1>Conquistas</h1>
+    <span style="width:40px"></span>
+  </header>
+
+  <!-- ── Summary bar ──────────────────────────────────────────────────────────── -->
+  <div class="achiev-summary">
+    <div class="ach-sum-item">
+      <span class="ach-sum-val">{{ unlocked().length }}</span>
+      <span class="ach-sum-lbl">Desbloqueadas</span>
+    </div>
+    <div class="ach-sum-div"></div>
+    <div class="ach-sum-item">
+      <span class="ach-sum-val">{{ locked().length }}</span>
+      <span class="ach-sum-lbl">Bloqueadas</span>
+    </div>
+    <div class="ach-sum-div"></div>
+    <div class="ach-sum-item">
+      <span class="ach-sum-val">{{ allAchievements.length }}</span>
+      <span class="ach-sum-lbl">Total</span>
+    </div>
+    <div class="ach-sum-div"></div>
+    <div class="ach-sum-item">
+      <span class="ach-sum-val">{{ (unlocked().length / allAchievements.length * 100) | number:'1.0-0' }}%</span>
+      <span class="ach-sum-lbl">Progresso</span>
+    </div>
+  </div>
+
+  <!-- Progress bar -->
+  <div class="achiev-prog-bar">
+    <div class="achiev-prog-fill"
+         [style.width.%]="unlocked().length / allAchievements.length * 100"></div>
+  </div>
+
+  <!-- ── Category filter ──────────────────────────────────────────────────────── -->
+  <div class="filter-scroll">
+    @for (cat of categories; track cat.key) {
+      <button class="filter-chip" [class.active]="filter() === cat.key"
+              (click)="filter.set(cat.key)">
+        <span class="mi mi-sm">{{ cat.icon }}</span> {{ cat.label }}
+      </button>
+    }
+  </div>
+
+  <main class="page-content">
+
+    <!-- ── Unlocked ────────────────────────────────────────────────────────────── -->
+    @if (filteredUnlocked().length) {
+      <p class="section-label">Conquistadas ({{ filteredUnlocked().length }})</p>
+      <div class="achiev-grid">
+        @for (a of filteredUnlocked(); track a.id) {
+          <div class="achiev-card unlocked" [class.rare]="a.rare" (click)="openShare(a)">
+            @if (a.rare) { <span class="rare-badge"><span class="mi mi-sm">auto_awesome</span> Raro</span> }
+            <span class="achiev-icon mi mi-lg">{{ a.icon }}</span>
+            <span class="achiev-title">{{ a.title }}</span>
+            <span class="achiev-desc">{{ a.description }}</span>
+            <span class="achiev-date">{{ a.unlockedAt }}</span>
+            <span class="share-hint">Toque para compartilhar</span>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- ── Locked ──────────────────────────────────────────────────────────────── -->
+    @if (filteredLocked().length) {
+      <p class="section-label" style="margin-top:16px">Bloqueadas ({{ filteredLocked().length }})</p>
+      <div class="achiev-grid">
+        @for (a of filteredLocked(); track a.id) {
+          <div class="achiev-card locked" [class.rare]="a.rare">
+            @if (a.rare) { <span class="rare-badge"><span class="mi mi-sm">auto_awesome</span> Raro</span> }
+            <span class="achiev-icon locked-icon mi mi-lg">{{ a.icon }}</span>
+            <span class="achiev-title locked-text">{{ a.title }}</span>
+            <span class="achiev-desc">{{ a.description }}</span>
+            @if (a.progress != null) {
+              <div class="lock-prog-bar">
+                <div class="lock-prog-fill" [style.width.%]="a.progress"></div>
+              </div>
+              <span class="lock-prog-pct">{{ a.progress }}%</span>
+            } @else {
+              <span class="lock-icon mi">lock</span>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    @if (!filteredUnlocked().length && !filteredLocked().length) {
+      <div class="empty-state">
+        <span class="mi mi-xl" style="color:var(--text-hint)">military_tech</span>
+        <p>Nenhuma conquista nesta categoria.</p>
+      </div>
+    }
+
+  </main>
+
+  <!-- ── Share modal ─────────────────────────────────────────────────────────── -->
+  @if (shareTarget()) {
+    <div class="modal-overlay" (click)="closeShare()">
+      <div class="modal-sheet" (click)="$event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <div class="share-card">
+          <span class="share-big-icon mi mi-xl">{{ shareTarget()!.icon }}</span>
+          <p class="share-title">{{ shareTarget()!.title }}</p>
+          <p class="share-desc">{{ shareTarget()!.description }}</p>
+          @if (shareTarget()!.rare) {
+            <span class="share-rare"><span class="mi mi-sm">auto_awesome</span> Conquista Rara</span>
+          }
+        </div>
+        <p style="font-size:13px; color:var(--text-secondary); text-align:center; margin:12px 0 8px">
+          Compartilhe sua conquista!
+        </p>
+        <div style="display:flex; gap:10px">
+          <button class="btn btn-outline" (click)="closeShare()">Fechar</button>
+          <button class="btn btn-primary" (click)="copyShare()">
+            @if (shareCopied()) { <span class="mi mi-sm">check_circle</span> Copiado! }
+            @else { <span class="mi mi-sm">content_copy</span> Copiar texto }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

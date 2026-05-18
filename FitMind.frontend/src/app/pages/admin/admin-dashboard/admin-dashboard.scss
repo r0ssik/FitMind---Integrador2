@@ -1,0 +1,203 @@
+.admin-users-btn {
+  background: none;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+  font-size: 18px;
+  cursor: pointer;
+  color: var(--text-primary);
+
+  &:hover { border-color: var(--primary); }
+}
+
+// ── Admin banner ──────────────────────────────────────────────────────────────
+
+.admin-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: linear-gradient(135deg, #1a237e, #283593);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  color: white;
+  margin-bottom: 16px;
+
+  .ab-icon { font-size: 32px; flex-shrink: 0; }
+
+  strong { font-size: 16px; font-weight: 700; display: block; }
+  p      { font-size: 12px; opacity: 0.8; }
+
+  .ab-badge {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    padding: 4px 10px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 20px;
+  }
+}
+
+// ── Metrics grid ──────────────────────────────────────────────────────────────
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+
+  @media (max-width: 360px) { grid-template-columns: 1fr 1fr; }
+}
+
+.metric-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 14px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+  box-shadow: var(--shadow);
+
+  .mc-icon { font-size: 22px; }
+  .mc-val  { font-size: 22px; font-weight: 800; color: var(--text-primary); }
+  .mc-lbl  { font-size: 10px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.3px; }
+
+  &.primary { border-top: 3px solid var(--primary); }
+  &.danger  { border-top: 3px solid var(--danger); .mc-val { color: var(--danger); } }
+}
+
+// ── Week chart ────────────────────────────────────────────────────────────────
+
+.chart-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  gap: 8px;
+}
+
+.chart-title { font-size: 14px; font-weight: 700; display: block; }
+.chart-sub   { font-size: 11px; color: var(--text-hint); display: block; margin-top: 2px; }
+
+.chart-badge {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: var(--bg);
+  color: var(--text-secondary);
+  white-space: nowrap;
+
+  &.badge-up { background: #e8f5e9; color: #2e7d32; }
+}
+
+.week-chart {
+  display: flex;
+  gap: 4px;
+  align-items: flex-end;
+  height: 100px;
+}
+
+.wc-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.wc-bar-wrap {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+}
+
+.wc-bar {
+  width: 100%;
+  background: #3f51b5;
+  border-radius: 3px 3px 0 0;
+  min-height: 4px;
+  transition: height 0.4s ease;
+}
+
+.wc-val { font-size: 9px; font-weight: 700; color: var(--text-secondary); }
+.wc-day { font-size: 10px; color: var(--text-hint); }
+
+// ── Report card ───────────────────────────────────────────────────────────────
+
+.report-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow);
+  border-left: 3px solid var(--danger);
+
+  &.report-resolved { border-left-color: var(--border); opacity: 0.75; }
+}
+
+.report-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.report-type {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: #ffebee;
+  color: #c62828;
+}
+
+.report-status {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+
+  &.status-pending   { background: #fff3e0; color: #e65100; }
+  &.status-resolved  { background: #e8f5e9; color: #2e7d32; }
+  &.status-dismissed { background: var(--bg); color: var(--text-hint); }
+}
+
+.report-reason {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.report-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  flex-wrap: wrap;
+}
+
+.report-filters {
+  display: flex;
+  gap: 4px;
+}
+
+.report-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}

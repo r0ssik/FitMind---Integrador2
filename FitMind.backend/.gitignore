@@ -1,0 +1,58 @@
+## .NET
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]uild/
+[Ll]og/
+[Ll]ogs/
+*.ncrunchproject
+*.ncrunch*
+
+## NuGet
+*.nupkg
+*.snupkg
+**/[Pp]ackages/
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
+
+## dotnet publish
+**/publish/
+**/PublishOutput/
+
+## Test results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+TestResult.xml
+[Rr]esult.xml
+coverage*.json
+coverage*.xml
+coverage*.info
+*.coverage
+*.coveragexml
+coveragereport/
+
+## Secrets / environment
+appsettings.Development.json
+appsettings.Local.json
+.env
+*.pfx
+*.p12
+
+## Docker
+.dockerignore
+
+## OS
+.DS_Store
+Thumbs.db

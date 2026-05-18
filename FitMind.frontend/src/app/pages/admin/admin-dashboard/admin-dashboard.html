@@ -1,0 +1,124 @@
+<div class="page-layout">
+
+  <header class="page-header">
+    <button class="back-btn" (click)="goHome()"><span class="mi">arrow_back</span></button>
+    <h1>Dashboard Admin</h1>
+    <button class="admin-users-btn" (click)="goUsers()" title="Gestão de usuários"><span class="mi">group</span></button>
+  </header>
+
+  <main class="page-content">
+
+    <!-- ── Admin badge ────────────────────────────────────────────────────── -->
+    <div class="admin-banner">
+      <span class="ab-icon mi">admin_panel_settings</span>
+      <div>
+        <strong>Painel Administrativo</strong>
+        <p>Visão geral da plataforma FitMind</p>
+      </div>
+      <span class="ab-badge">ADMIN</span>
+    </div>
+
+    <!-- ── Metrics grid ──────────────────────────────────────────────────── -->
+    <div class="metrics-grid">
+
+      <div class="metric-card primary">
+        <span class="mc-icon mi">group</span>
+        <span class="mc-val">{{ totalUsers | number }}</span>
+        <span class="mc-lbl">Usuários totais</span>
+      </div>
+
+      <div class="metric-card">
+        <span class="mc-icon mi">circle</span>
+        <span class="mc-val">{{ activeToday }}</span>
+        <span class="mc-lbl">Ativos hoje</span>
+      </div>
+
+      <div class="metric-card">
+        <span class="mc-icon mi">person_add</span>
+        <span class="mc-val">+{{ newThisWeek }}</span>
+        <span class="mc-lbl">Novos esta semana</span>
+      </div>
+
+      <div class="metric-card">
+        <span class="mc-icon mi">fitness_center</span>
+        <span class="mc-val">{{ workoutsToday }}</span>
+        <span class="mc-lbl">Treinos hoje</span>
+      </div>
+
+      <div class="metric-card">
+        <span class="mc-icon mi">emoji_events</span>
+        <span class="mc-val">{{ challengesActive }}</span>
+        <span class="mc-lbl">Desafios ativos</span>
+      </div>
+
+      <div class="metric-card danger">
+        <span class="mc-icon mi">flag</span>
+        <span class="mc-val">{{ reportsOpen }}</span>
+        <span class="mc-lbl">Denúncias abertas</span>
+      </div>
+
+    </div>
+
+    <!-- ── Weekly active chart ──────────────────────────────────────────── -->
+    <div class="chart-card" style="margin-bottom:16px">
+      <div class="chart-header">
+        <div>
+          <span class="chart-title">Usuários ativos</span>
+          <span class="chart-sub">Últimos 7 dias</span>
+        </div>
+        <span class="chart-badge badge-up">+{{ newThisWeek }} esta semana</span>
+      </div>
+      <div class="week-chart">
+        @for (d of weeklyActive; track d.day) {
+          <div class="wc-col">
+            <div class="wc-bar-wrap">
+              <div class="wc-bar" [style.height.px]="barH(d.val)"></div>
+            </div>
+            <span class="wc-val">{{ d.val }}</span>
+            <span class="wc-day">{{ d.day }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- ── Reports ────────────────────────────────────────────────────────── -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px">
+      <p class="section-label" style="margin:0">Denúncias</p>
+      <div class="report-filters">
+        <button class="filter-chip btn-sm" style="padding:4px 10px"
+                [class.active]="filterReport() === 'all'"      (click)="filterReport.set('all')">Todas</button>
+        <button class="filter-chip btn-sm" style="padding:4px 10px"
+                [class.active]="filterReport() === 'pending'"  (click)="filterReport.set('pending')">Abertas</button>
+        <button class="filter-chip btn-sm" style="padding:4px 10px"
+                [class.active]="filterReport() === 'resolved'" (click)="filterReport.set('resolved')">Resolvidas</button>
+      </div>
+    </div>
+
+    @for (r of filteredReports(); track r.id) {
+      <div class="report-card" [class.report-resolved]="r.status !== 'pending'">
+        <div class="report-top">
+          <span class="report-type">{{ r.type }}</span>
+          <span class="report-status" [class]="'status-' + r.status">{{ r.status }}</span>
+        </div>
+        <div class="report-body">
+          <p class="report-reason">{{ r.reason }}</p>
+          <div class="report-meta">
+            <span><span class="mi mi-sm">person</span> {{ r.reporter }} → {{ r.target }}</span>
+            <span><span class="mi mi-sm">event</span> {{ r.date }}</span>
+          </div>
+        </div>
+        @if (r.status === 'pending') {
+          <div class="report-actions">
+            <button class="btn btn-outline btn-sm" style="width:auto; color:var(--danger); border-color:var(--danger)"
+                    (click)="dismissReport(r.id)">Ignorar</button>
+            <button class="btn btn-primary btn-sm" style="width:auto"
+                    (click)="resolveReport(r.id)">
+              <span class="mi mi-sm">check_circle</span> Resolver
+            </button>
+          </div>
+        }
+      </div>
+    }
+
+  </main>
+</div>

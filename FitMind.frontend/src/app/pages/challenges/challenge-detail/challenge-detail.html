@@ -1,0 +1,192 @@
+<div class="page-layout">
+
+  <header class="page-header">
+    <button class="back-btn" (click)="goBack()"><span class="mi">arrow_back</span></button>
+    <h1>{{ challenge()?.title ?? 'Desafio' }}</h1>
+    <button class="invite-btn" (click)="showInvite.set(true)" title="Convidar"><span class="mi">person_add</span></button>
+  </header>
+
+  @if (challenge(); as c) {
+
+    <!-- ── Hero ──────────────────────────────────────────────────────────────── -->
+    <div class="challenge-hero">
+      <span class="hero-icon mi mi-xl">{{ c.icon }}</span>
+      <div class="hero-info">
+        <span class="hero-title">{{ c.title }}</span>
+        <span class="hero-meta">Meta: {{ c.goal }} {{ c.unit }} · {{ c.type === 'group' ? 'Grupo' : 'Individual' }}</span>
+      </div>
+      <div class="hero-deadline">
+        <span class="hd-days">{{ c.daysLeft }}</span>
+        <span class="hd-lbl">dias<br>restantes</span>
+      </div>
+    </div>
+
+    <!-- ── My progress bar ───────────────────────────────────────────────────── -->
+    @if (myProgress()) {
+      <div class="my-prog-card">
+        <div class="mp-row">
+          <span class="mp-label">Seu progresso</span>
+          <span class="mp-val">{{ myProgress()!.current }}/{{ c.goal }} {{ c.unit }}</span>
+        </div>
+        <div class="progress-bar" style="height:10px; margin-top:8px">
+          <div class="progress-fill" [style.width.%]="myPct()"></div>
+        </div>
+        <div class="mp-sub">
+          <span>{{ myPct() | number:'1.0-0':'pt' }}% concluído</span>
+          <span><span class="mi mi-sm">military_tech</span> {{ myRank() }}º lugar</span>
+        </div>
+      </div>
+    }
+
+    <!-- ── Tabs ───────────────────────────────────────────────────────────────── -->
+    <div class="tabs">
+      <button class="tab" [class.active]="activeTab() === 'ranking'"      (click)="activeTab.set('ranking')">
+        <span class="mi mi-sm">emoji_events</span> Ranking
+      </button>
+      <button class="tab" [class.active]="activeTab() === 'progress'"     (click)="activeTab.set('progress')">
+        <span class="mi mi-sm">show_chart</span> Progresso
+      </button>
+      <button class="tab" [class.active]="activeTab() === 'participants'" (click)="activeTab.set('participants')">
+        <span class="mi mi-sm">group</span> Participantes
+      </button>
+    </div>
+
+    <main class="page-content" style="padding-top:14px">
+
+      <!-- ── Ranking tab ──────────────────────────────────────────────────────── -->
+      @if (activeTab() === 'ranking') {
+        @if (ranking().length >= 3) { <div class="podium">
+          @for (p of ranking().slice(0, 3); track p.id; let i = $index) {
+            <div class="podium-item" [class.first]="i === 0">
+              <span class="podium-medal">{{ medalFor(i + 1) }}</span>
+              <div class="podium-avatar" [class.me]="p.isMe">{{ p.initials }}</div>
+              <span class="podium-name">{{ p.name }}</span>
+              <span class="podium-score">{{ p.current }} {{ c.unit }}</span>
+            </div>
+          }
+        </div> }
+
+        @for (p of ranking(); track p.id; let i = $index) {
+          <div class="rank-row" [class.rank-me]="p.isMe">
+            <span class="rank-pos">{{ medalFor(i + 1) }}</span>
+            <div class="rank-avatar" [class.me]="p.isMe">{{ p.initials }}</div>
+            <div class="rank-info">
+              <span class="rank-name">{{ p.name }}{{ p.isMe ? ' (você)' : '' }}</span>
+              <div class="rank-prog-bar">
+                <div class="rank-prog-fill" [style.width.%]="pct(p.current)"
+                     [style.background]="p.isMe ? 'var(--primary)' : '#bdbdbd'"></div>
+              </div>
+            </div>
+            <span class="rank-score">{{ p.current }}/{{ c.goal }}</span>
+          </div>
+        }
+      }
+
+      <!-- ── Progress tab ─────────────────────────────────────────────────────── -->
+      @if (activeTab() === 'progress') {
+        <div class="chart-card" style="margin-bottom:14px">
+          <div class="chart-header">
+            <div>
+              <span class="chart-title">Evolução diária</span>
+              <span class="chart-sub">{{ c.unit }} acumulados</span>
+            </div>
+            <span class="chart-badge badge-up">{{ myProgress()?.current ?? 0 }} {{ c.unit }}</span>
+          </div>
+          <svg viewBox="0 0 320 100" class="chart-svg">
+            @for (bar of miniBarRects(); track $index; let i = $index) {
+              <rect [attr.x]="bar.x" [attr.y]="bar.y"
+                    [attr.width]="bar.w" [attr.height]="bar.h"
+                    rx="2" fill="#4caf50" [attr.opacity]="bar.opacity"/>
+              @if (i === miniBarRects().length - 1) {
+                <text [attr.x]="bar.x + bar.w / 2" [attr.y]="bar.y - 4"
+                      text-anchor="middle" font-size="10" fill="#388e3c" font-weight="700">
+                  {{ bar.value }}
+                </text>
+              }
+            }
+            <line x1="0" x2="320" y1="82" y2="82" stroke="#e0e0e0" stroke-width="1"/>
+          </svg>
+        </div>
+
+        <div class="prog-stats" style="margin-bottom:0">
+          <div class="prog-stat pos">
+            <span class="ps-icon mi">local_fire_department</span>
+            <span class="ps-val">{{ myProgress()?.current ?? 0 }}</span>
+            <span class="ps-lbl">{{ c.unit }} feitos</span>
+          </div>
+          <div class="prog-stat">
+            <span class="ps-icon mi">track_changes</span>
+            <span class="ps-val">{{ c.goal - (myProgress()?.current ?? 0) }}</span>
+            <span class="ps-lbl">restantes</span>
+          </div>
+          <div class="prog-stat">
+            <span class="ps-icon mi">calendar_month</span>
+            <span class="ps-val">{{ c.daysLeft }}</span>
+            <span class="ps-lbl">dias left</span>
+          </div>
+          <div class="prog-stat pos">
+            <span class="ps-icon mi">military_tech</span>
+            <span class="ps-val">{{ myRank() }}º</span>
+            <span class="ps-lbl">posição</span>
+          </div>
+        </div>
+      }
+
+      <!-- ── Participants tab ──────────────────────────────────────────────────── -->
+      @if (activeTab() === 'participants') {
+        @for (p of c.participants; track p.id) {
+          <div class="participant-row" [class.part-me]="p.isMe">
+            <div class="part-avatar" [class.me]="p.isMe">{{ p.initials }}</div>
+            <div class="part-info">
+              <span class="part-name">{{ p.name }}{{ p.isMe ? ' (você)' : '' }}</span>
+              <div class="rank-prog-bar" style="margin-top:6px">
+                <div class="rank-prog-fill"
+                     [style.width.%]="pct(p.current)"
+                     [style.background]="p.isMe ? 'var(--primary)' : 'var(--secondary)'">
+                </div>
+              </div>
+            </div>
+            <span class="part-score">{{ p.current }}/{{ c.goal }}</span>
+          </div>
+        }
+
+        @if (c.type === 'group') {
+          <button class="btn btn-outline" style="margin-top:12px" (click)="showInvite.set(true)">
+            <span class="mi mi-sm">person_add</span> Convidar participantes
+          </button>
+        }
+      }
+
+    </main>
+
+  } @else {
+    <div class="empty-state">
+      <span class="mi mi-xl" style="color:var(--text-hint)">emoji_events</span>
+      <p>Desafio não encontrado.</p>
+    </div>
+  }
+
+  <!-- ── Invite modal ───────────────────────────────────────────────────────── -->
+  @if (showInvite()) {
+    <div class="modal-overlay" (click)="showInvite.set(false)">
+      <div class="modal-sheet" (click)="$event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <p class="modal-title">Convidar participantes</p>
+        <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px">
+          Compartilhe o link abaixo para convidar amigos para o desafio.
+        </p>
+        <div class="invite-link-row">
+          <span class="invite-link">{{ inviteLink() }}</span>
+          <button class="btn btn-primary btn-sm" style="width:auto" (click)="copyInvite()">
+            <span class="mi mi-sm">{{ linkCopied() ? 'check' : 'content_copy' }}</span>
+          </button>
+        </div>
+        @if (linkCopied()) {
+          <div class="alert alert-success" style="margin-top:10px">Link copiado!</div>
+        }
+        <button class="btn btn-outline" style="margin-top:12px" (click)="showInvite.set(false)">Fechar</button>
+      </div>
+    </div>
+  }
+
+</div>

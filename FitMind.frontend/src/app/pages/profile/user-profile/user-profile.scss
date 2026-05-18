@@ -1,0 +1,179 @@
+// ── Cover ─────────────────────────────────────────────────────────────────────
+
+.profile-cover {
+  position: relative;
+  height: 100px;
+  overflow: visible;
+}
+
+.cover-bg {
+  height: 100px;
+  background: linear-gradient(135deg, var(--primary-dark), #1565c0);
+}
+
+.profile-avatar-wrap {
+  position: absolute;
+  bottom: -44px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.profile-avatar {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  font-weight: 800;
+  border: 4px solid white;
+  box-shadow: var(--shadow-md);
+}
+
+// ── Info ──────────────────────────────────────────────────────────────────────
+
+.profile-name {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.profile-bio {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  max-width: 300px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+// ── Stats row ─────────────────────────────────────────────────────────────────
+
+.profile-stats {
+  display: flex;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 12px 0;
+  box-shadow: var(--shadow);
+  margin-bottom: 4px;
+}
+
+.pstat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+
+  .pstat-val { font-size: 20px; font-weight: 800; color: var(--text-primary); }
+  .pstat-lbl { font-size: 10px; color: var(--text-hint); text-transform: uppercase; }
+}
+
+.pstat-div {
+  width: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}
+
+// ── Activity ──────────────────────────────────────────────────────────────────
+
+.act-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  box-shadow: var(--shadow);
+}
+
+.act-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+
+.act-body { flex: 1; }
+
+.act-text {
+  font-size: 14px;
+  color: var(--text-primary);
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+
+.act-meta {
+  font-size: 11px;
+  color: var(--text-hint);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.act-tag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: var(--primary-light);
+  color: var(--primary-dark);
+}
+
+// ── Badges ────────────────────────────────────────────────────────────────────
+
+.badges-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.badge-card {
+  border-radius: var(--radius);
+  padding: 14px 10px;
+  background: var(--bg-card);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+  position: relative;
+
+  &.rare {
+    background: linear-gradient(135deg, #fffde7, #fff8e1);
+    border: 1.5px solid #ffd600;
+  }
+}
+
+.rare-tag {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: 12px;
+}
+
+.badge-icon  { font-size: 28px; }
+.badge-title { font-size: 12px; font-weight: 700; color: var(--text-primary); }
+
+// ── Stats cards ───────────────────────────────────────────────────────────────
+
+.stats-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.sc {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+
+  .sc-val { font-size: 26px; font-weight: 800; color: var(--primary-dark); }
+  .sc-lbl { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; }
+}

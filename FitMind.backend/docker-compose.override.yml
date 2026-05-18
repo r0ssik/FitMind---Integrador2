@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  fitmind-api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=fitmind-db;Database=fitmind;Username=fitmind_user;Password=fitmind_pass
+      - JwtSettings__SecretKey=dev-secret-key-change-in-production-min32chars
+      - JwtSettings__Issuer=FitMindAPI
+      - JwtSettings__Audience=FitMindClient
+      - JwtSettings__ExpirationMinutes=60
+      - JwtSettings__RefreshExpirationDays=7
