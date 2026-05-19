@@ -1,23 +1,17 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { DietService } from '../../../services/diet.service';
+import { SettingsService } from '../../../services/settings.service';
+import { LogFoodEntryRequest } from '../../../core/models/api.models';
 
 interface FoodItem {
-  id: number;
-  name: string;
-  amount: string;
-  kcal: number;
-  protein: number;
-  carbs: number;
-  fat: number;
+  id: number; name: string; amount: string;
+  kcal: number; protein: number; carbs: number; fat: number;
 }
 
 interface MealEntry {
-  id: number;
-  name: string;
-  time: string;
-  icon: string;
-  items: FoodItem[];
-  expanded: boolean;
+  id: number; name: string; time: string; icon: string;
+  mealType: string; items: FoodItem[]; expanded: boolean;
 }
 
 @Component({
@@ -26,49 +20,23 @@ interface MealEntry {
   templateUrl: './food-diary.html',
   styleUrl: './food-diary.scss',
 })
-export class FoodDiary {
+export class FoodDiary implements OnInit {
   selectedDate = signal(new Date());
   showAddModal = signal(false);
   activeMealId = signal<number | null>(null);
+  saving       = signal(false);
 
-  kcalGoal = 2000;
+  kcalGoal    = 2000;
   proteinGoal = 150;
-  carbsGoal = 220;
-  fatGoal = 65;
+  carbsGoal   = 220;
+  fatGoal     = 65;
 
   meals = signal<MealEntry[]>([
-    {
-      id: 1, name: 'Café da manhã', time: '07:30', icon: 'wb_sunny', expanded: true,
-      items: [
-        { id: 1, name: 'Ovos mexidos', amount: '3 unid.', kcal: 210, protein: 18, carbs: 2, fat: 14 },
-        { id: 2, name: 'Pão integral', amount: '2 fatias', kcal: 140, protein: 5, carbs: 26, fat: 2 },
-        { id: 3, name: 'Café com leite', amount: '200ml', kcal: 60, protein: 3, carbs: 8, fat: 2 },
-      ],
-    },
-    {
-      id: 2, name: 'Lanche da manhã', time: '10:00', icon: 'nutrition', expanded: false,
-      items: [
-        { id: 4, name: 'Iogurte grego', amount: '170g', kcal: 100, protein: 17, carbs: 6, fat: 0 },
-        { id: 5, name: 'Granola', amount: '30g', kcal: 130, protein: 3, carbs: 22, fat: 4 },
-      ],
-    },
-    {
-      id: 3, name: 'Almoço', time: '12:30', icon: 'restaurant', expanded: true,
-      items: [
-        { id: 6, name: 'Frango grelhado', amount: '200g', kcal: 330, protein: 62, carbs: 0, fat: 7 },
-        { id: 7, name: 'Arroz integral', amount: '150g', kcal: 165, protein: 3, carbs: 35, fat: 1 },
-        { id: 8, name: 'Feijão', amount: '80g', kcal: 90, protein: 5, carbs: 16, fat: 1 },
-        { id: 9, name: 'Salada', amount: 'À vontade', kcal: 20, protein: 1, carbs: 3, fat: 0 },
-      ],
-    },
-    {
-      id: 4, name: 'Lanche da tarde', time: '15:30', icon: 'local_cafe', expanded: false,
-      items: [],
-    },
-    {
-      id: 5, name: 'Jantar', time: '19:30', icon: 'dinner_dining', expanded: false,
-      items: [],
-    },
+    { id: 1, name: 'Café da manhã',   time: '07:30', icon: 'wb_sunny',      mealType: 'Breakfast', items: [], expanded: true  },
+    { id: 2, name: 'Lanche da manhã', time: '10:00', icon: 'nutrition',      mealType: 'MorningSnack', items: [], expanded: false },
+    { id: 3, name: 'Almoço',          time: '12:30', icon: 'restaurant',     mealType: 'Lunch',     items: [], expanded: true  },
+    { id: 4, name: 'Lanche da tarde', time: '15:30', icon: 'local_cafe',     mealType: 'AfternoonSnack', items: [], expanded: false },
+    { id: 5, name: 'Jantar',          time: '19:30', icon: 'dinner_dining',  mealType: 'Dinner',    items: [], expanded: false },
   ]);
 
   totals = computed(() => {
@@ -81,18 +49,50 @@ export class FoodDiary {
     };
   });
 
-  mealKcal(meal: MealEntry): number {
-    return meal.items.reduce((s, f) => s + f.kcal, 0);
+  constructor(
+    private router: Router,
+    private dietService: DietService,
+    private settingsService: SettingsService,
+  ) {}
+
+  ngOnInit(): void {
+    this.settingsService.get().subscribe({
+      next: s => {
+        if (s.calorieGoal) this.kcalGoal = s.calorieGoal;
+      },
+      error: () => {},
+    });
+    this.loadDiary();
   }
 
-  pct(value: number, goal: number): number {
-    return Math.min(Math.round((value / goal) * 100), 100);
+  private loadDiary(): void {
+    const dateStr = this.formatDateParam(this.selectedDate());
+    this.dietService.getDiary(dateStr).subscribe({
+      next: entries => {
+        // Group entries by mealType
+        this.meals.update(list => list.map(m => ({
+          ...m,
+          items: entries
+            .filter(e => e.mealType === m.mealType)
+            .map((e, i) => ({
+              id: i + 1,
+              name: e.foodName, amount: `${e.quantity}${e.unit}`,
+              kcal: e.calories, protein: e.proteins, carbs: e.carbs, fat: e.fats,
+            })),
+        })));
+      },
+      error: () => {},
+    });
   }
+
+  mealKcal(meal: MealEntry): number { return meal.items.reduce((s, f) => s + f.kcal, 0); }
+  mealMacro(meal: MealEntry, key: 'protein' | 'carbs' | 'fat'): number {
+    return meal.items.reduce((s, f) => s + f[key], 0);
+  }
+  pct(value: number, goal: number): number { return Math.min(Math.round((value / goal) * 100), 100); }
 
   toggleMeal(id: number): void {
-    this.meals.update(list =>
-      list.map(m => m.id === id ? { ...m, expanded: !m.expanded } : m)
-    );
+    this.meals.update(list => list.map(m => m.id === id ? { ...m, expanded: !m.expanded } : m));
   }
 
   openAdd(mealId: number): void {
@@ -100,41 +100,45 @@ export class FoodDiary {
     this.showAddModal.set(true);
   }
 
-  closeAdd(): void {
-    this.showAddModal.set(false);
-    this.activeMealId.set(null);
-  }
+  closeAdd(): void { this.showAddModal.set(false); this.activeMealId.set(null); }
 
   addQuickFood(mealId: number): void {
-    const newItem: FoodItem = {
-      id: Date.now(),
-      name: 'Alimento adicionado',
-      amount: '100g',
-      kcal: 150, protein: 10, carbs: 15, fat: 5,
+    const meal = this.meals().find(m => m.id === mealId);
+    if (!meal) return;
+    this.saving.set(true);
+    const body: LogFoodEntryRequest = {
+      date: this.formatDateParam(this.selectedDate()),
+      mealType: meal.mealType,
+      foodName: 'Alimento adicionado', quantity: 100, unit: 'g',
+      calories: 150, proteins: 10, carbs: 15, fats: 5,
     };
-    this.meals.update(list =>
-      list.map(m => m.id === mealId ? { ...m, items: [...m.items, newItem], expanded: true } : m)
-    );
-    this.closeAdd();
-  }
-
-  mealMacro(meal: MealEntry, key: 'protein' | 'carbs' | 'fat'): number {
-    return meal.items.reduce((s, f) => s + f[key], 0);
+    this.dietService.logFood(body).subscribe({
+      next: () => {
+        const newItem: FoodItem = {
+          id: Date.now(), name: body.foodName, amount: '100g',
+          kcal: 150, protein: 10, carbs: 15, fat: 5,
+        };
+        this.meals.update(list => list.map(m =>
+          m.id === mealId ? { ...m, items: [...m.items, newItem], expanded: true } : m
+        ));
+        this.saving.set(false);
+        this.closeAdd();
+      },
+      error: () => { this.saving.set(false); this.closeAdd(); },
+    });
   }
 
   removeFood(mealId: number, foodId: number): void {
-    this.meals.update(list =>
-      list.map(m => m.id === mealId
-        ? { ...m, items: m.items.filter(f => f.id !== foodId) }
-        : m
-      )
-    );
+    this.meals.update(list => list.map(m =>
+      m.id === mealId ? { ...m, items: m.items.filter(f => f.id !== foodId) } : m
+    ));
   }
 
   changeDate(offset: number): void {
     const d = new Date(this.selectedDate());
     d.setDate(d.getDate() + offset);
     this.selectedDate.set(d);
+    this.loadDiary();
   }
 
   get dateLabel(): string {
@@ -146,14 +150,14 @@ export class FoodDiary {
     return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
   }
 
-  get isToday(): boolean {
-    return this.selectedDate().toDateString() === new Date().toDateString();
+  get isToday(): boolean { return this.selectedDate().toDateString() === new Date().toDateString(); }
+
+  private formatDateParam(d: Date): string {
+    return d.toISOString().split('T')[0];
   }
 
   goBack():          void { this.router.navigate(['/home']); }
   goDietPlan():      void { this.router.navigate(['/diet-plan']); }
   goImageAnalysis(): void { this.router.navigate(['/image-analysis']); }
   goManualMeal():    void { this.router.navigate(['/manual-meal']); }
-
-  constructor(private router: Router) {}
 }

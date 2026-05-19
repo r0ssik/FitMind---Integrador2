@@ -57,7 +57,7 @@
       <div class="profile-section">
         <span class="section-label" style="margin-bottom:10px; display:block">Objetivos</span>
         <div class="chip-group">
-          @for (g of (user()?.goals?.length ? user()!.goals! : ['Não definido']); track g) {
+          @for (g of ['Não definido']; track g) {
             <span class="chip selected">{{ g }}</span>
           }
         </div>
@@ -157,7 +157,7 @@
 
       <div style="display:grid; grid-template-columns:1fr 2fr; gap:10px; margin-top:8px; margin-bottom:24px">
         <button class="btn btn-outline" (click)="cancelEdit()">Cancelar</button>
-        <button class="btn btn-primary" (click)="saveProfile()">
+        <button class="btn btn-primary" (click)="saveEdit()">
           <span class="mi mi-sm">save</span> Salvar perfil
         </button>
       </div>

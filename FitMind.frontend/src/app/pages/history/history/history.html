@@ -25,7 +25,7 @@
     @if (tab() === 'workouts') {
       <div class="hist-summary">
         <div class="hs-item">
-          <span class="hs-val">{{ workouts.length }}</span>
+          <span class="hs-val">{{ workouts().length }}</span>
           <span class="hs-lbl">Treinos</span>
         </div>
         <div class="hs-div"></div>
@@ -40,7 +40,7 @@
         </div>
       </div>
 
-      @for (w of workouts; track w.id) {
+      @for (w of workouts(); track w.id) {
         <div class="hist-row">
           <div class="hist-date-col">
             <span class="hd-day">{{ w.date.slice(0,2) }}</span>
@@ -49,11 +49,18 @@
           <div class="hist-body">
             <span class="hist-title">{{ w.name }}</span>
             <div class="hist-meta">
-              <span><span class="mi mi-sm">timer</span> {{ w.duration }} min</span>
-              <span><span class="mi mi-sm">format_list_numbered</span> {{ w.exercises }} exerc.</span>
+              <span><span class="mi mi-sm">timer</span> {{ w.durationMinutes }} min</span>
+              <span><span class="mi mi-sm">format_list_numbered</span> {{ w.exercisesTotal }} exerc.</span>
             </div>
           </div>
           <span class="hist-feeling mi mi-sm">{{ w.feeling }}</span>
+        </div>
+      }
+
+      @if (!workouts().length) {
+        <div class="empty-state">
+          <span class="mi mi-xl" style="color:var(--text-hint)">fitness_center</span>
+          <p>Nenhum treino registrado ainda.</p>
         </div>
       }
     }
@@ -62,7 +69,7 @@
     @if (tab() === 'diet') {
       <div class="hist-summary">
         <div class="hs-item">
-          <span class="hs-val">{{ diet.length }}</span>
+          <span class="hs-val">{{ diet().length }}</span>
           <span class="hs-lbl">Dias</span>
         </div>
         <div class="hs-div"></div>
@@ -72,12 +79,12 @@
         </div>
         <div class="hs-div"></div>
         <div class="hs-item">
-          <span class="hs-val">{{ onTargetDays }}/{{ diet.length }}</span>
+          <span class="hs-val">{{ onTargetDays }}/{{ diet().length }}</span>
           <span class="hs-lbl">Na meta</span>
         </div>
       </div>
 
-      @for (d of diet; track d.id) {
+      @for (d of diet(); track d.date) {
         <div class="hist-row">
           <div class="hist-date-col">
             <span class="hd-day">{{ d.date.slice(0,2) }}</span>
@@ -85,8 +92,8 @@
           </div>
           <div class="hist-body">
             <div class="diet-kcal-row">
-              <span class="hist-title">{{ d.kcal }} kcal</span>
-              <span class="diet-goal-lbl">/ {{ d.goal }}</span>
+              <span class="hist-title">{{ d.totalCalories }} kcal</span>
+              <span class="diet-goal-lbl">/ {{ d.calorieGoal }}</span>
             </div>
             <div class="diet-prog-bar">
               <div class="diet-prog-fill"
@@ -94,11 +101,18 @@
                    [style.background]="goalColor(d)"></div>
             </div>
             <div class="diet-macros">
-              <span class="dm p">P {{ d.protein }}g</span>
-              <span class="dm c">C {{ d.carbs }}g</span>
-              <span class="dm f">F {{ d.fat }}g</span>
+              <span class="dm p">P {{ d.totalProtein }}g</span>
+              <span class="dm c">C {{ d.totalCarbs }}g</span>
+              <span class="dm f">F {{ d.totalFat }}g</span>
             </div>
           </div>
+        </div>
+      }
+
+      @if (!diet().length) {
+        <div class="empty-state">
+          <span class="mi mi-xl" style="color:var(--text-hint)">restaurant</span>
+          <p>Nenhum registro de dieta ainda.</p>
         </div>
       }
     }
@@ -107,31 +121,37 @@
     @if (tab() === 'achievements') {
       <div class="hist-summary">
         <div class="hs-item">
-          <span class="hs-val">{{ achievements.length }}</span>
+          <span class="hs-val">{{ achievements().length }}</span>
           <span class="hs-lbl">Obtidas</span>
         </div>
         <div class="hs-div"></div>
         <div class="hs-item">
-          <span class="hs-val">{{ achievements.filter(a => a.rare).length }}</span>
-          <span class="hs-lbl">Raras</span>
+          <span class="hs-val">{{ totalPoints }}</span>
+          <span class="hs-lbl">Pontos</span>
         </div>
       </div>
 
-      @for (a of achievements; track a.id) {
-        <div class="hist-row" [class.row-rare]="a.rare">
+      @for (a of achievements(); track a.id) {
+        <div class="hist-row">
           <div class="hist-date-col">
-            <span class="hd-day">{{ a.date.slice(0,2) }}</span>
-            <span class="hd-month">{{ a.date.slice(3,8) }}</span>
+            <span class="hd-day">{{ a.unlockedAt.slice(0,2) }}</span>
+            <span class="hd-month">{{ a.unlockedAt.slice(3,8) }}</span>
           </div>
           <div class="hist-body">
             <div style="display:flex; align-items:center; gap:10px">
               <span class="mi mi-lg">{{ a.icon }}</span>
               <div>
-                <span class="hist-title">{{ a.title }}</span>
-                @if (a.rare) { <span class="rare-chip"><span class="mi mi-sm">auto_awesome</span> Raro</span> }
+                <span class="hist-title">{{ a.name }}</span>
               </div>
             </div>
           </div>
+        </div>
+      }
+
+      @if (!achievements().length) {
+        <div class="empty-state">
+          <span class="mi mi-xl" style="color:var(--text-hint)">military_tech</span>
+          <p>Nenhuma conquista desbloqueada ainda.</p>
         </div>
       }
     }

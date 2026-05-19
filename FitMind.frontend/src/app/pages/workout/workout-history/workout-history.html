@@ -86,25 +86,25 @@
       </div>
     }
 
-    @for (rec of filtered; track rec.date.getTime()) {
+    @for (rec of filtered; track rec.date) {
       <div class="history-record">
         <div class="rec-date-col">
-          <span class="rec-day">{{ rec.date.getDate() }}</span>
-          <span class="rec-month">{{ rec.date.toLocaleDateString('pt-BR', { month: 'short' }) }}</span>
+          <span class="rec-day">{{ rec.date | date:'dd' }}</span>
+          <span class="rec-month">{{ rec.date | date:'MMM' }}</span>
         </div>
         <div class="rec-body">
           <span class="rec-name">{{ rec.name }}</span>
           <div class="rec-meta">
-            <span><span class="mi mi-sm">timer</span> {{ rec.duration }}min</span>
+            <span><span class="mi mi-sm">timer</span> {{ rec.durationMinutes }}min</span>
             <span><span class="mi mi-sm">fitness_center</span> {{ rec.setsTotal }} séries</span>
           </div>
         </div>
         <div
           class="rec-feeling"
-          [style.background]="feelingConfig[rec.feeling].color + '20'"
-          [title]="feelingConfig[rec.feeling].label"
+          [style.background]="getFeelingConfig(rec.feeling).color + '20'"
+          [title]="getFeelingConfig(rec.feeling).label"
         >
-          <span class="mi mi-sm">{{ feelingConfig[rec.feeling].icon }}</span>
+          <span class="mi mi-sm">{{ getFeelingConfig(rec.feeling).icon }}</span>
         </div>
       </div>
     }

@@ -35,7 +35,7 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/workout/workout-generator/workout-generator').then(m => m.WorkoutGenerator),
   },
   {
-    path: 'workout-plans/detail',
+    path: 'workout-plans/detail/:planId/:dayId',
     loadComponent: () => import('./pages/workout/workout-detail/workout-detail').then(m => m.WorkoutDetail),
   },
   {

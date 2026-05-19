@@ -1,3 +1,4 @@
+using FitMind.BackEnd.Service.Dtos.Notification;
 using FitMind.BackEnd.Service.Interfaces;
 using FitMind.BackEnd.SystemInfra.ContextDb;
 using FitMind.BackEnd.SystemInfra.Entities;
@@ -8,11 +9,22 @@ namespace FitMind.BackEnd.Service.Services;
 
 public class NotificationService(AppDbContext context) : INotificationService
 {
-    public async Task<IEnumerable<Notification>> GetByUserAsync(Guid userId) =>
-        await context.Notifications
+    public async Task<IEnumerable<NotificationDto>> GetByUserAsync(Guid userId)
+    {
+        var notifications = await context.Notifications
             .Where(n => n.UserId == userId)
             .OrderByDescending(n => n.CreatedAt)
             .ToListAsync();
+
+        return notifications.Select(n => new NotificationDto(
+            n.Id,
+            n.Title,
+            n.Body,
+            n.Type.ToString().ToLower(),
+            n.IsRead,
+            n.CreatedAt,
+            null));
+    }
 
     public async Task MarkAsReadAsync(Guid notificationId, Guid userId)
     {

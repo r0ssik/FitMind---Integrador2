@@ -1,99 +1,29 @@
-import { Component, signal } from '@angular/core';
-import { DecimalPipe } from '@angular/common';
+import { Component, signal, OnInit } from '@angular/core';
+import { DecimalPipe, DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { Auth } from '../../../services/auth';
-
-
-interface WorkoutExercise {
-  name: string;
-  sets: string;
-  done: boolean;
-}
-
-interface Meal {
-  name: string;
-  time: string;
-  calories: number;
-}
-
-interface Challenge {
-  name: string;
-  icon: string;
-  current: number;
-  total: number;
-  unit: string;
-}
-
-interface FeedPost {
-  user: string;
-  initials: string;
-  text: string;
-  time: string;
-  likes: number;
-  liked: boolean;
-  comments: number;
-}
+import { ProgressService } from '../../../services/progress.service';
+import { WaterService } from '../../../services/water.service';
+import { SocialService } from '../../../services/social.service';
+import { ChallengeService } from '../../../services/challenge.service';
+import { DashboardProgressDto, PostDto, ChallengeDto, WaterIntakeDto } from '../../../core/models/api.models';
 
 @Component({
   selector: 'app-home',
-  imports: [DecimalPipe],
+  imports: [DecimalPipe, DatePipe],
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })
-export class Home {
+export class Home implements OnInit {
   activeNav = signal('home');
 
-  waterCups = signal([true, true, true, false, false, false, false, false]);
-  waterGoal = 8;
+  dashboard = signal<DashboardProgressDto | null>(null);
+  water     = signal<WaterIntakeDto | null>(null);
+  feed      = signal<PostDto[]>([]);
+  challenges = signal<ChallengeDto[]>([]);
 
-  workout: WorkoutExercise[] = [
-    { name: 'Agachamento', sets: '4x12', done: true },
-    { name: 'Leg Press', sets: '3x15', done: true },
-    { name: 'Cadeira Extensora', sets: '3x15', done: false },
-    { name: 'Panturrilha', sets: '4x20', done: false },
-  ];
-
-  meals: Meal[] = [
-    { name: 'Café da manhã', time: '07:30', calories: 420 },
-    { name: 'Almoço', time: '12:00', calories: 680 },
-    { name: 'Lanche', time: '15:30', calories: 210 },
-    { name: 'Jantar', time: '19:00', calories: 0 },
-  ];
-
-  challenges: Challenge[] = [
-    { name: '30 dias de treino', icon: 'emoji_events', current: 14, total: 30, unit: 'dias' },
-    { name: 'Beber 2L de água',  icon: 'water_drop',   current: 3,  total: 8,  unit: 'copos' },
-  ];
-
-  feed: FeedPost[] = [
-    { user: 'João Barros',  initials: 'JB', text: 'Completei meu desafio de 30 dias! Nunca me senti tão bem!',     time: '2h atrás', likes: 24, liked: false, comments: 5 },
-    { user: 'Emily Mekaru', initials: 'EM', text: 'Treino de hoje concluído! Pernas destruídas.',                  time: '4h atrás', likes: 18, liked: true,  comments: 3 },
-    { user: 'Carlos Silva', initials: 'CS', text: 'Novo recorde pessoal no supino: 100kg! Meses de dedicação.',    time: '6h atrás', likes: 42, liked: false, comments: 11 },
-  ];
-
-  get workoutDone(): number {
-    return this.workout.filter(w => w.done).length;
-  }
-
-  get workoutProgress(): number {
-    return (this.workoutDone / this.workout.length) * 100;
-  }
-
-  get waterDone(): number {
-    return this.waterCups().filter(c => c).length;
-  }
-
-  get waterProgress(): number {
-    return (this.waterDone / this.waterGoal) * 100;
-  }
-
-  get totalCalories(): number {
-    return this.meals.reduce((sum, m) => sum + m.calories, 0);
-  }
-
-  get caloriePct(): number {
-    return Math.min((this.totalCalories / 2000) * 100, 100);
-  }
+  waterCups  = signal<boolean[]>([]);
+  waterGoal  = 8;
 
   get userName(): string {
     return this.auth.currentUser()?.name?.split(' ')[0] ?? 'Usuário';
@@ -104,41 +34,95 @@ export class Home {
     return name.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase();
   }
 
-  constructor(private auth: Auth, private router: Router) {}
+  get workoutDone():     number { return this.dashboard()?.todayWorkoutDone  ?? 0; }
+  get workoutTotal():    number { return this.dashboard()?.todayWorkoutTotal ?? 0; }
+  get workoutProgress(): number {
+    const t = this.workoutTotal;
+    return t ? (this.workoutDone / t) * 100 : 0;
+  }
+
+  get waterDone():     number { return this.water()?.cups ?? 0; }
+  get waterProgress(): number { return ((this.water()?.cups ?? 0) / (this.water()?.goal ?? 8)) * 100; }
+
+  get totalCalories(): number { return this.dashboard()?.todayCalories ?? 0; }
+  get calorieGoal():   number { return this.dashboard()?.calorieGoal   ?? 2000; }
+  get caloriePct():    number { return Math.min((this.totalCalories / this.calorieGoal) * 100, 100); }
+
+  constructor(
+    private auth: Auth,
+    private router: Router,
+    private progressService: ProgressService,
+    private waterService: WaterService,
+    private socialService: SocialService,
+    private challengeService: ChallengeService,
+  ) {}
+
+  ngOnInit(): void {
+    this.progressService.getDashboard().subscribe({
+      next: d => {
+        this.dashboard.set(d);
+        const total = d.waterGoal || 8;
+        const cups  = d.waterCups || 0;
+        this.waterGoal = total;
+        this.waterCups.set(Array.from({ length: total }, (_, i) => i < cups));
+      },
+      error: () => {}
+    });
+
+    this.waterService.getToday().subscribe({
+      next: w => {
+        this.water.set(w);
+        this.waterGoal = w.goal;
+        this.waterCups.set(Array.from({ length: w.goal }, (_, i) => i < w.cups));
+      },
+      error: () => {}
+    });
+
+    this.socialService.getFeed(1, 3).subscribe({
+      next: posts => this.feed.set(posts),
+      error: () => {}
+    });
+
+    this.challengeService.getAll().subscribe({
+      next: c => this.challenges.set(c.slice(0, 3)),
+      error: () => {}
+    });
+  }
 
   toggleCup(index: number): void {
     const cups = [...this.waterCups()];
     cups[index] = !cups[index];
     this.waterCups.set(cups);
+    const count = cups.filter(c => c).length;
+    this.waterService.setCups({ cups: count }).subscribe({ error: () => {} });
   }
 
-  toggleExercise(index: number): void {
-    this.workout[index].done = !this.workout[index].done;
+  toggleLike(post: PostDto): void {
+    if (post.isLikedByCurrentUser) {
+      this.socialService.unlikePost(post.id).subscribe({ error: () => {} });
+    } else {
+      this.socialService.likePost(post.id).subscribe({ error: () => {} });
+    }
+    this.feed.update(list => list.map(p =>
+      p.id === post.id
+        ? { ...p, isLikedByCurrentUser: !p.isLikedByCurrentUser, likesCount: p.likesCount + (p.isLikedByCurrentUser ? -1 : 1) }
+        : p
+    ));
   }
 
-  toggleLike(post: FeedPost): void {
-    post.liked = !post.liked;
-    post.likes += post.liked ? 1 : -1;
+  challengeProgress(c: ChallengeDto): number {
+    if (!c.myProgress) return 0;
+    return Math.min((c.myProgress / c.goal) * 100, 100);
   }
 
-  logout(): void {
-    this.auth.logout();
-  }
-
-  challengeProgress(c: Challenge): number {
-    return (c.current / c.total) * 100;
-  }
-
-  goProfile():       void { this.router.navigate(['/profile']); }
-  goNotifications(): void { this.router.navigate(['/notifications']); }
+  logout():           void { this.auth.logout(); }
+  goProfile():        void { this.router.navigate(['/profile']); }
+  goNotifications():  void { this.router.navigate(['/notifications']); }
 
   navigate(section: string): void {
     const map: Record<string, string> = {
-      home:     '/home',
-      workout:  '/workout-plans',
-      diet:     '/food-diary',
-      progress: '/progress',
-      social:   '/social',
+      home: '/home', workout: '/workout-plans', diet: '/food-diary',
+      progress: '/progress', social: '/social',
     };
     this.activeNav.set(section);
     const route = map[section];

@@ -10,22 +10,22 @@
   <!-- ── Summary bar ──────────────────────────────────────────────────────────── -->
   <div class="achiev-summary">
     <div class="ach-sum-item">
-      <span class="ach-sum-val">{{ unlocked().length }}</span>
+      <span class="ach-sum-val">{{ filteredUnlocked().length }}</span>
       <span class="ach-sum-lbl">Desbloqueadas</span>
     </div>
     <div class="ach-sum-div"></div>
     <div class="ach-sum-item">
-      <span class="ach-sum-val">{{ locked().length }}</span>
+      <span class="ach-sum-val">{{ filteredLocked().length }}</span>
       <span class="ach-sum-lbl">Bloqueadas</span>
     </div>
     <div class="ach-sum-div"></div>
     <div class="ach-sum-item">
-      <span class="ach-sum-val">{{ allAchievements.length }}</span>
+      <span class="ach-sum-val">{{ allAchievements().length }}</span>
       <span class="ach-sum-lbl">Total</span>
     </div>
     <div class="ach-sum-div"></div>
     <div class="ach-sum-item">
-      <span class="ach-sum-val">{{ (unlocked().length / allAchievements.length * 100) | number:'1.0-0' }}%</span>
+      <span class="ach-sum-val">{{ allAchievements().length ? (filteredUnlocked().length / allAchievements().length * 100 | number:'1.0-0') : 0 }}%</span>
       <span class="ach-sum-lbl">Progresso</span>
     </div>
   </div>
@@ -33,7 +33,7 @@
   <!-- Progress bar -->
   <div class="achiev-prog-bar">
     <div class="achiev-prog-fill"
-         [style.width.%]="unlocked().length / allAchievements.length * 100"></div>
+         [style.width.%]="allAchievements().length ? filteredUnlocked().length / allAchievements().length * 100 : 0"></div>
   </div>
 
   <!-- ── Category filter ──────────────────────────────────────────────────────── -->
@@ -56,7 +56,7 @@
           <div class="achiev-card unlocked" [class.rare]="a.rare" (click)="openShare(a)">
             @if (a.rare) { <span class="rare-badge"><span class="mi mi-sm">auto_awesome</span> Raro</span> }
             <span class="achiev-icon mi mi-lg">{{ a.icon }}</span>
-            <span class="achiev-title">{{ a.title }}</span>
+            <span class="achiev-title">{{ a.name }}</span>
             <span class="achiev-desc">{{ a.description }}</span>
             <span class="achiev-date">{{ a.unlockedAt }}</span>
             <span class="share-hint">Toque para compartilhar</span>
@@ -73,7 +73,7 @@
           <div class="achiev-card locked" [class.rare]="a.rare">
             @if (a.rare) { <span class="rare-badge"><span class="mi mi-sm">auto_awesome</span> Raro</span> }
             <span class="achiev-icon locked-icon mi mi-lg">{{ a.icon }}</span>
-            <span class="achiev-title locked-text">{{ a.title }}</span>
+            <span class="achiev-title locked-text">{{ a.name }}</span>
             <span class="achiev-desc">{{ a.description }}</span>
             @if (a.progress != null) {
               <div class="lock-prog-bar">
@@ -104,7 +104,7 @@
         <div class="modal-handle"></div>
         <div class="share-card">
           <span class="share-big-icon mi mi-xl">{{ shareTarget()!.icon }}</span>
-          <p class="share-title">{{ shareTarget()!.title }}</p>
+          <p class="share-title">{{ shareTarget()!.name }}</p>
           <p class="share-desc">{{ shareTarget()!.description }}</p>
           @if (shareTarget()!.rare) {
             <span class="share-rare"><span class="mi mi-sm">auto_awesome</span> Conquista Rara</span>

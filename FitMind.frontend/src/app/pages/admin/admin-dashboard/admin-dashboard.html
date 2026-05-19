@@ -97,14 +97,14 @@
     @for (r of filteredReports(); track r.id) {
       <div class="report-card" [class.report-resolved]="r.status !== 'pending'">
         <div class="report-top">
-          <span class="report-type">{{ r.type }}</span>
+          <span class="report-type">{{ r.targetType }}</span>
           <span class="report-status" [class]="'status-' + r.status">{{ r.status }}</span>
         </div>
         <div class="report-body">
           <p class="report-reason">{{ r.reason }}</p>
           <div class="report-meta">
-            <span><span class="mi mi-sm">person</span> {{ r.reporter }} → {{ r.target }}</span>
-            <span><span class="mi mi-sm">event</span> {{ r.date }}</span>
+            <span><span class="mi mi-sm">person</span> {{ r.reporterName }} → {{ r.targetId }}</span>
+            <span><span class="mi mi-sm">event</span> {{ formatDate(r.createdAt) }}</span>
           </div>
         </div>
         @if (r.status === 'pending') {

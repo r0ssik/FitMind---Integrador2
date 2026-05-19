@@ -30,12 +30,12 @@
           type="text"
           placeholder="Ex: frango, arroz, ovo..."
           [ngModel]="query()"
-          (ngModelChange)="query.set($event); selectedFood.set(null)"
+          (ngModelChange)="onQueryChange($event)"
           class="search-input"
           autocomplete="off"
         />
         @if (query()) {
-          <button class="clear-input" (click)="query.set(''); selectedFood.set(null)">×</button>
+          <button class="clear-input" (click)="onQueryChange(''); selectedFood.set(null)">×</button>
         }
       </div>
 
@@ -49,7 +49,7 @@
                 @if (food.brand) { <span class="sr-brand">{{ food.brand }}</span> }
               </div>
               <div class="sr-macros">
-                <span>{{ food.per100g.kcal }} kcal</span>
+                <span>{{ food.caloriesPer100g }} kcal</span>
                 <span class="sr-per">por 100g</span>
               </div>
             </button>
@@ -74,7 +74,7 @@
               <span class="portion-food-brand">{{ selectedFood()!.brand }}</span>
             }
           </div>
-          <div class="macros-per100">por 100g: {{ selectedFood()!.per100g.kcal }} kcal</div>
+          <div class="macros-per100">por 100g: {{ selectedFood()!.caloriesPer100g }} kcal</div>
         </div>
 
         <!-- Porções comuns -->

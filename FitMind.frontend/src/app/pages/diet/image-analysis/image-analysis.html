@@ -138,13 +138,13 @@
 
           <div class="detected-header">
             <div class="detected-name-row">
-              <div class="confidence-dot" [style.background]="food.confidence >= 85 ? '#4caf50' : food.confidence >= 70 ? '#ff9800' : '#f44336'"></div>
+              <div class="confidence-dot" [style.background]="food.confidencePercent >= 85 ? '#4caf50' : food.confidencePercent >= 70 ? '#ff9800' : '#f44336'"></div>
               @if (!food.editing) {
                 <span class="detected-name">{{ food.name }}</span>
               } @else {
                 <input class="edit-name-input" [value]="food.name" (input)="updateFood(i, 'name', $any($event.target).value)" />
               }
-              <span class="confidence-badge">{{ food.confidence }}%</span>
+              <span class="confidence-badge">{{ food.confidencePercent }}%</span>
             </div>
             <div class="detected-actions">
               <button class="det-btn edit" (click)="toggleEdit(i)" [title]="food.editing ? 'Confirmar' : 'Editar'">
@@ -175,7 +175,7 @@
 
             <div class="det-macros">
               <div class="det-macro">
-                <span class="det-mv">{{ food.kcal }}</span>
+                <span class="det-mv">{{ food.calories }}</span>
                 <span class="det-ml">kcal</span>
               </div>
               <div class="det-macro protein">

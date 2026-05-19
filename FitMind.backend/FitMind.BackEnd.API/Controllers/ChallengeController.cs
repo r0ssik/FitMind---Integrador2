@@ -48,7 +48,7 @@ public class ChallengeController(IChallengeService challengeService) : Controlle
         var userId = User.GetUserId();
         try
         {
-            await challengeService.JoinAsync(id, userId);
+            await challengeService.JoinAsync(userId, id);
             return NoContent();
         }
         catch (InvalidOperationException ex)
@@ -67,7 +67,7 @@ public class ChallengeController(IChallengeService challengeService) : Controlle
         var userId = User.GetUserId();
         try
         {
-            await challengeService.UpdateProgressAsync(id, userId, dto);
+            await challengeService.UpdateProgressAsync(userId, id, dto);
             return NoContent();
         }
         catch (KeyNotFoundException ex)
@@ -82,7 +82,7 @@ public class ChallengeController(IChallengeService challengeService) : Controlle
         var userId = User.GetUserId();
         try
         {
-            await challengeService.DeleteAsync(id, userId);
+            await challengeService.DeleteAsync(userId, id);
             return NoContent();
         }
         catch (KeyNotFoundException ex)

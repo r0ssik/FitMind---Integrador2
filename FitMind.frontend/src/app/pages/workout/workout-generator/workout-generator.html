@@ -104,10 +104,10 @@
         <span class="mi mi-sm">check_circle</span> Plano gerado com sucesso pela IA!
       </div>
 
-      @for (day of generatedPlan()!; track day.day) {
+      @for (day of generatedPlan()!.days; track day.id) {
         <div class="day-card">
           <div class="day-header-static">
-            <span class="day-name">{{ day.day }}</span>
+            <span class="day-name">{{ day.dayName }}</span>
             <span class="day-focus">{{ day.focus }}</span>
           </div>
           <div class="exercise-list">
@@ -115,11 +115,13 @@
               <div class="exercise-row">
                 <div class="ex-info">
                   <span class="ex-name">{{ ex.name }}</span>
-                  <span class="ex-detail">{{ ex.sets }}x {{ ex.reps }} · Descanso: {{ ex.rest }}</span>
-                  <span class="ex-tip">
-                    <span class="mi mi-sm" style="color:var(--warning)">lightbulb</span>
-                    {{ ex.tip }}
-                  </span>
+                  <span class="ex-detail">{{ ex.sets }}x {{ ex.reps }} · Descanso: {{ ex.restTime }}</span>
+                  @if (ex.tips) {
+                    <span class="ex-tip">
+                      <span class="mi mi-sm" style="color:var(--warning)">lightbulb</span>
+                      {{ ex.tips }}
+                    </span>
+                  }
                 </div>
               </div>
             }

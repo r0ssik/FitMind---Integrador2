@@ -1,6 +1,7 @@
 import { Component, signal, computed } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
+import { ChallengeService } from '../../../services/challenge.service';
 
 type ChallengeType = 'individual' | 'group';
 
@@ -11,9 +12,7 @@ type ChallengeType = 'individual' | 'group';
   styleUrl:    './challenge-create.scss',
 })
 export class ChallengeCreate {
-  constructor(private router: Router) {}
-
-  // ── Form fields ──────────────────────────────────────────────────────────────
+  constructor(private router: Router, private challengeService: ChallengeService) {}
 
   title    = signal('');
   goal     = signal('');
@@ -23,31 +22,24 @@ export class ChallengeCreate {
   unit     = signal('dias');
   creating = signal(false);
   created  = signal(false);
+  error    = signal('');
   errors   = signal<Record<string, string>>({});
 
   readonly units = ['dias', 'treinos', 'km', 'kg', 'kcal', 'copos de água'];
 
-  // ── Computed ──────────────────────────────────────────────────────────────────
-
-  canSubmit = computed(() =>
-    !!this.title().trim() && !!this.goal().trim() && !!this.deadline()
-  );
+  canSubmit = computed(() => !!this.title().trim() && !!this.goal().trim() && !!this.deadline());
 
   minDate = computed(() => {
-    const d = new Date();
-    d.setDate(d.getDate() + 1);
+    const d = new Date(); d.setDate(d.getDate() + 1);
     return d.toISOString().split('T')[0];
   });
-
-  // ── Actions ───────────────────────────────────────────────────────────────────
 
   validate(): boolean {
     const errs: Record<string, string> = {};
     if (!this.title().trim())  errs['title']    = 'Título é obrigatório';
     if (!this.goal().trim())   errs['goal']     = 'Meta é obrigatória';
     if (!this.deadline())      errs['deadline'] = 'Prazo é obrigatório';
-    if (this.type() === 'group' && (this.maxPpl() < 2 || this.maxPpl() > 10))
-      errs['maxPpl'] = 'Grupo deve ter entre 2 e 10 participantes';
+    if (isNaN(Number(this.goal()))) errs['goal'] = 'Meta deve ser um número';
     this.errors.set(errs);
     return Object.keys(errs).length === 0;
   }
@@ -55,12 +47,28 @@ export class ChallengeCreate {
   submit(): void {
     if (!this.validate()) return;
     this.creating.set(true);
-    setTimeout(() => {
-      this.creating.set(false);
-      this.created.set(true);
-      // Navigate to the new challenge detail (mock id = 99)
-      setTimeout(() => this.router.navigate(['/challenges', 99]), 1000);
-    }, 1200);
+    this.error.set('');
+
+    const today = new Date().toISOString().split('T')[0];
+    this.challengeService.create({
+      name:        this.title(),
+      description: '',
+      type:        this.type() === 'group' ? 'Group' : 'Individual',
+      goal:        Number(this.goal()),
+      unit:        this.unit(),
+      startDate:   today,
+      endDate:     this.deadline(),
+    }).subscribe({
+      next: challenge => {
+        this.creating.set(false);
+        this.created.set(true);
+        setTimeout(() => this.router.navigate(['/challenges', challenge.id]), 1000);
+      },
+      error: () => {
+        this.error.set('Erro ao criar desafio. Tente novamente.');
+        this.creating.set(false);
+      },
+    });
   }
 
   goBack(): void { this.router.navigate(['/home']); }

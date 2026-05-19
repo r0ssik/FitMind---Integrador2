@@ -2,7 +2,7 @@
 
   <header class="page-header">
     <button class="back-btn" (click)="goBack()"><span class="mi">arrow_back</span></button>
-    <h1>{{ challenge()?.title ?? 'Desafio' }}</h1>
+    <h1>{{ challenge()?.name ?? 'Desafio' }}</h1>
     <button class="invite-btn" (click)="showInvite.set(true)" title="Convidar"><span class="mi">person_add</span></button>
   </header>
 
@@ -10,9 +10,9 @@
 
     <!-- ── Hero ──────────────────────────────────────────────────────────────── -->
     <div class="challenge-hero">
-      <span class="hero-icon mi mi-xl">{{ c.icon }}</span>
+      <span class="hero-icon mi mi-xl">{{ c.icon ?? 'emoji_events' }}</span>
       <div class="hero-info">
-        <span class="hero-title">{{ c.title }}</span>
+        <span class="hero-title">{{ c.name }}</span>
         <span class="hero-meta">Meta: {{ c.goal }} {{ c.unit }} · {{ c.type === 'group' ? 'Grupo' : 'Individual' }}</span>
       </div>
       <div class="hero-deadline">
@@ -26,7 +26,7 @@
       <div class="my-prog-card">
         <div class="mp-row">
           <span class="mp-label">Seu progresso</span>
-          <span class="mp-val">{{ myProgress()!.current }}/{{ c.goal }} {{ c.unit }}</span>
+          <span class="mp-val">{{ myProgress()!.currentProgress }}/{{ c.goal }} {{ c.unit }}</span>
         </div>
         <div class="progress-bar" style="height:10px; margin-top:8px">
           <div class="progress-fill" [style.width.%]="myPct()"></div>
@@ -56,28 +56,28 @@
       <!-- ── Ranking tab ──────────────────────────────────────────────────────── -->
       @if (activeTab() === 'ranking') {
         @if (ranking().length >= 3) { <div class="podium">
-          @for (p of ranking().slice(0, 3); track p.id; let i = $index) {
+          @for (p of ranking().slice(0, 3); track p.userId; let i = $index) {
             <div class="podium-item" [class.first]="i === 0">
               <span class="podium-medal">{{ medalFor(i + 1) }}</span>
-              <div class="podium-avatar" [class.me]="p.isMe">{{ p.initials }}</div>
+              <div class="podium-avatar" [class.me]="isMe(p.userId)">{{ p.initials }}</div>
               <span class="podium-name">{{ p.name }}</span>
-              <span class="podium-score">{{ p.current }} {{ c.unit }}</span>
+              <span class="podium-score">{{ p.currentProgress }} {{ c.unit }}</span>
             </div>
           }
         </div> }
 
-        @for (p of ranking(); track p.id; let i = $index) {
-          <div class="rank-row" [class.rank-me]="p.isMe">
+        @for (p of ranking(); track p.userId; let i = $index) {
+          <div class="rank-row" [class.rank-me]="isMe(p.userId)">
             <span class="rank-pos">{{ medalFor(i + 1) }}</span>
-            <div class="rank-avatar" [class.me]="p.isMe">{{ p.initials }}</div>
+            <div class="rank-avatar" [class.me]="isMe(p.userId)">{{ p.initials }}</div>
             <div class="rank-info">
-              <span class="rank-name">{{ p.name }}{{ p.isMe ? ' (você)' : '' }}</span>
+              <span class="rank-name">{{ p.name }}{{ isMe(p.userId) ? ' (você)' : '' }}</span>
               <div class="rank-prog-bar">
-                <div class="rank-prog-fill" [style.width.%]="pct(p.current)"
-                     [style.background]="p.isMe ? 'var(--primary)' : '#bdbdbd'"></div>
+                <div class="rank-prog-fill" [style.width.%]="pct(p.currentProgress)"
+                     [style.background]="isMe(p.userId) ? 'var(--primary)' : '#bdbdbd'"></div>
               </div>
             </div>
-            <span class="rank-score">{{ p.current }}/{{ c.goal }}</span>
+            <span class="rank-score">{{ p.currentProgress }}/{{ c.goal }}</span>
           </div>
         }
       }
@@ -90,7 +90,7 @@
               <span class="chart-title">Evolução diária</span>
               <span class="chart-sub">{{ c.unit }} acumulados</span>
             </div>
-            <span class="chart-badge badge-up">{{ myProgress()?.current ?? 0 }} {{ c.unit }}</span>
+            <span class="chart-badge badge-up">{{ myProgress()?.currentProgress ?? 0 }} {{ c.unit }}</span>
           </div>
           <svg viewBox="0 0 320 100" class="chart-svg">
             @for (bar of miniBarRects(); track $index; let i = $index) {
@@ -111,12 +111,12 @@
         <div class="prog-stats" style="margin-bottom:0">
           <div class="prog-stat pos">
             <span class="ps-icon mi">local_fire_department</span>
-            <span class="ps-val">{{ myProgress()?.current ?? 0 }}</span>
+            <span class="ps-val">{{ myProgress()?.currentProgress ?? 0 }}</span>
             <span class="ps-lbl">{{ c.unit }} feitos</span>
           </div>
           <div class="prog-stat">
             <span class="ps-icon mi">track_changes</span>
-            <span class="ps-val">{{ c.goal - (myProgress()?.current ?? 0) }}</span>
+            <span class="ps-val">{{ c.goal - (myProgress()?.currentProgress ?? 0) }}</span>
             <span class="ps-lbl">restantes</span>
           </div>
           <div class="prog-stat">
@@ -134,19 +134,19 @@
 
       <!-- ── Participants tab ──────────────────────────────────────────────────── -->
       @if (activeTab() === 'participants') {
-        @for (p of c.participants; track p.id) {
-          <div class="participant-row" [class.part-me]="p.isMe">
-            <div class="part-avatar" [class.me]="p.isMe">{{ p.initials }}</div>
+        @for (p of c.participants; track p.userId) {
+          <div class="participant-row" [class.part-me]="isMe(p.userId)">
+            <div class="part-avatar" [class.me]="isMe(p.userId)">{{ p.initials }}</div>
             <div class="part-info">
-              <span class="part-name">{{ p.name }}{{ p.isMe ? ' (você)' : '' }}</span>
+              <span class="part-name">{{ p.name }}{{ isMe(p.userId) ? ' (você)' : '' }}</span>
               <div class="rank-prog-bar" style="margin-top:6px">
                 <div class="rank-prog-fill"
-                     [style.width.%]="pct(p.current)"
-                     [style.background]="p.isMe ? 'var(--primary)' : 'var(--secondary)'">
+                     [style.width.%]="pct(p.currentProgress)"
+                     [style.background]="isMe(p.userId) ? 'var(--primary)' : 'var(--secondary)'">
                 </div>
               </div>
             </div>
-            <span class="part-score">{{ p.current }}/{{ c.goal }}</span>
+            <span class="part-score">{{ p.currentProgress }}/{{ c.goal }}</span>
           </div>
         }
 
@@ -176,7 +176,7 @@
           Compartilhe o link abaixo para convidar amigos para o desafio.
         </p>
         <div class="invite-link-row">
-          <span class="invite-link">{{ inviteLink() }}</span>
+          <span class="invite-link">{{ inviteLink }}</span>
           <button class="btn btn-primary btn-sm" style="width:auto" (click)="copyInvite()">
             <span class="mi mi-sm">{{ linkCopied() ? 'check' : 'content_copy' }}</span>
           </button>

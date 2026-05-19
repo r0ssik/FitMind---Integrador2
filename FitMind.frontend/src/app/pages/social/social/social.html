@@ -24,28 +24,30 @@
 
         <!-- Post header -->
         <div class="post-header">
-          <div class="post-avatar" (click)="goToProfile(post.userId)">{{ post.initials }}</div>
+          <div class="post-avatar" (click)="goToProfile(post.userId)">
+            {{ post.userName.split(' ').map(n => n[0]).slice(0,2).join('').toUpperCase() }}
+          </div>
           <div class="post-meta">
-            <span class="post-user" (click)="goToProfile(post.userId)">{{ post.user }}</span>
+            <span class="post-user" (click)="goToProfile(post.userId)">{{ post.userName }}</span>
             <div class="post-sub">
-              <span class="post-tag">{{ post.tag }}</span>
-              <span class="post-time">· {{ post.time }}</span>
+              @if (post.tags) { <span class="post-tag">{{ post.tags }}</span> }
+              <span class="post-time">· {{ post.createdAt | date:'dd/MM' }}</span>
             </div>
           </div>
         </div>
 
         <!-- Post body -->
-        <p class="post-text">{{ post.text }}</p>
+        <p class="post-text">{{ post.content }}</p>
 
         <!-- Actions -->
         <div class="post-actions">
-          <button class="action-btn" [class.liked]="post.liked" (click)="toggleLike(post)">
-            <span class="mi mi-sm" [class.mi-fill]="post.liked">favorite</span>
-            <span>{{ post.likes }}</span>
+          <button class="action-btn" [class.liked]="post.isLikedByCurrentUser" (click)="toggleLike(post)">
+            <span class="mi mi-sm" [class.mi-fill]="post.isLikedByCurrentUser">favorite</span>
+            <span>{{ post.likesCount }}</span>
           </button>
           <button class="action-btn" (click)="toggleComments(post)">
             <span class="mi mi-sm">chat_bubble_outline</span>
-            <span>{{ post.comments.length }}</span>
+            <span>{{ post.commentsCount }}</span>
           </button>
           <button class="action-btn">
             <span class="mi mi-sm">share</span>
@@ -57,18 +59,20 @@
         @if (post.showComments) {
           <div class="comments-section">
 
-            @for (c of post.comments; track c.id) {
+            @for (c of post.loadedComments; track c.id) {
               <div class="comment-item">
-                <div class="comment-avatar">{{ c.initials }}</div>
-                <div class="comment-body">
-                  <span class="comment-user">{{ c.user }}</span>
-                  <p class="comment-text">{{ c.text }}</p>
+                <div class="comment-avatar">
+                  {{ c.userName.split(' ').map(n => n[0]).slice(0,2).join('').toUpperCase() }}
                 </div>
-                <span class="comment-time">{{ c.time }}</span>
+                <div class="comment-body">
+                  <span class="comment-user">{{ c.userName }}</span>
+                  <p class="comment-text">{{ c.content }}</p>
+                </div>
+                <span class="comment-time">{{ c.createdAt | date:'dd/MM' }}</span>
               </div>
             }
 
-            @if (!post.comments.length) {
+            @if (!post.loadedComments.length) {
               <p class="no-comments">Seja o primeiro a comentar!</p>
             }
 

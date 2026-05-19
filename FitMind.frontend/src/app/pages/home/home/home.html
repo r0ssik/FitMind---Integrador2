@@ -2,31 +2,16 @@
 
   <!-- Header usuário -->
   <header class="user-header">
-
-<div>
-   <span class="greeting">Bom dia,</span>
-   <span class="user-name">
-      {{ userName }} 👋
-   </span>
-</div>
-
-<img src="logo.png" class="home-logo">
-
-<div class="user-actions">
-
-<button class="notif-btn"
-(click)="goNotifications()">
-🔔
-</button>
-
-<button class="avatar"
-(click)="goProfile()">
-{{ userInitials }}
-</button>
-
-</div>
-</header>
-
+    <div>
+      <span class="greeting">Bom dia,</span>
+      <span class="user-name">{{ userName }} 👋</span>
+    </div>
+    <img src="logo.png" class="home-logo">
+    <div class="user-actions">
+      <button class="notif-btn" (click)="goNotifications()">🔔</button>
+      <button class="avatar" (click)="goProfile()">{{ userInitials }}</button>
+    </div>
+  </header>
 
   <!-- Content -->
   <main class="home-content" style="padding-bottom: 80px">
@@ -34,26 +19,20 @@
     <!-- Resumo treino do dia -->
     <div class="widget widget-full" style="margin-bottom: 14px">
       <div class="widget-header">
-        <span class="widget-title">Treino de hoje — Perna</span>
+        <span class="widget-title">Treino de hoje{{ dashboard()?.todayWorkoutName ? ' — ' + dashboard()!.todayWorkoutName : '' }}</span>
         <span class="widget-icon mi">fitness_center</span>
       </div>
       <div class="workout-summary">
         <span style="font-size:13px; color: var(--text-secondary); margin-bottom: 8px; display:block">
-          {{ workoutDone }}/{{ workout.length }} exercícios concluídos
+          {{ workoutDone }}/{{ workoutTotal }} exercícios concluídos
         </span>
         <div class="progress-bar" style="margin-bottom: 12px">
           <div class="progress-fill" [style.width.%]="workoutProgress"></div>
         </div>
-        @for (ex of workout; track ex.name; let i = $index) {
-          <div class="workout-item">
-            <div class="workout-dot" [style.background]="ex.done ? 'var(--primary)' : 'var(--border)'"></div>
-            <span class="workout-name" [style.text-decoration]="ex.done ? 'line-through' : 'none'"
-                  [style.color]="ex.done ? 'var(--text-hint)' : 'var(--text-primary)'">{{ ex.name }}</span>
-            <span class="workout-sets">{{ ex.sets }}</span>
-            <div class="workout-check" [class.done]="ex.done" (click)="toggleExercise(i)">
-              @if (ex.done) { <span class="mi mi-sm">check</span> }
-            </div>
-          </div>
+        @if (!workoutTotal) {
+          <p style="font-size:13px; color:var(--text-hint); text-align:center; padding:8px 0">
+            Nenhum treino programado para hoje
+          </p>
         }
       </div>
     </div>
@@ -68,22 +47,14 @@
         </div>
         <div style="display:flex; align-items:baseline; gap:6px; margin-bottom:4px">
           <span class="widget-value">{{ totalCalories }}</span>
-          <span class="widget-sub">/ 2000 kcal</span>
+          <span class="widget-sub">/ {{ calorieGoal }} kcal</span>
         </div>
         <div class="progress-bar" style="margin-bottom: 12px">
           <div class="progress-fill" [style.width.%]="caloriePct" style="background: var(--warning)"></div>
         </div>
-        @for (meal of meals; track meal.name) {
-          <div class="meal-item">
-            <div>
-              <div class="meal-name">{{ meal.name }}</div>
-              <div class="meal-time">{{ meal.time }}</div>
-            </div>
-            <span class="meal-cal" [style.color]="meal.calories ? 'var(--primary-dark)' : 'var(--text-hint)'">
-              {{ meal.calories ? meal.calories + ' kcal' : '—' }}
-            </span>
-          </div>
-        }
+        <button class="btn btn-outline btn-sm" style="width:auto; margin-top:4px" (click)="navigate('diet')">
+          <span class="mi mi-sm">add</span> Registrar refeição
+        </button>
       </div>
 
       <!-- Água -->
@@ -112,25 +83,32 @@
           <span class="widget-title">Progresso</span>
           <span class="widget-icon mi">show_chart</span>
         </div>
-        <div class="widget-value" style="font-size: 20px">-2,4 kg</div>
-        <div class="widget-sub">este mês</div>
+        @if (dashboard()?.weightDeltaThisMonth != null) {
+          <div class="widget-value" style="font-size: 20px">
+            {{ dashboard()!.weightDeltaThisMonth! > 0 ? '+' : '' }}{{ dashboard()!.weightDeltaThisMonth | number:'1.1-1' }} kg
+          </div>
+          <div class="widget-sub">este mês</div>
+        } @else {
+          <div class="widget-value" style="font-size: 20px; color:var(--text-hint)">—</div>
+          <div class="widget-sub">sem dados de peso</div>
+        }
         <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px">
           <div>
             <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px">
               <span style="color:var(--text-secondary)">Treinos</span>
-              <span style="font-weight:600">14/20</span>
+              <span style="font-weight:600">{{ workoutDone }}/{{ workoutTotal }}</span>
             </div>
             <div class="progress-bar">
-              <div class="progress-fill" style="width: 70%"></div>
+              <div class="progress-fill" [style.width.%]="workoutProgress"></div>
             </div>
           </div>
           <div>
             <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px">
               <span style="color:var(--text-secondary)">Meta calorias</span>
-              <span style="font-weight:600">78%</span>
+              <span style="font-weight:600">{{ caloriePct | number:'1.0-0' }}%</span>
             </div>
             <div class="progress-bar">
-              <div class="progress-fill" style="width: 78%; background: var(--warning)"></div>
+              <div class="progress-fill" [style.width.%]="caloriePct" style="background: var(--warning)"></div>
             </div>
           </div>
         </div>
@@ -142,18 +120,23 @@
           <span class="widget-title">Desafios ativos</span>
           <span class="widget-icon mi">emoji_events</span>
         </div>
-        @for (c of challenges; track c.name) {
+        @for (c of challenges(); track c.id) {
           <div class="challenge-item">
-            <span class="challenge-icon mi">{{ c.icon }}</span>
+            <span class="challenge-icon mi">{{ c.icon ?? 'emoji_events' }}</span>
             <div class="challenge-info">
               <div class="challenge-name">{{ c.name }}</div>
-              <div class="challenge-progress-text">{{ c.current }}/{{ c.total }} {{ c.unit }}</div>
+              <div class="challenge-progress-text">{{ c.myProgress ?? 0 }}/{{ c.goal }} {{ c.unit }}</div>
               <div class="progress-bar" style="margin-top: 6px">
                 <div class="progress-fill" [style.width.%]="challengeProgress(c)"></div>
               </div>
             </div>
             <span class="challenge-badge">{{ (challengeProgress(c) | number:'1.0-0') }}%</span>
           </div>
+        }
+        @if (!challenges().length) {
+          <p style="font-size:13px; color:var(--text-hint); text-align:center; padding:8px 0">
+            Nenhum desafio ativo
+          </p>
         }
       </div>
 
@@ -163,21 +146,26 @@
           <span class="widget-title">Feed social</span>
           <span class="widget-icon mi">group</span>
         </div>
-        @for (post of feed; track post.user) {
+        @for (post of feed(); track post.id) {
           <div class="feed-item">
-            <div class="feed-avatar">{{ post.initials }}</div>
+            <div class="feed-avatar">{{ post.userName.split(' ').map(n => n[0]).slice(0,2).join('').toUpperCase() }}</div>
             <div class="feed-body">
-              <span class="feed-user">{{ post.user }}</span>
-              <p class="feed-text">{{ post.text }}</p>
+              <span class="feed-user">{{ post.userName }}</span>
+              <p class="feed-text">{{ post.content }}</p>
               <div class="feed-actions">
-                <button [class.liked]="post.liked" (click)="toggleLike(post)">
-                  <span class="mi mi-sm" [class.mi-fill]="post.liked">favorite</span> {{ post.likes }}
+                <button [class.liked]="post.isLikedByCurrentUser" (click)="toggleLike(post)">
+                  <span class="mi mi-sm" [class.mi-fill]="post.isLikedByCurrentUser">favorite</span> {{ post.likesCount }}
                 </button>
-                <button><span class="mi mi-sm">chat_bubble_outline</span> {{ post.comments }}</button>
+                <button><span class="mi mi-sm">chat_bubble_outline</span> {{ post.commentsCount }}</button>
               </div>
             </div>
-            <span class="feed-time">{{ post.time }}</span>
+            <span class="feed-time">{{ post.createdAt | date:'dd/MM' }}</span>
           </div>
+        }
+        @if (!feed().length) {
+          <p style="font-size:13px; color:var(--text-hint); text-align:center; padding:8px 0">
+            Nenhum post no feed
+          </p>
         }
       </div>
 

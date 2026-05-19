@@ -100,24 +100,24 @@
       <!-- Macro resumo -->
       <div class="macro-summary-card">
         <div class="macro-kcal">
-          <span class="macro-kcal-val">{{ plan()!.totalKcal }}</span>
+          <span class="macro-kcal-val">{{ plan()!.dailyCalories }}</span>
           <span class="macro-kcal-lbl">kcal/dia</span>
         </div>
         <div class="macro-bars">
           <div class="macro-bar-row">
             <span class="macro-name protein">Proteína</span>
-            <div class="macro-bar"><div class="macro-fill protein" [style.width.%]="(plan()!.protein*4/plan()!.totalKcal)*100"></div></div>
-            <span class="macro-val">{{ plan()!.protein }}g</span>
+            <div class="macro-bar"><div class="macro-fill protein" [style.width.%]="plan()!.dailyCalories ? (planProtein*4/plan()!.dailyCalories)*100 : 0"></div></div>
+            <span class="macro-val">{{ planProtein }}g</span>
           </div>
           <div class="macro-bar-row">
             <span class="macro-name carbs">Carbs</span>
-            <div class="macro-bar"><div class="macro-fill carbs" [style.width.%]="(plan()!.carbs*4/plan()!.totalKcal)*100"></div></div>
-            <span class="macro-val">{{ plan()!.carbs }}g</span>
+            <div class="macro-bar"><div class="macro-fill carbs" [style.width.%]="plan()!.dailyCalories ? (planCarbs*4/plan()!.dailyCalories)*100 : 0"></div></div>
+            <span class="macro-val">{{ planCarbs }}g</span>
           </div>
           <div class="macro-bar-row">
             <span class="macro-name fat">Gordura</span>
-            <div class="macro-bar"><div class="macro-fill fat" [style.width.%]="(plan()!.fat*9/plan()!.totalKcal)*100"></div></div>
-            <span class="macro-val">{{ plan()!.fat }}g</span>
+            <div class="macro-bar"><div class="macro-fill fat" [style.width.%]="plan()!.dailyCalories ? (planFat*9/plan()!.dailyCalories)*100 : 0"></div></div>
+            <span class="macro-val">{{ planFat }}g</span>
           </div>
         </div>
       </div>
@@ -130,23 +130,21 @@
               <span class="diet-meal-name">{{ meal.name }}</span>
               <span class="diet-meal-time">{{ meal.time }}</span>
             </div>
-            <span class="diet-meal-kcal">{{ mealKcal(meal) }} kcal</span>
+            <span class="diet-meal-kcal">{{ meal.calories }} kcal</span>
           </div>
           <div class="diet-food-list">
-            @for (food of meal.foods; track food.item) {
-              <div class="diet-food-row">
-                <div class="diet-food-info">
-                  <span class="diet-food-name">{{ food.item }}</span>
-                  <span class="diet-food-amount">{{ food.amount }}</span>
-                </div>
-                <div class="diet-food-macros">
-                  <span class="macro-tag p">P {{ food.p }}g</span>
-                  <span class="macro-tag c">C {{ food.c }}g</span>
-                  <span class="macro-tag f">G {{ food.f }}g</span>
-                  <span class="diet-food-kcal">{{ food.kcal }} kcal</span>
-                </div>
+            <div class="diet-food-row">
+              <div class="diet-food-info">
+                @if (meal.description) {
+                  <span class="diet-food-name">{{ meal.description }}</span>
+                }
               </div>
-            }
+              <div class="diet-food-macros">
+                <span class="macro-tag p">P {{ meal.proteins }}g</span>
+                <span class="macro-tag c">C {{ meal.carbs }}g</span>
+                <span class="macro-tag f">G {{ meal.fats }}g</span>
+              </div>
+            </div>
           </div>
         </div>
       }

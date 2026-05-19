@@ -1,17 +1,9 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { AdminService } from '../../../services/admin.service';
+import { AdminUserDto } from '../../../core/models/api.models';
 
 type UserStatus = 'active' | 'suspended' | 'blocked';
-
-interface AdminUser {
-  id:        number;
-  name:      string;
-  email:     string;
-  initials:  string;
-  joined:    string;
-  workouts:  number;
-  status:    UserStatus;
-}
 
 @Component({
   selector: 'app-admin-users',
@@ -19,40 +11,35 @@ interface AdminUser {
   templateUrl: './admin-users.html',
   styleUrl:    './admin-users.scss',
 })
-export class AdminUsers {
-  constructor(private router: Router) {}
+export class AdminUsers implements OnInit {
+  constructor(private router: Router, private adminService: AdminService) {}
 
-  search  = signal('');
+  search       = signal('');
   filterStatus = signal<UserStatus | 'all'>('all');
+  loading      = signal(true);
+  error        = signal('');
 
-  confirmAction = signal<{ user: AdminUser; action: 'suspend' | 'block' | 'delete' } | null>(null);
-
-  users = signal<AdminUser[]>([
-    { id:1,  name:'Gabriel Santos',  email:'gabriel@email.com', initials:'GS', joined:'01/02/2025', workouts:87,  status:'active'    },
-    { id:2,  name:'João Barros',     email:'joao@email.com',    initials:'JB', joined:'05/02/2025', workouts:312, status:'active'    },
-    { id:3,  name:'Emily Mekaru',    email:'emily@email.com',   initials:'EM', joined:'10/02/2025', workouts:180, status:'active'    },
-    { id:4,  name:'Carlos Silva',    email:'carlos@email.com',  initials:'CS', joined:'12/02/2025', workouts:241, status:'active'    },
-    { id:5,  name:'Ana Lima',        email:'ana@email.com',     initials:'AL', joined:'18/02/2025', workouts:95,  status:'active'    },
-    { id:6,  name:'Pedro Costa',     email:'pedro@email.com',   initials:'PC', joined:'01/03/2025', workouts:42,  status:'suspended' },
-    { id:7,  name:'Lucas Torres',    email:'lucas@email.com',   initials:'LT', joined:'05/03/2025', workouts:11,  status:'blocked'   },
-    { id:8,  name:'André Melo',      email:'andre@email.com',   initials:'AM', joined:'10/03/2025', workouts:28,  status:'suspended' },
-    { id:9,  name:'Carla Santos',    email:'carla@email.com',   initials:'CaSt',joined:'15/03/2025',workouts:66, status:'active'    },
-    { id:10, name:'Rafael Lima',     email:'rafael@email.com',  initials:'RL', joined:'20/03/2025', workouts:53,  status:'active'    },
-  ]);
+  confirmAction = signal<{ user: AdminUserDto; action: 'suspend' | 'block' | 'delete' } | null>(null);
+  users         = signal<AdminUserDto[]>([]);
 
   filtered = computed(() => {
     const q = this.search().toLowerCase().trim();
     const f = this.filterStatus();
     return this.users().filter(u => {
       const matchQ = !q || u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
-      const matchF = f === 'all' || u.status === f;
+      const matchF = f === 'all' || u.status.toLowerCase() === f;
       return matchQ && matchF;
     });
   });
 
-  // ── Actions ───────────────────────────────────────────────────────────────────
+  ngOnInit(): void {
+    this.adminService.getUsers().subscribe({
+      next:  list => { this.users.set(list); this.loading.set(false); },
+      error: ()   => { this.error.set('Erro ao carregar usuários.'); this.loading.set(false); },
+    });
+  }
 
-  openConfirm(user: AdminUser, action: 'suspend' | 'block' | 'delete'): void {
+  openConfirm(user: AdminUserDto, action: 'suspend' | 'block' | 'delete'): void {
     this.confirmAction.set({ user, action });
   }
 
@@ -63,17 +50,25 @@ export class AdminUsers {
     if (!ca) return;
     const { user, action } = ca;
 
-    if (action === 'delete') {
-      this.users.update(us => us.filter(u => u.id !== user.id));
-    } else {
-      const newStatus: UserStatus = action === 'suspend' ? 'suspended' : 'blocked';
-      this.users.update(us => us.map(u => u.id === user.id ? { ...u, status: newStatus } : u));
+    if (action === 'suspend') {
+      this.adminService.suspendUser(user.id).subscribe({
+        next:  () => this.users.update(us => us.map(u => u.id === user.id ? { ...u, status: 'suspended' } : u)),
+        error: () => {},
+      });
+    } else if (action === 'block') {
+      this.adminService.blockUser(user.id).subscribe({
+        next:  () => this.users.update(us => us.map(u => u.id === user.id ? { ...u, status: 'blocked' } : u)),
+        error: () => {},
+      });
     }
     this.closeConfirm();
   }
 
-  reactivate(user: AdminUser): void {
-    this.users.update(us => us.map(u => u.id === user.id ? { ...u, status: 'active' } : u));
+  reactivate(user: AdminUserDto): void {
+    this.adminService.reactivateUser(user.id).subscribe({
+      next:  () => this.users.update(us => us.map(u => u.id === user.id ? { ...u, status: 'active' } : u)),
+      error: () => {},
+    });
   }
 
   actionLabel(action: string): string {
@@ -86,8 +81,12 @@ export class AdminUsers {
     return m[action] ?? 'warning';
   }
 
-  statusLabel(s: UserStatus): string {
+  statusLabel(s: string): string {
     return s === 'active' ? 'Ativo' : s === 'suspended' ? 'Suspenso' : 'Bloqueado';
+  }
+
+  formatDate(iso: string): string {
+    return new Date(iso).toLocaleDateString('pt-BR');
   }
 
   goBack(): void { this.router.navigate(['/admin']); }

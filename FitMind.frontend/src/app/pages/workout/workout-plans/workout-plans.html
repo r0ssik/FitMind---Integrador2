@@ -19,50 +19,56 @@
 
     <!-- Plano Atual -->
     @if (activeTab() === 'current') {
+      @if (currentPlan(); as plan) {
       <div class="plan-header-card">
         <div class="plan-badge ai"><span class="mi mi-sm">smart_toy</span> Gerado por IA</div>
-        <h2>{{ currentPlan.name }}</h2>
+        <h2>{{ plan.name }}</h2>
         <div class="plan-meta">
-          <span><span class="mi mi-sm">gps_fixed</span> {{ currentPlan.goal }}</span>
-          <span><span class="mi mi-sm">calendar_month</span> {{ currentPlan.daysPerWeek }}x por semana</span>
-          <span><span class="mi mi-sm">timer</span> {{ currentPlan.weeks }} semanas</span>
+          <span><span class="mi mi-sm">gps_fixed</span> {{ plan.goal }}</span>
+          <span><span class="mi mi-sm">calendar_month</span> {{ plan.daysPerWeek }}x por semana</span>
+          <span><span class="mi mi-sm">timer</span> {{ plan.weeks }} semanas</span>
         </div>
-        <p class="plan-created">Criado em {{ formatDate(currentPlan.createdAt) }}</p>
+        <p class="plan-created">Criado em {{ formatDate(plan.createdAt) }}</p>
       </div>
 
       <p class="section-label">Dias de treino</p>
 
-      @for (day of currentPlan.days; track day.day) {
+      @for (day of plan.days; track day.id) {
         <div class="day-card">
-          <div class="day-header" (click)="toggleDay(day.day)">
+          <div class="day-header" (click)="toggleDay(day.id)">
             <div class="day-info">
-              <span class="day-name">{{ day.day }}</span>
+              <span class="day-name">{{ day.dayName }}</span>
               <span class="day-focus">{{ day.focus }}</span>
             </div>
             <div class="day-right">
               <span class="exercise-count">{{ day.exercises.length }} exercícios</span>
-              <span class="chevron" [class.open]="expandedDay() === day.day">›</span>
+              <span class="chevron" [class.open]="expandedDay() === day.id">›</span>
             </div>
           </div>
 
-          @if (expandedDay() === day.day) {
+          @if (expandedDay() === day.id) {
             <div class="exercise-list">
               @for (ex of day.exercises; track ex.name) {
                 <div class="exercise-row">
                   <div class="ex-info">
                     <span class="ex-name">{{ ex.name }}</span>
-                    <span class="ex-detail">{{ ex.sets }}x {{ ex.reps }} · Descanso: {{ ex.rest }}</span>
+                    <span class="ex-detail">{{ ex.sets }}x {{ ex.reps }} · Descanso: {{ ex.restTime }}</span>
                   </div>
                 </div>
               }
             </div>
+            <button class="btn btn-primary" style="margin: 8px 16px 16px" (click)="startDay(plan.id, day.id)">
+              <span class="mi mi-sm">play_arrow</span> Iniciar treino
+            </button>
           }
         </div>
       }
-
-      <button class="btn-outline-green" (click)="goDetail()">
-        <span class="mi mi-sm">assignment</span> Ver treino completo
-      </button>
+      } @else {
+        <div class="empty-state">
+          <span class="mi mi-xl" style="color:var(--text-hint)">fitness_center</span>
+          <p>Nenhum plano ativo. Gere um com IA!</p>
+        </div>
+      }
       <button class="btn-outline-green" (click)="goGenerate()">
         <span class="mi mi-sm">auto_awesome</span> Gerar novo plano com IA
       </button>
@@ -70,7 +76,7 @@
 
     <!-- Histórico -->
     @if (activeTab() === 'history') {
-      @for (plan of history; track plan.id) {
+      @for (plan of history(); track plan.id) {
         <div class="history-card">
           <div class="plan-badge ai" style="margin-bottom: 8px"><span class="mi mi-sm">smart_toy</span> IA</div>
           <h3>{{ plan.name }}</h3>
@@ -84,7 +90,7 @@
         </div>
       }
 
-      @if (history.length === 0) {
+      @if (history().length === 0) {
         <div class="empty-state">
           <span class="mi mi-xl" style="color:var(--text-hint)">assignment</span>
           <p>Nenhum plano no histórico</p>

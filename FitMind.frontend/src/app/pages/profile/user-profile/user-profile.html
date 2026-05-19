@@ -41,22 +41,22 @@
       <!-- Stats row -->
       <div class="profile-stats">
         <div class="pstat">
-          <span class="pstat-val">{{ p.followers }}</span>
+          <span class="pstat-val">{{ p.followersCount }}</span>
           <span class="pstat-lbl">Seguidores</span>
         </div>
         <div class="pstat-div"></div>
         <div class="pstat">
-          <span class="pstat-val">{{ p.following }}</span>
+          <span class="pstat-val">{{ p.followingCount }}</span>
           <span class="pstat-lbl">Seguindo</span>
         </div>
         <div class="pstat-div"></div>
         <div class="pstat">
-          <span class="pstat-val">{{ p.workouts }}</span>
+          <span class="pstat-val">{{ p.totalWorkouts }}</span>
           <span class="pstat-lbl">Treinos</span>
         </div>
         <div class="pstat-div"></div>
         <div class="pstat">
-          <span class="pstat-val">{{ p.streak }}</span>
+          <span class="pstat-val">{{ p.currentStreak }}</span>
           <span class="pstat-lbl"><span class="mi mi-sm" style="color:var(--warning)">local_fire_department</span> Dias</span>
         </div>
       </div>
@@ -71,14 +71,14 @@
       <!-- ── Activity ──────────────────────────────────────────────────────── -->
       @if (activeTab() === 'activity') {
         <div style="margin-top:14px">
-          @for (act of p.activity; track act.id) {
+          @for (act of p.recentActivity; track act.occurredAt) {
             <div class="act-row">
               <span class="act-icon mi">{{ act.icon }}</span>
               <div class="act-body">
                 <p class="act-text">{{ act.text }}</p>
                 <span class="act-meta">
                   <span class="act-tag">{{ act.tag }}</span>
-                  · {{ act.time }}
+                  · {{ act.occurredAt }}
                 </span>
               </div>
             </div>
@@ -90,8 +90,8 @@
       @if (activeTab() === 'achievements') {
         <div class="badges-grid" style="margin-top:14px">
           @for (b of p.badges; track b.title) {
-            <div class="badge-card" [class.rare]="b.rare">
-              @if (b.rare) { <span class="rare-tag mi mi-sm">auto_awesome</span> }
+            <div class="badge-card" [class.rare]="b.isRare">
+              @if (b.isRare) { <span class="rare-tag mi mi-sm">auto_awesome</span> }
               <span class="badge-icon mi mi-lg">{{ b.icon }}</span>
               <span class="badge-title">{{ b.title }}</span>
             </div>
@@ -102,15 +102,15 @@
       <!-- ── Stats ─────────────────────────────────────────────────────────── -->
       @if (activeTab() === 'stats') {
         <div class="stats-cards" style="margin-top:14px">
-          <div class="sc"><span class="sc-val">{{ p.workouts }}</span><span class="sc-lbl">Treinos totais</span></div>
+          <div class="sc"><span class="sc-val">{{ p.totalWorkouts }}</span><span class="sc-lbl">Treinos totais</span></div>
           <div class="sc">
             <span class="sc-val" style="display:flex;align-items:center;gap:4px">
-              {{ p.streak }}<span class="mi mi-sm" style="color:var(--warning)">local_fire_department</span>
+              {{ p.currentStreak }}<span class="mi mi-sm" style="color:var(--warning)">local_fire_department</span>
             </span>
             <span class="sc-lbl">Sequência atual</span>
           </div>
           <div class="sc"><span class="sc-val">{{ p.badges.length }}</span><span class="sc-lbl">Conquistas</span></div>
-          <div class="sc"><span class="sc-val">{{ p.followers }}</span><span class="sc-lbl">Seguidores</span></div>
+          <div class="sc"><span class="sc-val">{{ p.followersCount }}</span><span class="sc-lbl">Seguidores</span></div>
         </div>
       }
 

@@ -42,8 +42,8 @@
             <span class="user-email">{{ u.email }}</span>
             <div class="user-meta">
               <span class="user-status-chip" [class]="'chip-' + u.status">{{ statusLabel(u.status) }}</span>
-              <span class="user-joined">Desde {{ u.joined }}</span>
-              <span><span class="mi mi-sm">fitness_center</span> {{ u.workouts }} treinos</span>
+              <span class="user-joined">Desde {{ formatDate(u.joinedAt) }}</span>
+              <span><span class="mi mi-sm">fitness_center</span> {{ u.totalWorkouts }} treinos</span>
             </div>
           </div>
         </div>

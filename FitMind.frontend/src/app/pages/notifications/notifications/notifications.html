@@ -36,19 +36,19 @@
     }
 
     @for (notif of filtered; track notif.id) {
-      <div class="notif-card" [class.unread]="!notif.read" (click)="markRead(notif.id)">
+      <div class="notif-card" [class.unread]="!notif.isRead" (click)="markRead(notif.id)">
         <div class="notif-icon" [style.background]="typeConfig[notif.type].color + '20'">
           <span class="mi">{{ typeConfig[notif.type].icon }}</span>
         </div>
         <div class="notif-body">
           <div class="notif-header">
             <span class="notif-title">{{ notif.title }}</span>
-            <span class="notif-time">{{ notif.time | date:'HH:mm' }}</span>
+            <span class="notif-time">{{ notif.createdAt | date:'HH:mm' }}</span>
           </div>
-          <p class="notif-text">{{ notif.body }}</p>
-          @if (notif.action) {
+          <p class="notif-text">{{ notif.message }}</p>
+          @if (notif.actionRoute) {
             <button class="notif-action" (click)="$event.stopPropagation(); navigate(notif)">
-              {{ notif.action }} <span class="mi mi-sm">arrow_forward</span>
+              {{ notif.actionRoute }} <span class="mi mi-sm">arrow_forward</span>
             </button>
           }
         </div>

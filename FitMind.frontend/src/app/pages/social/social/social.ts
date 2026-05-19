@@ -1,162 +1,123 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, OnInit } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { Auth } from '../../../services/auth';
+import { SocialService } from '../../../services/social.service';
+import { PostDto, CommentDto } from '../../../core/models/api.models';
 
 type FeedFilter = 'all' | 'following' | 'challenges';
 
-interface Comment {
-  id:       number;
-  user:     string;
-  initials: string;
-  text:     string;
-  time:     string;
-}
-
-interface Post {
-  id:          number;
-  user:        string;
-  initials:    string;
-  userId:      number;
-  text:        string;
-  tag:         string;
-  time:        string;
-  likes:       number;
-  liked:       boolean;
-  comments:    Comment[];
+interface PostWithComments extends PostDto {
+  loadedComments: CommentDto[];
   showComments: boolean;
 }
 
 @Component({
   selector: 'app-social',
-  imports: [],
+  imports: [DatePipe],
   templateUrl: './social.html',
   styleUrl:    './social.scss',
 })
-export class Social {
-  constructor(private auth: Auth, private router: Router) {}
+export class Social implements OnInit {
+  constructor(private auth: Auth, private router: Router, private socialService: SocialService) {}
 
   filter      = signal<FeedFilter>('all');
   newPostText = signal('');
   showNewPost = signal(false);
   posting     = signal(false);
-  newComment  = signal<Record<number, string>>({});
+  newComment  = signal<Record<string, string>>({});
+  loading     = signal(true);
 
-  posts = signal<Post[]>([
-    {
-      id: 1, userId: 2, user: 'João Barros', initials: 'JB',
-      text: 'Completei meu desafio de 30 dias! Nunca me senti tão bem. Obrigado a todos que me incentivaram!',
-      tag: 'Desafio', time: '2h atrás', likes: 24, liked: false, showComments: false,
-      comments: [
-        { id:1, user:'Emily Mekaru',  initials:'EM', text:'Incrível! Parabéns!',  time:'1h atrás' },
-        { id:2, user:'Carlos Silva',  initials:'CS', text:'Arrasou demais!',       time:'45min atrás' },
-      ],
-    },
-    {
-      id: 2, userId: 3, user: 'Emily Mekaru', initials: 'EM',
-      text: 'Treino de hoje concluído! Pernas destruídas. Agachamento 4x12 a 80kg.',
-      tag: 'Treino', time: '4h atrás', likes: 18, liked: true, showComments: false,
-      comments: [
-        { id:1, user:'João Barros', initials:'JB', text:'Isso! Continua assim!', time:'3h atrás' },
-        { id:2, user:'Ana Lima',    initials:'AL', text:'Mandou bem!',            time:'2h atrás' },
-      ],
-    },
-    {
-      id: 3, userId: 4, user: 'Carlos Silva', initials: 'CS',
-      text: 'Novo recorde pessoal no supino: 100kg! Meses de dedicação valeram a pena.',
-      tag: 'Conquista', time: '6h atrás', likes: 42, liked: false, showComments: false,
-      comments: [
-        { id:1, user:'Emily Mekaru', initials:'EM', text:'Monstro!', time:'5h atrás' },
-      ],
-    },
-    {
-      id: 4, userId: 5, user: 'Ana Lima', initials: 'AL',
-      text: 'Hoje segui minha dieta 100%! Macro bate direitinho. Consistência é tudo.',
-      tag: 'Dieta', time: '8h atrás', likes: 15, liked: false, showComments: false,
-      comments: [],
-    },
-    {
-      id: 5, userId: 6, user: 'Pedro Costa', initials: 'PC',
-      text: 'Perdeu 5kg em 6 semanas seguindo o plano do FitMind. Método funciona!',
-      tag: 'Progresso', time: '1d atrás', likes: 67, liked: false, showComments: false,
-      comments: [
-        { id:1, user:'João Barros',  initials:'JB', text:'Sensacional!',        time:'20h atrás' },
-        { id:2, user:'Carlos Silva', initials:'CS', text:'Que evolução incrível!', time:'18h atrás' },
-      ],
-    },
-  ]);
+  posts = signal<PostWithComments[]>([]);
 
   filtered = computed(() => {
     const f = this.filter();
-    if (f === 'challenges') return this.posts().filter(p => p.tag.includes('Desafio'));
+    if (f === 'challenges') return this.posts().filter(p => (p.tags ?? '').includes('Desafio'));
     return this.posts();
   });
 
-  get userName():    string { return this.auth.currentUser()?.name?.split(' ')[0] ?? 'Você'; }
-  get userInitials():string {
+  get userName():     string { return this.auth.currentUser()?.name?.split(' ')[0] ?? 'Você'; }
+  get userInitials(): string {
     const n = this.auth.currentUser()?.name ?? 'U';
     return n.split(' ').map((x: string) => x[0]).slice(0, 2).join('').toUpperCase();
   }
 
-  // ── Post actions ──────────────────────────────────────────────────────────────
-
-  toggleLike(post: Post): void {
-    post.liked  = !post.liked;
-    post.likes += post.liked ? 1 : -1;
-    this.posts.update(ps => [...ps]);
+  ngOnInit(): void {
+    this.socialService.getFeed(1, 20).subscribe({
+      next: posts => {
+        this.posts.set(posts.map(p => ({ ...p, loadedComments: [], showComments: false })));
+        this.loading.set(false);
+      },
+      error: () => this.loading.set(false),
+    });
   }
 
-  toggleComments(post: Post): void {
-    post.showComments = !post.showComments;
-    this.posts.update(ps => [...ps]);
+  toggleLike(post: PostWithComments): void {
+    if (post.isLikedByCurrentUser) {
+      this.socialService.unlikePost(post.id).subscribe({ error: () => {} });
+    } else {
+      this.socialService.likePost(post.id).subscribe({ error: () => {} });
+    }
+    this.posts.update(list => list.map(p =>
+      p.id === post.id
+        ? { ...p, isLikedByCurrentUser: !p.isLikedByCurrentUser, likesCount: p.likesCount + (p.isLikedByCurrentUser ? -1 : 1) }
+        : p
+    ));
   }
 
-  setComment(postId: number, val: string): void {
+  toggleComments(post: PostWithComments): void {
+    if (!post.showComments && !post.loadedComments.length) {
+      this.socialService.getComments(post.id).subscribe({
+        next: comments => {
+          this.posts.update(list => list.map(p =>
+            p.id === post.id ? { ...p, loadedComments: comments, showComments: true } : p
+          ));
+        },
+        error: () => {},
+      });
+    } else {
+      this.posts.update(list => list.map(p =>
+        p.id === post.id ? { ...p, showComments: !p.showComments } : p
+      ));
+    }
+  }
+
+  setComment(postId: string, val: string): void {
     this.newComment.update(m => ({ ...m, [postId]: val }));
   }
 
-  submitComment(post: Post): void {
+  submitComment(post: PostWithComments): void {
     const text = (this.newComment()[post.id] ?? '').trim();
     if (!text) return;
-    const c: Comment = {
-      id:       post.comments.length + 1,
-      user:     this.auth.currentUser()?.name ?? 'Você',
-      initials: this.userInitials,
-      text,
-      time:     'agora',
-    };
-    post.comments = [...post.comments, c];
-    this.posts.update(ps => [...ps]);
-    this.newComment.update(m => ({ ...m, [post.id]: '' }));
+    this.socialService.addComment(post.id, { content: text }).subscribe({
+      next: comment => {
+        this.posts.update(list => list.map(p =>
+          p.id === post.id
+            ? { ...p, loadedComments: [...p.loadedComments, comment], commentsCount: p.commentsCount + 1 }
+            : p
+        ));
+        this.newComment.update(m => ({ ...m, [post.id]: '' }));
+      },
+      error: () => {},
+    });
   }
-
-  // ── Create post ───────────────────────────────────────────────────────────────
 
   submitPost(): void {
     const text = this.newPostText().trim();
     if (!text) return;
     this.posting.set(true);
-    setTimeout(() => {
-      const p: Post = {
-        id:           this.posts().length + 1,
-        userId:       1,
-        user:         this.auth.currentUser()?.name ?? 'Você',
-        initials:     this.userInitials,
-        text,
-        tag:          'Post',
-        time:         'agora',
-        likes:        0,
-        liked:        false,
-        showComments: false,
-        comments:     [],
-      };
-      this.posts.update(ps => [p, ...ps]);
-      this.newPostText.set('');
-      this.showNewPost.set(false);
-      this.posting.set(false);
-    }, 600);
+    this.socialService.createPost({ content: text }).subscribe({
+      next: post => {
+        this.posts.update(list => [{ ...post, loadedComments: [], showComments: false }, ...list]);
+        this.newPostText.set('');
+        this.showNewPost.set(false);
+        this.posting.set(false);
+      },
+      error: () => this.posting.set(false),
+    });
   }
 
-  goToProfile(userId: number): void { this.router.navigate(['/profile', userId]); }
+  goToProfile(userId: string): void { this.router.navigate(['/profile', userId]); }
   goCreateChallenge():         void { this.router.navigate(['/challenges/create']); }
   goBack():                    void { this.router.navigate(['/home']); }
 }

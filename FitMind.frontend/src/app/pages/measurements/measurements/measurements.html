@@ -30,10 +30,10 @@
 
           <div class="snap-item">
             <span class="snap-icon mi">science</span>
-            <span class="snap-val">{{ latest()!.bf ?? '—' }} <small>%</small></span>
+            <span class="snap-val">{{ latest()!.bodyFatPercentage ?? '—' }} <small>%</small></span>
             <span class="snap-name">Gordura</span>
-            @if (latest()!.bf) {
-              <span class="snap-tag">{{ bfCategory(latest()!.bf) }}</span>
+            @if (latest()!.bodyFatPercentage) {
+              <span class="snap-tag">{{ bfCategory(latest()!.bodyFatPercentage) }}</span>
             }
           </div>
 
@@ -97,7 +97,7 @@
         </div>
         <div class="meas-body">
           @if (rec.weight) { <span class="meas-chip">{{ rec.weight }} kg</span> }
-          @if (rec.bf)     { <span class="meas-chip">{{ rec.bf }}%</span> }
+          @if (rec.bodyFatPercentage)     { <span class="meas-chip">{{ rec.bodyFatPercentage }}%</span> }
           @if (rec.waist)  { <span class="meas-chip">C:{{ rec.waist }}</span> }
           @if (rec.hip)    { <span class="meas-chip">Q:{{ rec.hip }}</span> }
           @if (rec.chest)  { <span class="meas-chip">P:{{ rec.chest }}</span> }

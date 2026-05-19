@@ -1,16 +1,8 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, OnInit } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { Router } from '@angular/router';
-
-interface Report {
-  id:       number;
-  type:     string;
-  reporter: string;
-  target:   string;
-  reason:   string;
-  date:     string;
-  status:   'pending' | 'resolved' | 'dismissed';
-}
+import { AdminService } from '../../../services/admin.service';
+import { DashboardStatsDto, ReportDto } from '../../../core/models/api.models';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -18,56 +10,59 @@ interface Report {
   templateUrl: './admin-dashboard.html',
   styleUrl:    './admin-dashboard.scss',
 })
-export class AdminDashboard {
-  constructor(private router: Router) {}
+export class AdminDashboard implements OnInit {
+  constructor(private router: Router, private adminService: AdminService) {}
 
-  // ── Mock metrics ─────────────────────────────────────────────────────────────
+  loading = signal(true);
+  stats   = signal<DashboardStatsDto | null>(null);
+  reports = signal<ReportDto[]>([]);
+  filterReport = signal<'all' | 'pending' | 'resolved'>('all');
 
-  totalUsers       = 1_248;
-  activeToday      = 312;
-  newThisWeek      = 47;
-  workoutsToday    = 518;
-  challengesActive = 23;
-  reportsOpen      = 5;
-
-  // ── Trend chart (last 7 days active users) ────────────────────────────────
-
-  weeklyActive = [
-    { day: 'Seg', val: 280 }, { day: 'Ter', val: 295 },
-    { day: 'Qua', val: 310 }, { day: 'Qui', val: 298 },
-    { day: 'Sex', val: 340 }, { day: 'Sáb', val: 360 },
-    { day: 'Dom', val: 312 },
-  ];
-
-  maxActive = Math.max(...this.weeklyActive.map(d => d.val));
+  get totalUsers():       number { return this.stats()?.totalUsers       ?? 0; }
+  get activeToday():      number { return this.stats()?.activeToday      ?? 0; }
+  get newThisWeek():      number { return this.stats()?.newThisWeek      ?? 0; }
+  get workoutsToday():    number { return this.stats()?.workoutsToday    ?? 0; }
+  get challengesActive(): number { return this.stats()?.activeChallenges ?? 0; }
+  get reportsOpen():      number { return this.stats()?.openReports      ?? 0; }
+  get weeklyActive():     { day: string; val: number }[] {
+    return (this.stats()?.weeklyActivity ?? []).map(w => ({ day: w.day, val: w.count }));
+  }
+  get maxActive(): number { return Math.max(...this.weeklyActive.map(d => d.val), 1); }
 
   barH(val: number): number { return Math.round((val / this.maxActive) * 70); }
 
-  // ── Reports ───────────────────────────────────────────────────────────────────
-
-  reports = signal<Report[]>([
-    { id:1, type:'Post',    reporter:'Ana Lima',     target:'Carlos Silva',  reason:'Conteúdo inadequado',    date:'26/04', status:'pending'   },
-    { id:2, type:'Usuário', reporter:'João Barros',  target:'Pedro Costa',   reason:'Spam no feed',           date:'25/04', status:'pending'   },
-    { id:3, type:'Post',    reporter:'Emily Mekaru', target:'Lucas Torres',  reason:'Linguagem ofensiva',      date:'24/04', status:'resolved'  },
-    { id:4, type:'Usuário', reporter:'Carla Santos', target:'André Melo',    reason:'Perfil falso',           date:'23/04', status:'pending'   },
-    { id:5, type:'Post',    reporter:'Rafael Lima',  target:'Diego Souza',   reason:'Propaganda enganosa',    date:'22/04', status:'dismissed' },
-  ]);
-
-  filterReport = signal<'all' | 'pending' | 'resolved'>('all');
-
   filteredReports = () => {
     const f = this.filterReport();
-    const r = this.reports();
-    if (f === 'all') return r;
-    return r.filter(rep => rep.status === f);
+    return f === 'all' ? this.reports() : this.reports().filter(r => r.status.toLowerCase() === f);
   };
 
-  resolveReport(id: number): void {
-    this.reports.update(rs => rs.map(r => r.id === id ? { ...r, status: 'resolved' as const } : r));
+  ngOnInit(): void {
+    this.adminService.getDashboard().subscribe({
+      next:  s  => { this.stats.set(s); this.loading.set(false); },
+      error: () => this.loading.set(false),
+    });
+    this.adminService.getReports().subscribe({
+      next:  r  => this.reports.set(r),
+      error: () => {},
+    });
   }
 
-  dismissReport(id: number): void {
-    this.reports.update(rs => rs.map(r => r.id === id ? { ...r, status: 'dismissed' as const } : r));
+  resolveReport(id: string): void {
+    this.adminService.updateReportStatus(id, { status: 'Resolved' }).subscribe({
+      next: () => this.reports.update(rs => rs.map(r => r.id === id ? { ...r, status: 'Resolved' } : r)),
+      error: () => {},
+    });
+  }
+
+  dismissReport(id: string): void {
+    this.adminService.updateReportStatus(id, { status: 'Dismissed' }).subscribe({
+      next: () => this.reports.update(rs => rs.map(r => r.id === id ? { ...r, status: 'Dismissed' } : r)),
+      error: () => {},
+    });
+  }
+
+  formatDate(iso: string): string {
+    return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
   }
 
   goUsers(): void { this.router.navigate(['/admin/users']); }
