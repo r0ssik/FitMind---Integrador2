@@ -85,23 +85,23 @@
         <div class="form-group">
           <label>Sexo</label>
           <div class="radio-cards">
-            <label class="radio-card" [class.selected]="step2Form.value.sex === 'M'" (click)="step2Form.patchValue({sex: 'M'})">
-              <input type="radio" value="M" formControlName="sex" />
+            <label class="radio-card" [class.selected]="step2Form.value.sex === 0" (click)="step2Form.patchValue({sex: 0})">
+              <input type="radio" [value]="0" formControlName="sex" />
               <div class="card-icon mi mi-lg">man</div>
               <div class="card-label">Masculino</div>
             </label>
-            <label class="radio-card" [class.selected]="step2Form.value.sex === 'F'" (click)="step2Form.patchValue({sex: 'F'})">
-              <input type="radio" value="F" formControlName="sex" />
+            <label class="radio-card" [class.selected]="step2Form.value.sex === 1" (click)="step2Form.patchValue({sex: 1})">
+              <input type="radio" [value]="1" formControlName="sex" />
               <div class="card-icon mi mi-lg">woman</div>
               <div class="card-label">Feminino</div>
             </label>
-            <label class="radio-card" [class.selected]="step2Form.value.sex === 'NB'" (click)="step2Form.patchValue({sex: 'NB'})">
-              <input type="radio" value="NB" formControlName="sex" />
+            <label class="radio-card" [class.selected]="step2Form.value.sex === '2'" (click)="step2Form.patchValue({sex: '2'})">
+              <input type="radio" [value]="2" formControlName="sex" />
               <div class="card-icon mi mi-lg">transgender</div>
               <div class="card-label">Não-binário</div>
             </label>
-            <label class="radio-card" [class.selected]="step2Form.value.sex === 'NI'" (click)="step2Form.patchValue({sex: 'NI'})">
-              <input type="radio" value="NI" formControlName="sex" />
+            <label class="radio-card" [class.selected]="step2Form.value.sex === '3'" (click)="step2Form.patchValue({sex: '3'})">
+              <input type="radio" [value]="3" formControlName="sex" />
               <div class="card-icon mi mi-lg">remove</div>
               <div class="card-label">Prefiro não informar</div>
             </label>

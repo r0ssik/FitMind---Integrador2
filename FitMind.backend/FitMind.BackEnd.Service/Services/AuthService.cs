@@ -40,7 +40,7 @@ public class AuthService(
             Email = request.Email,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
             Phone = request.Phone,
-            BirthDate = request.BirthDate,
+            BirthDate = DateTime.SpecifyKind(request.BirthDate, DateTimeKind.Utc),
             Sex = request.Sex,
             Weight = request.Weight,
             Height = request.Height,
