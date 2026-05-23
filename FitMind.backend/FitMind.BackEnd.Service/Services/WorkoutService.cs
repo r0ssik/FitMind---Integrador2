@@ -71,7 +71,7 @@ public class WorkoutService(AppDbContext context) : IWorkoutService
         {
             UserId = userId,
             WorkoutPlanId = dto.WorkoutPlanId,
-            Date = dto.Date,
+            Date = DateTime.SpecifyKind(dto.Date, DateTimeKind.Utc),
             DurationMinutes = dto.DurationMinutes,
             Feeling = dto.Feeling,
             Notes = dto.Notes

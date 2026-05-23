@@ -2,6 +2,7 @@ import { Component, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Auth } from '../../../services/auth';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-register',
@@ -41,7 +42,7 @@ export class Register {
     { value: 6, label: '6x por semana' },
   ];
 
-  constructor(private fb: FormBuilder, private auth: Auth, private router: Router) {
+  constructor(private fb: FormBuilder, private auth: Auth, private router: Router, private toastr: ToastrService) {
     this.step1Form = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
@@ -93,15 +94,21 @@ export class Register {
   }
 
   async onSubmit(): Promise<void> {
-    this.step3Form.markAllAsTouched();
-    if (this.step3Form.value.goals.length === 0) {
-      this.error.set('Selecione ao menos um objetivo.');
-      return;
-    }
-    this.loading.set(true);
-    this.error.set('');
-    try {
-      await this.auth.register({
+
+  this.step3Form.markAllAsTouched();
+
+  if (this.step3Form.value.goals.length === 0) {
+    this.error.set('Selecione ao menos um objetivo.');
+    return;
+  }
+
+  this.loading.set(true);
+  this.error.set('');
+
+  try {
+
+    await this.auth.register(
+      {
         name: this.step1Form.value.name,
         email: this.step1Form.value.email,
         phone: this.step1Form.value.phone,
@@ -112,14 +119,51 @@ export class Register {
         limitations: this.step2Form.value.limitations,
         goals: this.step3Form.value.goals,
         weeklyAvailability: this.step3Form.value.weeklyAvailability,
-      }, this.step1Form.value.password);
-      this.router.navigate(['/home']);
-    } catch {
-      this.error.set('Erro ao criar conta. Tente novamente.');
-    } finally {
-      this.loading.set(false);
-    }
+      },
+      this.step1Form.value.password
+    );
+
+    this.toastr.success('Conta criada com sucesso!');
+    this.router.navigate(['/home']);
+
+  } catch (err: any) {
+
+    if (err.status === 400) {
+
+  this.toastr.error('Dados inválidos.');
+  this.error.set('Dados inválidos. Verifique os campos.');
+
+} else if (err.status === 401) {
+
+  this.toastr.error('Não autorizado.');
+  this.error.set('Não autorizado.');
+
+} else if (err.status === 409) {
+
+  this.toastr.error('E-mail já cadastrado.');
+  this.error.set('E-mail já cadastrado.');
+
+} else if (err.status === 500) {
+
+  this.toastr.error('Erro interno do servidor.');
+  this.error.set('Erro interno do servidor.');
+
+} else if (err.status === 0) {
+
+  this.toastr.error('Servidor offline.');
+  this.error.set('Servidor offline ou sem conexão.');
+
+} else {
+
+  this.toastr.error('Erro ao criar conta.');
+  this.error.set('Erro ao criar conta.');
+}
+  } finally {
+
+    this.loading.set(false);
+
   }
+}
 
   hasGoal(value: string): boolean {
     return (this.step3Form.value.goals ?? []).includes(value);

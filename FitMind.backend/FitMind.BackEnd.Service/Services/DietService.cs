@@ -56,7 +56,7 @@ public class DietService(AppDbContext context) : IDietService
         var entry = new FoodDiaryEntry
         {
             UserId = userId,
-            Date = dto.Date.Date,
+            Date = DateTime.SpecifyKind(dto.Date.Date, DateTimeKind.Utc),
             MealType = dto.MealType,
             FoodName = dto.FoodName,
             Quantity = dto.Quantity,

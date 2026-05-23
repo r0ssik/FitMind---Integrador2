@@ -119,7 +119,13 @@ public class ProgressService(AppDbContext context) : IProgressService
             .FirstOrDefaultAsync(w => w.UserId == userId && w.Date.Date == today);
 
         // Weight delta this month
-        var firstOfMonth = new DateTime(today.Year, today.Month, 1);
+
+        // Weight delta this month
+        var firstOfMonth = DateTime.SpecifyKind(
+            new DateTime(today.Year, today.Month, 1),
+        DateTimeKind.Utc
+        );
+
         var monthMeas = await context.BodyMeasurements
             .Where(m => m.UserId == userId && m.Weight.HasValue && m.Date >= firstOfMonth)
             .OrderBy(m => m.Date)

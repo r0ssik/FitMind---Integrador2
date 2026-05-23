@@ -40,8 +40,8 @@ public class ChallengeService(AppDbContext context) : IChallengeService
             Type = dto.Type,
             Goal = dto.Goal,
             Unit = dto.Unit,
-            StartDate = dto.StartDate,
-            EndDate = dto.EndDate
+            StartDate = DateTime.SpecifyKind(dto.StartDate, DateTimeKind.Utc),
+            EndDate = DateTime.SpecifyKind(dto.EndDate, DateTimeKind.Utc)
         };
 
         // Creator auto-joins

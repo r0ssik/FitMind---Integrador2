@@ -95,12 +95,12 @@
               <div class="card-icon mi mi-lg">woman</div>
               <div class="card-label">Feminino</div>
             </label>
-            <label class="radio-card" [class.selected]="step2Form.value.sex === '2'" (click)="step2Form.patchValue({sex: '2'})">
+            <label class="radio-card" [class.selected]="step2Form.value.sex === 2" (click)="step2Form.patchValue({sex: 2})">
               <input type="radio" [value]="2" formControlName="sex" />
               <div class="card-icon mi mi-lg">transgender</div>
               <div class="card-label">Não-binário</div>
             </label>
-            <label class="radio-card" [class.selected]="step2Form.value.sex === '3'" (click)="step2Form.patchValue({sex: '3'})">
+            <label class="radio-card" [class.selected]="step2Form.value.sex === 3" (click)="step2Form.patchValue({sex: 3})">
               <input type="radio" [value]="3" formControlName="sex" />
               <div class="card-icon mi mi-lg">remove</div>
               <div class="card-label">Prefiro não informar</div>
