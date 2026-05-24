@@ -10,7 +10,7 @@ public class WaterService(AppDbContext context) : IWaterService
 {
     public async Task<WaterIntakeDto> GetTodayAsync(Guid userId)
     {
-        var today = DateTime.UtcNow.Date;
+        var today = DateTime.SpecifyKind(DateTime.UtcNow.Date, DateTimeKind.Utc);
         var entry = await context.WaterIntakes
             .FirstOrDefaultAsync(w => w.UserId == userId && w.Date.Date == today);
         var goal = await GetGoalAsync(userId);
@@ -19,7 +19,7 @@ public class WaterService(AppDbContext context) : IWaterService
 
     public async Task<WaterIntakeDto> SetCupsAsync(Guid userId, SetWaterCupsDto dto)
     {
-        var today = DateTime.UtcNow.Date;
+        var today = DateTime.SpecifyKind(DateTime.UtcNow.Date, DateTimeKind.Utc);
         var entry = await context.WaterIntakes
             .FirstOrDefaultAsync(w => w.UserId == userId && w.Date.Date == today);
 

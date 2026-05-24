@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using FitMind.BackEnd.IoC;
 using FitMind.BackEnd.API.Extensions;
 using FitMind.BackEnd.API.Jobs;
@@ -13,7 +14,9 @@ using Quartz;
 var builder = WebApplication.CreateBuilder(args);
 
 // ── Controllers ───────────────────────────────────────────────
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(opts =>
+        opts.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddEndpointsApiExplorer();
 
 // ── Swagger ───────────────────────────────────────────────────

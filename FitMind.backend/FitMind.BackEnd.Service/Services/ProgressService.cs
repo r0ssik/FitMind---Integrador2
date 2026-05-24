@@ -157,7 +157,7 @@ public class ProgressService(AppDbContext context) : IProgressService
             await context.BodyMeasurements.AddAsync(new BodyMeasurement
             {
                 UserId = userId,
-                Date = dto.Date.Date,
+                Date = DateTime.SpecifyKind(dto.Date.Date, DateTimeKind.Utc),
                 Weight = dto.Value
             });
             await context.SaveChangesAsync();

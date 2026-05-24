@@ -20,7 +20,7 @@ public class MeasurementService(AppDbContext context) : IMeasurementService
         var m = new BodyMeasurement
         {
             UserId = userId,
-            Date = dto.Date,
+            Date = DateTime.SpecifyKind(dto.Date, DateTimeKind.Utc),
             Weight = dto.Weight,
             BodyFatPercentage = dto.BodyFatPercentage,
             MuscleMassPercentage = dto.MuscleMassPercentage,
