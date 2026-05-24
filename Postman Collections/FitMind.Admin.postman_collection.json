@@ -1,0 +1,327 @@
+{
+  "info": {
+    "name": "FitMind API — Admin",
+    "description": "Coleção para testes de funcionalidades administrativas. Execute 'Login Admin' primeiro para salvar o token automaticamente. O usuário precisa ter IsAdmin = true no banco.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl",      "value": "http://localhost:5000" },
+    { "key": "accessToken",  "value": "" },
+    { "key": "refreshToken", "value": "" }
+  ],
+  "item": [
+
+    {
+      "name": "🔐 Auth Admin",
+      "item": [
+        {
+          "name": "Login Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.accessToken)  { pm.collectionVariables.set('accessToken',  json.accessToken);  }",
+                  "if (json.refreshToken) { pm.collectionVariables.set('refreshToken', json.refreshToken); }",
+                  "if (!json.user || !json.user.isAdmin) {",
+                  "    console.warn('⚠️ ATENÇÃO: Este usuário NÃO é admin. Endpoints de admin retornarão 403.');",
+                  "} else {",
+                  "    console.log('✅ Login admin realizado com sucesso.');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@fitmind.com\",\n  \"password\": \"Admin@123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.accessToken)  { pm.collectionVariables.set('accessToken',  json.accessToken);  }",
+                  "if (json.refreshToken) { pm.collectionVariables.set('refreshToken', json.refreshToken); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "refresh"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accessToken\": \"{{accessToken}}\",\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Revoke Token (Logout)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/revoke",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "revoke"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "\"{{refreshToken}}\""
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "📊 Dashboard Admin",
+      "item": [
+        {
+          "name": "Get Dashboard Stats",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/dashboard",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "dashboard"]
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "👥 Gerenciar Usuários",
+      "item": [
+        {
+          "name": "List Users (com filtro)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users?search=&status=",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "users"],
+              "query": [
+                { "key": "search", "value": "" },
+                { "key": "status", "value": "" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/user",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "user"]
+            }
+          }
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/user/USER_ID_AQUI",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "user", "USER_ID_AQUI"]
+            }
+          }
+        },
+        {
+          "name": "Set User Active / Inactive",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/user/USER_ID_AQUI/active?isActive=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "user", "USER_ID_AQUI", "active"],
+              "query": [{ "key": "isActive", "value": "true" }]
+            }
+          }
+        },
+        {
+          "name": "Suspend User",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users/USER_ID_AQUI/suspend",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "users", "USER_ID_AQUI", "suspend"]
+            }
+          }
+        },
+        {
+          "name": "Block User",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users/USER_ID_AQUI/block",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "users", "USER_ID_AQUI", "block"]
+            }
+          }
+        },
+        {
+          "name": "Reactivate User",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users/USER_ID_AQUI/reactivate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "users", "USER_ID_AQUI", "reactivate"]
+            }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/user/USER_ID_AQUI",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "user", "USER_ID_AQUI"]
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🚨 Denúncias / Reports",
+      "item": [
+        {
+          "name": "Get Reports (todos)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/reports?status=",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "reports"],
+              "query": [{ "key": "status", "value": "" }]
+            }
+          }
+        },
+        {
+          "name": "Get Reports — Pendentes",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/reports?status=Pending",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "reports"],
+              "query": [{ "key": "status", "value": "Pending" }]
+            }
+          }
+        },
+        {
+          "name": "Get Reports — Resolvidos",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/reports?status=Resolved",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "reports"],
+              "query": [{ "key": "status", "value": "Resolved" }]
+            }
+          }
+        },
+        {
+          "name": "Update Report Status — Resolver",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/reports/REPORT_ID_AQUI/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "reports", "REPORT_ID_AQUI", "status"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Resolved\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Report Status — Descartar",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/reports/REPORT_ID_AQUI/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "reports", "REPORT_ID_AQUI", "status"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Dismissed\"\n}"
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🔌 Health Check",
+      "item": [
+        {
+          "name": "Test API",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/testapi",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "testapi"]
+            }
+          }
+        }
+      ]
+    }
+
+  ]
+}

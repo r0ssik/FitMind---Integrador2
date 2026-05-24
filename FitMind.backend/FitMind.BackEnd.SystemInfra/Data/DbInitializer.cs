@@ -1,17 +1,95 @@
 using System.Text.Json;
+using BCrypt.Net;
 using FitMind.BackEnd.SystemInfra.ContextDb;
 using FitMind.BackEnd.SystemInfra.Entities;
+using FitMind.BackEnd.SystemInfra.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace FitMind.BackEnd.SystemInfra.Data;
 
 public static class DbInitializer
 {
+    // ── Credenciais dos usuários de seed ─────────────────────────
+    // Admin
+    public const string AdminEmail    = "admin@fitmind.com";
+    public const string AdminPassword = "Admin@123";
+    public const string AdminName     = "Admin FitMind";
+
+    // Usuário comum
+    public const string UserEmail    = "usuario@fitmind.com";
+    public const string UserPassword = "Usuario@123";
+    public const string UserName     = "Usuário Teste";
+
     public static async Task SeedAsync(AppDbContext context)
     {
         await context.Database.MigrateAsync();
+        await SeedUsersAsync(context);
         await SeedFoodItemsAsync(context);
         await SeedAchievementsAsync(context);
+    }
+
+    // ── Users ─────────────────────────────────────────────────────
+    private static async Task SeedUsersAsync(AppDbContext context)
+    {
+        await UpsertUserAsync(context,
+            email:    AdminEmail,
+            password: AdminPassword,
+            name:     AdminName,
+            isAdmin:  true);
+
+        await UpsertUserAsync(context,
+            email:    UserEmail,
+            password: UserPassword,
+            name:     UserName,
+            isAdmin:  false);
+
+        await context.SaveChangesAsync();
+    }
+
+    private static async Task UpsertUserAsync(
+        AppDbContext context,
+        string email, string password, string name, bool isAdmin)
+    {
+        var user = await context.Users
+            .Include(u => u.Settings)
+            .FirstOrDefaultAsync(u => u.Email == email);
+
+        if (user is null)
+        {
+            // ── Criar ──────────────────────────────────────────
+            user = new User
+            {
+                Name         = name,
+                Email        = email,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
+                Phone        = "11999999999",
+                BirthDate    = DateTime.SpecifyKind(new DateTime(1990, 1, 1), DateTimeKind.Utc),
+                Sex          = UserSex.NotInformed,
+                Weight       = 70m,
+                Height       = 170m,
+                IsAdmin      = isAdmin,
+                IsActive     = true
+            };
+            await context.Users.AddAsync(user);
+            // Flush para obter o Id gerado
+            await context.SaveChangesAsync();
+
+            // Criar configurações padrão
+            await context.UserSettings.AddAsync(new UserSettings { UserId = user.Id });
+        }
+        else
+        {
+            // ── Atualizar ──────────────────────────────────────
+            user.Name         = name;
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(password);
+            user.IsAdmin      = isAdmin;
+            user.IsActive     = true;
+            user.IsSuspended  = false;
+
+            // Criar settings se por algum motivo não existir
+            if (user.Settings is null)
+                await context.UserSettings.AddAsync(new UserSettings { UserId = user.Id });
+        }
     }
 
     // ── Food Items ────────────────────────────────────────────
