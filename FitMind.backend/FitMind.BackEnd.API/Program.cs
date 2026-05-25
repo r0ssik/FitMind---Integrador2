@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Quartz;
+using FitMind.BackEnd.Service.Services.AI;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,7 @@ builder.Services.AddControllers()
     .AddJsonOptions(opts =>
         opts.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddEndpointsApiExplorer();
+
 
 // ── Swagger ───────────────────────────────────────────────────
 builder.Services.AddSwaggerGen(c =>
@@ -73,6 +75,7 @@ builder.Services.AddAuthorization();
 
 // ── Infrastructure & Services (IoC) ──────────────────────────
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddHttpClient<GeminiService>();
 
 // ── CORS ──────────────────────────────────────────────────────
 builder.Services.AddCors(options =>

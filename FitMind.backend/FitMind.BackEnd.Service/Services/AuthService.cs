@@ -7,6 +7,7 @@ using FitMind.BackEnd.SystemInfra.Repositories;
 using FitMind.BackEnd.SystemInfra.Security;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
+using System.Text.Json;
 
 namespace FitMind.BackEnd.Service.Services;
 
@@ -44,7 +45,8 @@ public class AuthService(
             Sex = request.Sex,
             Weight = request.Weight,
             Height = request.Height,
-            Limitations = request.Limitations
+            Limitations = request.Limitations,
+            Goals = JsonSerializer.Serialize(request.Goals)
         };
 
         await userRepository.AddAsync(user);
