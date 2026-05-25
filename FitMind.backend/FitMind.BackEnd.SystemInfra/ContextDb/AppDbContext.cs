@@ -120,7 +120,14 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         });
 
         modelBuilder.Entity<Challenge>(e =>
-            e.Property(c => c.Goal).HasPrecision(8, 2));
+{
+            e.Property(c => c.Goal).HasPrecision(8, 2);
+
+            e.HasOne(c => c.CreatedBy)
+                .WithMany()
+                .HasForeignKey(c => c.CreatedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
 
         modelBuilder.Entity<ChallengeParticipant>(e =>
             e.Property(cp => cp.CurrentProgress).HasPrecision(8, 2));

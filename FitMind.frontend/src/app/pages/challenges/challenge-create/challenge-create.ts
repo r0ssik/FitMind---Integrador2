@@ -20,6 +20,17 @@ export class ChallengeCreate {
   type     = signal<ChallengeType>('individual');
   maxPpl   = signal(5);
   unit     = signal('dias');
+
+  challengeCategory = signal('Workout');
+
+  challengeCategories = [
+    { label: 'Treino', value: 'Workout' },
+    { label: 'Passos', value: 'Steps' },
+    { label: 'Água', value: 'Water' },
+    { label: 'Peso', value: 'Weight' },
+    { label: 'Calorias', value: 'Calories' },
+];
+
   creating = signal(false);
   created  = signal(false);
   error    = signal('');
@@ -53,7 +64,7 @@ export class ChallengeCreate {
     this.challengeService.create({
       name:        this.title(),
       description: '',
-      type:        this.type() === 'group' ? 'Group' : 'Individual',
+      type: this.challengeCategory(),
       goal:        Number(this.goal()),
       unit:        this.unit(),
       startDate:   today,

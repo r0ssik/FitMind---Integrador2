@@ -58,6 +58,22 @@
         </div>
       </div>
 
+      <!-- Categoria -->
+      <div class="form-group">
+        <label>Categoria do desafio</label>
+
+        <select
+          [value]="challengeCategory()"
+          (change)="challengeCategory.set($any($event.target).value)"
+        >
+          @for (item of challengeCategories; track item.value) {
+            <option [value]="item.value">
+              {{ item.label }}
+            </option>
+          }
+        </select>
+      </div>
+
       <!-- Prazo -->
       <div class="form-group">
         <label>Prazo <span class="req">*</span></label>
