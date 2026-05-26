@@ -214,6 +214,196 @@ Regras:
         };
     }
 
+    public async Task<JsonElement> GenerateDietAsync(Guid userId, AiGenerateDietDto request)
+    {
+        var user = await _context.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Id == userId)
+            ?? throw new KeyNotFoundException("Usuario nao encontrado.");
+
+        if (_useMock)
+            return BuildMockDiet(request);
+
+        var prompt = BuildDietPrompt(user, request);
+
+        var body = new
+        {
+            contents = new[]
+            {
+                new
+                {
+                    parts = new[]
+                    {
+                        new { text = prompt }
+                    }
+                }
+            },
+            generationConfig = new
+            {
+                temperature = 0.35,
+                topP = 0.8,
+                maxOutputTokens = 2500,
+                responseMimeType = "application/json",
+                responseJsonSchema = BuildCompactDietSchema()
+            }
+        };
+
+        using var httpRequest = new HttpRequestMessage(
+            HttpMethod.Post,
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent");
+
+        httpRequest.Headers.Add("x-goog-api-key", _apiKey);
+        httpRequest.Content = new StringContent(
+            JsonSerializer.Serialize(body),
+            Encoding.UTF8,
+            "application/json");
+
+        var response = await _httpClient.SendAsync(httpRequest);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            if (response.StatusCode == HttpStatusCode.TooManyRequests)
+                return BuildMockDiet(request);
+
+            var error = await response.Content.ReadAsStringAsync();
+            throw new Exception($"Erro Gemini: {response.StatusCode} - {error}");
+        }
+
+        await using var responseStream = await response.Content.ReadAsStreamAsync();
+        using var responseJson = await JsonDocument.ParseAsync(responseStream);
+
+        var text = responseJson.RootElement
+            .GetProperty("candidates")[0]
+            .GetProperty("content")
+            .GetProperty("parts")[0]
+            .GetProperty("text")
+            .GetString();
+
+        if (string.IsNullOrWhiteSpace(text))
+            throw new Exception("Gemini retornou uma resposta vazia.");
+
+        using var dietJson = JsonDocument.Parse(text);
+        return dietJson.RootElement.Clone();
+    }
+
+    private static string BuildDietPrompt(User user, AiGenerateDietDto request)
+    {
+        var age = CalculateAge(user.BirthDate);
+        var restrictions = request.Restrictions?.Count > 0
+            ? string.Join(", ", request.Restrictions)
+            : "nenhuma";
+        var preferences = request.FoodPreferences?.Count > 0
+            ? string.Join(", ", request.FoodPreferences)
+            : "sem preferencia";
+
+        return $"""
+Voce e um nutricionista. Gere um plano alimentar seguro e personalizado para este paciente.
+
+Dados:
+- idade: {age}
+- sexo: {user.Sex}
+- pesoKg: {user.Weight}
+- alturaCm: {user.Height}
+- objetivo: {request.Goal}
+- orcamento: {request.Budget}
+- refeicoesPoiDia: {Math.Clamp(request.MealsPerDay, 3, 6)}
+- restricoes: {restrictions}
+- preferencias: {preferences}
+
+Regras:
+- Respeite todas as restricoes alimentares.
+- Ajuste calorias ao objetivo (deficit para emagrecer, superavit para hipertrofia).
+- Use alimentos acessiveis ao orcamento informado.
+- Retorne JSON minificado, sem markdown e sem campos extras.
+- Use nomes de alimentos em portugues.
+""";
+    }
+
+    private static object BuildCompactDietSchema()
+    {
+        return new
+        {
+            type = "object",
+            propertyOrdering = new[] { "n", "g", "cal", "m", "a" },
+            properties = new
+            {
+                n = new { type = "string", description = "Nome do plano alimentar." },
+                g = new { type = "string", description = "Objetivo nutricional." },
+                cal = new { type = "integer", description = "Calorias diarias totais." },
+                m = new
+                {
+                    type = "array",
+                    description = "Refeicoes do dia.",
+                    items = new
+                    {
+                        type = "object",
+                        propertyOrdering = new[] { "n", "t", "cal", "p", "c", "f", "i" },
+                        properties = new
+                        {
+                            n = new { type = "string", description = "Nome da refeicao." },
+                            t = new { type = "string", description = "Horario sugerido." },
+                            cal = new { type = "integer", description = "Calorias da refeicao." },
+                            p = new { type = "number", description = "Proteinas em gramas." },
+                            c = new { type = "number", description = "Carboidratos em gramas." },
+                            f = new { type = "number", description = "Gorduras em gramas." },
+                            i = new
+                            {
+                                type = "array",
+                                description = "Alimentos da refeicao.",
+                                items = new { type = "string" },
+                                minItems = 2,
+                                maxItems = 5
+                            }
+                        },
+                        required = new[] { "n", "t", "cal", "p", "c", "f", "i" }
+                    },
+                    minItems = 3,
+                    maxItems = 6
+                },
+                a = new
+                {
+                    type = "array",
+                    description = "Alertas e dicas nutricionais.",
+                    items = new { type = "string" },
+                    maxItems = 3
+                }
+            },
+            required = new[] { "n", "g", "cal", "m", "a" }
+        };
+    }
+
+    private static JsonElement BuildMockDiet(AiGenerateDietDto request)
+    {
+        var meals = Math.Clamp(request.MealsPerDay, 3, 6);
+        var mealNames = new[] { "Cafe da manha", "Lanche da manha", "Almoco", "Lanche da tarde", "Jantar", "Ceia" };
+        var mealTimes = new[] { "07:00", "10:00", "12:30", "15:30", "19:00", "21:30" };
+
+        var plan = new
+        {
+            n = "Dieta mock",
+            g = request.Goal,
+            cal = 2000,
+            m = Enumerable.Range(0, meals).Select(i => new
+            {
+                n = mealNames[i],
+                t = mealTimes[i],
+                cal = 2000 / meals,
+                p = 30.0,
+                c = 50.0,
+                f = 10.0,
+                i = new[] { "Arroz integral", "Frango grelhado", "Salada verde" }
+            }),
+            a = new[]
+            {
+                "Mock ativo: resposta gerada sem chamar Gemini.",
+                "UseMock=false para testar a IA real."
+            }
+        };
+
+        using var document = JsonDocument.Parse(JsonSerializer.Serialize(plan));
+        return document.RootElement.Clone();
+    }
+
     private static int CalculateAge(DateTime birthDate)
     {
         if (birthDate == default) return 0;

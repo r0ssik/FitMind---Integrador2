@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+using FitMind.BackEnd.Service.Converters;
 using FitMind.BackEnd.SystemInfra.Enums;
 
 namespace FitMind.BackEnd.Service.Dtos.Diet;
@@ -28,6 +30,7 @@ public record MealDto(
 public record CreateDietPlanDto(
     string Name,
     DietGoal Goal,
+    [property: JsonConverter(typeof(StringOrNumberConverter))]
     string? Budget,
     string? Restrictions
 );

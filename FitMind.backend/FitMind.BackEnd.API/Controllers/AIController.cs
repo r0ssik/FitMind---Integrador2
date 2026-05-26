@@ -16,7 +16,14 @@ public class AIController(GeminiService geminiService) : ControllerBase
     {
         var userId = User.GetUserId();
         var result = await geminiService.GenerateWorkoutAsync(userId, request);
+        return Ok(result);
+    }
 
+    [HttpPost("diet")]
+    public async Task<IActionResult> GenerateDiet([FromBody] AiGenerateDietDto request)
+    {
+        var userId = User.GetUserId();
+        var result = await geminiService.GenerateDietAsync(userId, request);
         return Ok(result);
     }
 }
