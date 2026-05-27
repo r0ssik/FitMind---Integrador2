@@ -32,6 +32,7 @@ public class UserService(UserRepository userRepository) : IUserService
         if (dto.Weight.HasValue) user.Weight = dto.Weight.Value;
         if (dto.Height.HasValue) user.Height = dto.Height.Value;
         if (dto.Limitations is not null) user.Limitations = dto.Limitations;
+        if (dto.Goals is not null) user.Goals = dto.Goals;
         if (dto.Sex is not null && Enum.TryParse<UserSex>(dto.Sex, ignoreCase: true, out var sex))
             user.Sex = sex;
         if (dto.BirthDate.HasValue)
@@ -63,6 +64,7 @@ public class UserService(UserRepository userRepository) : IUserService
     private static UserDto MapToDto(SystemInfra.Entities.User u) => new(
         u.Id, u.Name, u.Email, u.Phone, u.BirthDate, u.Sex,
         u.Weight, u.Height, u.Bio, u.AvatarUrl, u.Limitations,
+        u.Goals,
         u.IsAdmin, u.IsActive, u.CreatedAt
     );
 }

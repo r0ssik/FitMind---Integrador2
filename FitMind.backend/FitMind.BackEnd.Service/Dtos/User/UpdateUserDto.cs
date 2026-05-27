@@ -8,6 +8,7 @@ public record UpdateUserDto(
     decimal? Weight,
     decimal? Height,
     string? Limitations,
+    string? Goals,
     string? Sex,          // enum name: Male | Female | NonBinary | NotInformed
     DateTime? BirthDate
 );

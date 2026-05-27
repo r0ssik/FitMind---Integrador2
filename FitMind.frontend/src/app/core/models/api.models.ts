@@ -24,13 +24,19 @@ export interface ResetPasswordRequest { token: string; newPassword: string; }
 export interface UserDto {
   id: string; name: string; email: string; phone: string;
   birthDate: string; sex: string; weight: number; height: number;
-  bio?: string; avatarUrl?: string; limitations?: string;
+  bio?: string;
+  avatarUrl?: string;
+  limitations?: string;
+  goals?: string;
   isAdmin: boolean; isActive: boolean; createdAt: string;
 }
 
 export interface UpdateUserDto {
   name?: string; phone?: string; bio?: string; avatarUrl?: string;
-  weight?: number; height?: number; limitations?: string;
+  weight?: number;
+  height?: number;
+  limitations?: string;
+  goals?: string;
   sex?: string;       // enum name: Male | Female | NonBinary | NotInformed
   birthDate?: string; // ISO date: YYYY-MM-DD
 }

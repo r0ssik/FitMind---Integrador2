@@ -14,6 +14,7 @@ public record UserDto(
     string? Bio,
     string? AvatarUrl,
     string? Limitations,
+    string? Goals,
     bool IsAdmin,
     bool IsActive,
     DateTime CreatedAt

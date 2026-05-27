@@ -2,10 +2,12 @@ import { Component, signal, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Auth } from '../../../services/auth';
 import { UserService } from '../../../services/user.service';
+import { DatePipe } from '@angular/common';
+
 
 @Component({
   selector: 'app-my-profile',
-  imports: [],
+  imports: [DatePipe],
   templateUrl: './my-profile.html',
   styleUrl:    './my-profile.scss',
 })
@@ -58,7 +60,27 @@ export class MyProfile implements OnInit {
     return map[v] ?? (v || '—');
   }
 
-  ngOnInit(): void {}
+ngOnInit(): void {
+  const u = this.user();
+
+  if (!u) return;
+
+  const gs = Array.isArray(u.goals)
+    ? u.goals
+    : (u.goals
+        ? u.goals.split(',').map(g => g.trim()).filter(Boolean)
+        : []);
+
+  this.goals.set(gs);
+
+  const lims = Array.isArray(u.limitations)
+    ? u.limitations
+    : (u.limitations
+        ? u.limitations.split(',').map(l => l.trim()).filter(Boolean)
+        : []);
+
+  this.limitations.set(this.normalizeLimitations(lims));
+}
 
   startEdit(): void {
     const u = this.user();
@@ -71,8 +93,12 @@ export class MyProfile implements OnInit {
     this.fWeight.set(u.weight ? String(u.weight) : '');
     this.fHeight.set(u.height ? String(u.height) : '');
     this.fBio.set(u.bio ?? '');
-    const lims = u.limitations ? u.limitations.split(',').map(l => l.trim()).filter(Boolean) : [];
-    this.limitations.set(lims);
+    const lims = Array.isArray(u.limitations)
+      ? u.limitations
+      : (u.limitations
+        ? u.limitations.split(',').map(l => l.trim()).filter(Boolean)
+        : []);
+    this.limitations.set(this.normalizeLimitations(lims));
     this.editing.set(true);
     this.error.set('');
   }
@@ -87,6 +113,7 @@ export class MyProfile implements OnInit {
       weight:      this.fWeight() ? +this.fWeight() : undefined,
       height:      this.fHeight() ? +this.fHeight() : undefined,
       limitations: this.limitations().join(', ') || undefined,
+      goals:       this.goals().join(', ') || undefined,
       sex:         this.fSex()   || undefined,
       birthDate:   this.fBirth() || undefined,
     }).subscribe({
@@ -127,4 +154,16 @@ export class MyProfile implements OnInit {
   goSettings():     void { this.router.navigate(['/settings']); }
   goAchievements(): void { this.router.navigate(['/achievements']); }
   goHistory():      void { this.router.navigate(['/history']); }
+
+  private normalizeLimitations(values: string[]): string[] {
+  const map: Record<string, string> = {
+    'Problemas no joelho': 'Problema no joelho',
+    'Problemas no ombro': 'Problema no ombro',
+    'Problemas na coluna': 'Problema nas costas',
+  };
+
+  return [...new Set(
+    values.map(v => map[v] ?? v)
+  )];
+}
 }

@@ -16,7 +16,7 @@ public class DietController(IDietService dietService) : ControllerBase
     {
         var userId = User.GetUserId();
         var plan = await dietService.GetActivePlanAsync(userId);
-        return plan is null ? NotFound() : Ok(plan);
+        return Ok(plan);
     }
 
     [HttpGet("history")]
