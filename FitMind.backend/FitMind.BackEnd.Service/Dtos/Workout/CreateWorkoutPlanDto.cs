@@ -8,7 +8,25 @@ public record CreateWorkoutPlanDto(
     int DaysPerWeek,
     int Weeks,
     string? ExperienceLevel,
-    string? Location
+    string? Location,
+    List<CreateWorkoutDayDto>? Days   // days + exercises from the AI plan
+);
+
+public record CreateWorkoutDayDto(
+    string DayName,
+    string Focus,
+    int OrderIndex,
+    List<CreateExerciseDto> Exercises
+);
+
+public record CreateExerciseDto(
+    string Name,
+    int Sets,
+    string Reps,
+    string RestTime,
+    int EffortLevel,
+    string? Tips,
+    int OrderIndex
 );
 
 public record LogWorkoutSessionDto(

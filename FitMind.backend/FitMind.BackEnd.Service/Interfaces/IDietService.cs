@@ -7,6 +7,7 @@ public interface IDietService
     Task<DietPlanDto?> GetActivePlanAsync(Guid userId);
     Task<IEnumerable<DietPlanDto>> GetHistoryAsync(Guid userId);
     Task<DietPlanDto> CreatePlanAsync(Guid userId, CreateDietPlanDto dto);
+    Task ActivatePlanAsync(Guid userId, Guid planId);
     Task LogFoodEntryAsync(Guid userId, LogFoodEntryDto dto);
     Task<IEnumerable<object>> GetDiaryByDateAsync(Guid userId, DateTime date);
 }

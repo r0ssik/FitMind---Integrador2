@@ -93,10 +93,21 @@ export class DietPlanGenerator {
 
     this.loading.set(true);
     this.dietService.createPlan({
-      name:         plan.name,
-      goal:         plan.goal,
-      budget:       this.form.value.budget ?? '',
-      restrictions: this.selectedRestrictions().filter(r => r !== 'Nenhuma').join(', '),
+      name:           plan.name,
+      goal:           this.mapGoal(this.form.value.goal ?? plan.goal),
+      budget:         this.form.value.budget ?? '',
+      restrictions:   this.selectedRestrictions().filter(r => r !== 'Nenhuma').join(', '),
+      dailyCalories:  plan.dailyCalories ?? 0,
+      isAiGenerated:  true,
+      meals: (plan.meals ?? []).map(m => ({
+        name:        m.name,
+        time:        m.time,
+        calories:    m.calories,
+        proteins:    m.proteins,
+        carbs:       m.carbs,
+        fats:        m.fats,
+        description: m.description,
+      })),
     }).subscribe({
       next: () => this.router.navigate(['/food-diary']),
       error: () => {
@@ -104,6 +115,18 @@ export class DietPlanGenerator {
         this.error.set('Erro ao salvar plano. Tente novamente.');
       },
     });
+  }
+
+  /** Maps form goal value or AI free-text to a valid DietGoal enum name. */
+  private mapGoal(raw: string): string {
+    const lower = (raw ?? '').toLowerCase();
+    if (/emagrec|perda|weight.?loss/.test(lower))           return 'WeightLoss';
+    if (/hipertrofia|musculo|massa|muscle|gain/.test(lower)) return 'MuscleGain';
+    if (/manutenc|maintenance/.test(lower))                  return 'WeightMaintenance';
+    if (/saude|health|melhora/.test(lower))                  return 'HealthImprovement';
+    // Enum names pass through untouched
+    if (['WeightLoss','MuscleGain','WeightMaintenance','HealthImprovement'].includes(raw)) return raw;
+    return 'HealthImprovement';
   }
 
   goBack(): void { this.router.navigate(['/food-diary']); }

@@ -55,6 +55,17 @@ export interface WorkoutPlanDto {
 export interface CreateWorkoutPlanRequest {
   name: string; goal: string; daysPerWeek: number; weeks: number;
   experienceLevel?: string; location?: string;
+  days?: CreateWorkoutDayRequest[];
+}
+
+export interface CreateWorkoutDayRequest {
+  dayName: string; focus: string; orderIndex: number;
+  exercises: CreateExerciseRequest[];
+}
+
+export interface CreateExerciseRequest {
+  name: string; sets: number; reps: string; restTime: string;
+  effortLevel: number; tips?: string; orderIndex: number;
 }
 
 export interface LogWorkoutSessionRequest {
@@ -87,8 +98,15 @@ export interface DietPlanDto {
   createdAt: string; meals: MealDto[];
 }
 
+export interface CreateMealRequest {
+  name: string; time: string; calories: number;
+  proteins: number; carbs: number; fats: number; description?: string;
+}
+
 export interface CreateDietPlanRequest {
   name: string; goal: string; budget?: string; restrictions?: string;
+  dailyCalories?: number; isAiGenerated?: boolean;
+  meals?: CreateMealRequest[];
 }
 
 export interface LogFoodEntryRequest {

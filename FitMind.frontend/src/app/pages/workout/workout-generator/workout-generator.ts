@@ -86,6 +86,21 @@ export class WorkoutGenerator {
       weeks:           plan.weeks,
       experienceLevel: 'Intermediate',
       location:        this.form.value.location,
+      // Send AI-generated days + exercises so they are persisted in the DB
+      days: (plan.days ?? []).map((d, di) => ({
+        dayName:    d.dayName,
+        focus:      d.focus,
+        orderIndex: d.orderIndex ?? di,
+        exercises:  (d.exercises ?? []).map((e, ei) => ({
+          name:        e.name,
+          sets:        e.sets ?? 3,
+          reps:        e.reps ?? '10',
+          restTime:    e.restTime ?? '60s',
+          effortLevel: e.effortLevel ?? 2,
+          tips:        e.tips,
+          orderIndex:  ei,
+        })),
+      })),
     }).subscribe({
       next: () => this.router.navigate(['/workout-plans']),
       error: () => {

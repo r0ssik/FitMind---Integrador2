@@ -106,11 +106,43 @@ public class ProgressService(AppDbContext context) : IProgressService
         if (activePlan != null)
         {
             var dayOfWeek = DateTime.UtcNow.DayOfWeek.ToString();
+
+            // 1) Try matching by day-of-week name (e.g. "Segunda", "Monday", "Tuesday")
             var workoutDay = activePlan.Days.FirstOrDefault(d =>
                 d.DayName.Contains(dayOfWeek, StringComparison.OrdinalIgnoreCase));
-            dayName = workoutDay?.Focus;
-            total = workoutDay?.Exercises.Count ?? 0;
-            done  = todaySession?.ExercisesTotal ?? 0;
+
+            // 2) Fallback for AI plans that use "Dia 1", "Dia 2" naming:
+            //    rotate through plan days based on the current day-of-week (Monday = 0)
+            if (workoutDay == null && activePlan.Days.Any())
+            {
+                var orderedDays = activePlan.Days.OrderBy(d => d.OrderIndex).ToList();
+                var dayIndex    = ((int)DateTime.UtcNow.DayOfWeek + 6) % 7; // Mon=0 … Sun=6
+                workoutDay      = orderedDays[dayIndex % orderedDays.Count];
+            }
+
+            dayName = workoutDay?.Focus ?? workoutDay?.DayName;
+            total   = workoutDay?.Exercises.Count ?? 0;
+
+            // Only count the session as "done" when it was specifically for
+            // today's planned workout day — prevents stale / wrong-day sessions
+            // from polluting the dashboard counter.
+            if (todaySession != null && workoutDay != null)
+            {
+                bool sameDay = !string.IsNullOrEmpty(todaySession.WorkoutDayName) &&
+                               todaySession.WorkoutDayName.Equals(
+                                   workoutDay.DayName, StringComparison.OrdinalIgnoreCase);
+
+                bool sameFocus = !string.IsNullOrEmpty(todaySession.WorkoutFocus) &&
+                                 !string.IsNullOrEmpty(workoutDay.Focus) &&
+                                 todaySession.WorkoutFocus.Equals(
+                                     workoutDay.Focus, StringComparison.OrdinalIgnoreCase);
+
+                bool samePlan = todaySession.WorkoutPlanId == activePlan.Id;
+
+                done = (samePlan && (sameDay || sameFocus))
+                    ? todaySession.ExercisesTotal
+                    : 0;
+            }
         }
 
         // Today's calories

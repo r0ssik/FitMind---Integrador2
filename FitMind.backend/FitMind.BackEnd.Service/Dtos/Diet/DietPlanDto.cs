@@ -32,7 +32,20 @@ public record CreateDietPlanDto(
     DietGoal Goal,
     [property: JsonConverter(typeof(StringOrNumberConverter))]
     string? Budget,
-    string? Restrictions
+    string? Restrictions,
+    int DailyCalories = 0,
+    bool IsAiGenerated = false,
+    List<CreateMealDto>? Meals = null
+);
+
+public record CreateMealDto(
+    string Name,
+    string Time,
+    int Calories,
+    decimal Proteins,
+    decimal Carbs,
+    decimal Fats,
+    string? Description
 );
 
 public record LogFoodEntryDto(

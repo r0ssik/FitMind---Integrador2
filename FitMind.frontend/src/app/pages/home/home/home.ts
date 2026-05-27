@@ -42,7 +42,16 @@ export class Home implements OnInit {
   get workoutTotal():    number { return this.dashboard()?.todayWorkoutTotal ?? 0; }
   get workoutProgress(): number {
     const t = this.workoutTotal;
-    return t ? (this.workoutDone / t) * 100 : 0;
+    if (!t) return this.workoutDone > 0 ? 100 : 0;
+    return Math.min((this.workoutDone / t) * 100, 100);
+  }
+  // Safe label: never shows "5/0" — clamps done to total when total is known
+  get workoutLabel(): string {
+    const done = this.workoutDone;
+    const total = this.workoutTotal;
+    if (!total && !done) return '0 exercícios';
+    if (!total)          return `${done} exercícios concluídos`;
+    return `${Math.min(done, total)}/${total} exercícios concluídos`;
   }
 
   get waterDone():     number { return this.water()?.cups ?? 0; }

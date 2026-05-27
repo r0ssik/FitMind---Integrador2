@@ -34,6 +34,14 @@ public class DietController(IDietService dietService) : ControllerBase
         return CreatedAtAction(nameof(GetActivePlan), plan);
     }
 
+    [HttpPatch("{planId:guid}/activate")]
+    public async Task<IActionResult> ActivatePlan(Guid planId)
+    {
+        var userId = User.GetUserId();
+        await dietService.ActivatePlanAsync(userId, planId);
+        return NoContent();
+    }
+
     [HttpPost("diary")]
     public async Task<IActionResult> LogFood([FromBody] LogFoodEntryDto dto)
     {

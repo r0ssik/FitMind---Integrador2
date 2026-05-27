@@ -1,3 +1,254 @@
+// ── Tabs ──────────────────────────────────────────────────────────────────────
+.diary-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 10px 16px 0;
+  border-bottom: 1.5px solid var(--border);
+  background: var(--bg-card);
+}
+
+.diary-tab {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px 8px 0 0;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-hint);
+  cursor: pointer;
+  transition: all 0.2s;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1.5px;
+
+  &.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+    background: var(--primary-light, rgba(76,175,80,.08));
+  }
+}
+
+// ── Meu Plano ─────────────────────────────────────────────────────────────────
+.plan-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 15px;
+}
+
+.plan-hero {
+  background: linear-gradient(135deg, var(--primary-dark, #2e7d32), var(--primary, #4caf50));
+  border-radius: var(--radius, 12px);
+  padding: 20px;
+  color: #fff;
+  margin-bottom: 16px;
+
+  .plan-hero-name {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+
+  .plan-hero-goal {
+    font-size: 12px;
+    opacity: 0.82;
+    margin-bottom: 12px;
+    text-transform: capitalize;
+  }
+
+  .plan-hero-kcal {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    margin-bottom: 14px;
+
+    .plan-kcal-val {
+      font-size: 36px;
+      font-weight: 800;
+      line-height: 1;
+    }
+    .plan-kcal-lbl {
+      font-size: 13px;
+      opacity: 0.85;
+    }
+  }
+}
+
+.plan-macro-row {
+  display: flex;
+  gap: 8px;
+}
+
+.plan-macro-chip {
+  flex: 1;
+  background: rgba(255,255,255,0.18);
+  border-radius: 8px;
+  padding: 7px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+
+  .pmc-label { font-size: 10px; opacity: 0.85; }
+  .pmc-val   { font-size: 15px; font-weight: 700; }
+}
+
+.plan-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-hint);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 10px;
+}
+
+.plan-meal-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius, 12px);
+  padding: 14px;
+  margin-bottom: 10px;
+
+  .plan-meal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .plan-meal-name-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .plan-meal-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .plan-meal-time {
+    font-size: 12px;
+    color: var(--text-hint);
+  }
+
+  .plan-meal-kcal {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  .plan-meal-foods {
+    display: flex;
+    align-items: flex-start;
+    gap: 5px;
+    margin-bottom: 8px;
+    padding: 8px 10px;
+    background: var(--bg, #f9f9f9);
+    border-radius: 8px;
+  }
+
+  .plan-meal-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    flex: 1;
+  }
+
+  .plan-meal-macros {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+}
+
+.plan-history-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius, 12px);
+  padding: 12px 14px;
+  margin-bottom: 8px;
+
+  .phc-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .phc-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .phc-meta {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .phc-date {
+    font-size: 11px;
+    color: var(--text-hint);
+  }
+
+  .phc-btn {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+}
+
+.spinner-sm {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.plan-info-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 0 4px;
+}
+
+// ── Macro tags (shared) ───────────────────────────────────────────────────────
+.macro-tag {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 20px;
+
+  &.p { background: #e8f5e9; color: #2e7d32; }
+  &.c { background: #fff8e1; color: #f57f17; }
+  &.f { background: #fce4ec; color: #c62828; }
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
 .modal-add-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;

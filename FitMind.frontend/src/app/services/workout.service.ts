@@ -5,6 +5,7 @@ import { environment } from '../../environments/environment';
 import {
   WorkoutPlanDto, CreateWorkoutPlanRequest,
   LogWorkoutSessionRequest, AiGenerateWorkoutRequest,
+  CreateWorkoutDayRequest, CreateExerciseRequest,
 } from '../core/models/api.models';
 
 @Injectable({ providedIn: 'root' })

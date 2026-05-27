@@ -30,6 +30,7 @@ public class DietService(AppDbContext context) : IDietService
 
     public async Task<DietPlanDto> CreatePlanAsync(Guid userId, CreateDietPlanDto dto)
     {
+        // Desativa plano anterior
         await context.DietPlans
             .Where(p => p.UserId == userId && p.IsActive)
             .ExecuteUpdateAsync(s => s.SetProperty(p => p.IsActive, false));
@@ -41,14 +42,49 @@ public class DietService(AppDbContext context) : IDietService
             Goal = dto.Goal,
             Budget = dto.Budget,
             Restrictions = dto.Restrictions,
+            DailyCalories = dto.DailyCalories,
             IsActive = true,
-            IsAiGenerated = false
+            IsAiGenerated = dto.IsAiGenerated
         };
+
+        // Persiste refeições se fornecidas
+        if (dto.Meals is { Count: > 0 })
+        {
+            plan.Meals = dto.Meals.Select(m => new Meal
+            {
+                Name        = m.Name,
+                Time        = m.Time,
+                Calories    = m.Calories,
+                Proteins    = m.Proteins,
+                Carbs       = m.Carbs,
+                Fats        = m.Fats,
+                Description = m.Description,
+            }).ToList();
+        }
 
         await context.DietPlans.AddAsync(plan);
         await context.SaveChangesAsync();
 
+        // Recarrega as refeições para retornar o DTO completo
+        await context.Entry(plan).Collection(p => p.Meals).LoadAsync();
+
         return MapToDto(plan);
+    }
+
+    public async Task ActivatePlanAsync(Guid userId, Guid planId)
+    {
+        // Confirma que o plano pertence ao usuário
+        var plan = await context.DietPlans
+            .FirstOrDefaultAsync(p => p.Id == planId && p.UserId == userId)
+            ?? throw new KeyNotFoundException("Plano não encontrado.");
+
+        // Desativa todos os planos ativos
+        await context.DietPlans
+            .Where(p => p.UserId == userId && p.IsActive)
+            .ExecuteUpdateAsync(s => s.SetProperty(p => p.IsActive, false));
+
+        plan.IsActive = true;
+        await context.SaveChangesAsync();
     }
 
     public async Task LogFoodEntryAsync(Guid userId, LogFoodEntryDto dto)

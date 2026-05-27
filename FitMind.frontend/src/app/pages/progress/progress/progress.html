@@ -9,9 +9,9 @@
 
   <!-- Period selector -->
   <div class="filter-scroll">
-    <button class="filter-chip" [class.active]="period() === '7d'"  (click)="period.set('7d')">7 dias</button>
-    <button class="filter-chip" [class.active]="period() === '30d'" (click)="period.set('30d')">30 dias</button>
-    <button class="filter-chip" [class.active]="period() === '3m'"  (click)="period.set('3m')">3 meses</button>
+    <button class="filter-chip" [class.active]="period() === '7d'"  (click)="onPeriodChange('7d')">7 dias</button>
+    <button class="filter-chip" [class.active]="period() === '30d'" (click)="onPeriodChange('30d')">30 dias</button>
+    <button class="filter-chip" [class.active]="period() === '3m'"  (click)="onPeriodChange('3m')">3 meses</button>
   </div>
 
   <main class="page-content">
@@ -43,6 +43,120 @@
         <span class="ps-lbl">Média/treino</span>
       </div>
 
+    </div>
+
+    <!-- ── Altura ────────────────────────────────────────────────────────────── -->
+    <div class="height-card">
+      <div class="height-info">
+        <span class="mi" style="font-size:20px; color:var(--primary)">height</span>
+        <div>
+          <span class="height-label">Minha altura</span>
+          @if (!editingHeight()) {
+            <span class="height-val">
+              {{ userHeight() > 0 ? userHeight() + ' cm' : 'Não informada' }}
+            </span>
+          }
+        </div>
+      </div>
+
+      @if (!editingHeight()) {
+        <button class="btn-icon-sm" (click)="startEditHeight()" title="Editar altura">
+          <span class="mi">edit</span>
+        </button>
+      } @else {
+        <div class="height-edit-row">
+          <input type="number" class="height-input" [(ngModel)]="heightInput"
+                 [ngModelOptions]="{standalone: true}"
+                 min="100" max="250" placeholder="cm" />
+          <button class="btn btn-primary btn-xs" [disabled]="savingHeight()" (click)="saveHeight()">
+            @if (savingHeight()) { <span class="spinner-xs"></span> } @else { Salvar }
+          </button>
+          <button class="btn btn-outline btn-xs" (click)="cancelEditHeight()">Cancelar</button>
+        </div>
+      }
+
+      @if (heightSaved()) {
+        <span class="height-saved-msg"><span class="mi mi-sm">check_circle</span> Altura salva!</span>
+      }
+    </div>
+
+    <!-- ── Análise de Saúde IA ────────────────────────────────────────────────── -->
+    <div class="insight-card">
+      <div class="insight-header">
+        <div class="insight-title-row">
+          <span class="mi" style="font-size:20px; color:var(--primary)">psychology</span>
+          <span class="insight-title">Análise de Saúde</span>
+        </div>
+        <button class="btn btn-primary btn-sm insight-btn"
+          [disabled]="insightLoading()"
+          (click)="generateInsight()">
+          @if (insightLoading()) {
+            <span class="spinner-xs"></span> Analisando...
+          } @else {
+            <span class="mi mi-sm">auto_awesome</span>
+            {{ insight() ? 'Reanalisar' : 'Analisar agora' }}
+          }
+        </button>
+      </div>
+
+      @if (!insight() && !insightLoading()) {
+        <p class="insight-hint">
+          Clique em <strong>Analisar agora</strong> para receber um feedback personalizado sobre
+          sua saúde com base nos seus dados de treino, peso e dieta.
+        </p>
+      }
+
+      @if (insightLoading()) {
+        <div class="insight-loading">
+          <span class="mi insight-loading-icon">auto_awesome</span>
+          <p>Analisando seus dados...</p>
+          <span class="insight-loading-sub">Calculando IMC, consistência de treinos e tendências</span>
+        </div>
+      }
+
+      @if (insight(); as ins) {
+
+        <!-- Score geral -->
+        <div class="insight-score-row">
+          <div class="score-ring" [style.--score-color]="ins.scoreColor">
+            <svg viewBox="0 0 56 56" class="score-svg">
+              <circle cx="28" cy="28" r="24" fill="none" stroke="#f0f0f0" stroke-width="5"/>
+              <circle cx="28" cy="28" r="24" fill="none"
+                [attr.stroke]="ins.scoreColor" stroke-width="5"
+                stroke-linecap="round"
+                [attr.stroke-dasharray]="'150.8'"
+                [attr.stroke-dashoffset]="150.8 - (ins.score / 100) * 150.8"
+                transform="rotate(-90 28 28)"/>
+            </svg>
+            <div class="score-center">
+              <span class="score-num">{{ ins.score }}</span>
+            </div>
+          </div>
+          <div class="score-meta">
+            <span class="score-label" [style.color]="ins.scoreColor">{{ ins.scoreLabel }}</span>
+            <div class="bmi-badge" [style.background]="ins.bmiColor + '22'" [style.color]="ins.bmiColor">
+              IMC {{ ins.bmi }} — {{ ins.bmiCategory }}
+            </div>
+            <span class="score-date">Análise em {{ ins.analysisDate }}</span>
+          </div>
+        </div>
+
+        <!-- Highlights -->
+        <div class="insight-highlights">
+          @for (h of ins.highlights; track h.text) {
+            <div class="hl-item" [class.hl-good]="h.type === 'good'" [class.hl-warn]="h.type === 'warn'">
+              <span class="mi hl-icon">{{ h.icon }}</span>
+              <span class="hl-text">{{ h.text }}</span>
+            </div>
+          }
+        </div>
+
+        <!-- Recomendação -->
+        <div class="insight-rec">
+          <span class="mi mi-sm" style="color:var(--primary); flex-shrink:0">tips_and_updates</span>
+          <p class="insight-rec-text">{{ ins.recommendation }}</p>
+        </div>
+      }
     </div>
 
     <!-- ── Peso ──────────────────────────────────────────────────────────────── -->

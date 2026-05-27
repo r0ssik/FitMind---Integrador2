@@ -39,17 +39,49 @@ public class WorkoutService(AppDbContext context) : IWorkoutService
 
         var plan = new WorkoutPlan
         {
-            UserId = userId,
-            Name = dto.Name,
-            Goal = dto.Goal,
-            DaysPerWeek = dto.DaysPerWeek,
-            Weeks = dto.Weeks,
-            IsActive = true,
-            IsAiGenerated = false
+            UserId        = userId,
+            Name          = dto.Name,
+            Goal          = dto.Goal,
+            DaysPerWeek   = dto.DaysPerWeek,
+            Weeks         = dto.Weeks,
+            IsActive      = true,
+            IsAiGenerated = dto.Days is { Count: > 0 }  // true when AI days are provided
         };
+
+        // Persist AI-generated days and exercises when provided
+        if (dto.Days is { Count: > 0 })
+        {
+            foreach (var dayDto in dto.Days)
+            {
+                var day = new WorkoutDay
+                {
+                    DayName    = dayDto.DayName,
+                    Focus      = dayDto.Focus,
+                    OrderIndex = dayDto.OrderIndex,
+                    Exercises  = dayDto.Exercises.Select((e, i) => new Exercise
+                    {
+                        Name        = e.Name,
+                        Sets        = e.Sets,
+                        Reps        = e.Reps,
+                        RestTime    = e.RestTime,
+                        EffortLevel = e.EffortLevel,
+                        Tips        = e.Tips,
+                        OrderIndex  = e.OrderIndex > 0 ? e.OrderIndex : i,
+                    }).ToList()
+                };
+                plan.Days.Add(day);
+            }
+        }
 
         await context.WorkoutPlans.AddAsync(plan);
         await context.SaveChangesAsync();
+
+        // Reload with days + exercises for the response
+        await context.Entry(plan)
+            .Collection(p => p.Days)
+            .Query()
+            .Include(d => d.Exercises)
+            .LoadAsync();
 
         return MapToDto(plan);
     }

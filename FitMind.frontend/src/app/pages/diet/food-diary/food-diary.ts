@@ -1,8 +1,9 @@
 import { Component, signal, computed, OnInit } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { DietService } from '../../../services/diet.service';
 import { SettingsService } from '../../../services/settings.service';
-import { LogFoodEntryRequest } from '../../../core/models/api.models';
+import { DietPlanDto, LogFoodEntryRequest } from '../../../core/models/api.models';
 
 interface FoodItem {
   id: number; name: string; amount: string;
@@ -16,15 +17,21 @@ interface MealEntry {
 
 @Component({
   selector: 'app-food-diary',
-  imports: [],
+  imports: [DatePipe],
   templateUrl: './food-diary.html',
   styleUrl: './food-diary.scss',
 })
 export class FoodDiary implements OnInit {
+  activeTab    = signal<'diary' | 'plan'>('diary');
   selectedDate = signal(new Date());
   showAddModal = signal(false);
   activeMealId = signal<number | null>(null);
   saving       = signal(false);
+  activePlan    = signal<DietPlanDto | null>(null);
+  planHistory   = signal<DietPlanDto[]>([]);
+  planLoading   = signal(false);
+  showHistory   = signal(false);
+  restoringId   = signal<string | null>(null);
 
   kcalGoal    = 2000;
   proteinGoal = 150;
@@ -63,6 +70,52 @@ export class FoodDiary implements OnInit {
       error: () => {},
     });
     this.loadDiary();
+    this.loadActivePlan();
+  }
+
+  private loadActivePlan(): void {
+    this.planLoading.set(true);
+    this.dietService.getActivePlan().subscribe({
+      next: plan => { this.activePlan.set(plan); this.planLoading.set(false); },
+      error: ()   => { this.activePlan.set(null); this.planLoading.set(false); },
+    });
+    this.dietService.getHistory().subscribe({
+      next: plans => this.planHistory.set(plans),
+      error: ()   => {},
+    });
+  }
+
+  restorePlan(planId: string): void {
+    this.restoringId.set(planId);
+    this.dietService.activatePlan(planId).subscribe({
+      next: () => {
+        this.restoringId.set(null);
+        this.showHistory.set(false);
+        this.loadActivePlan();
+      },
+      error: () => this.restoringId.set(null),
+    });
+  }
+
+  get inactivePlans(): DietPlanDto[] {
+    const active = this.activePlan();
+    return this.planHistory().filter(p => !active || p.id !== active.id);
+  }
+
+  get planTotalCalories(): number {
+    return this.activePlan()?.dailyCalories ?? 0;
+  }
+
+  get planTotalProtein(): number {
+    return Math.round((this.activePlan()?.meals ?? []).reduce((s, m) => s + m.proteins, 0));
+  }
+
+  get planTotalCarbs(): number {
+    return Math.round((this.activePlan()?.meals ?? []).reduce((s, m) => s + m.carbs, 0));
+  }
+
+  get planTotalFat(): number {
+    return Math.round((this.activePlan()?.meals ?? []).reduce((s, m) => s + m.fats, 0));
   }
 
   private loadDiary(): void {

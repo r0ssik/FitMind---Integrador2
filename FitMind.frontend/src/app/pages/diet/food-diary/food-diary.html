@@ -5,12 +5,26 @@
     <button class="generate-btn" (click)="goDietPlan()" title="Gerar plano IA"><span class="mi">auto_awesome</span></button>
   </header>
 
-  <!-- Navegador de data -->
+  <!-- Abas -->
+  <div class="diary-tabs">
+    <button class="diary-tab" [class.active]="activeTab() === 'diary'" (click)="activeTab.set('diary')">
+      <span class="mi mi-sm">menu_book</span> Diário
+    </button>
+    <button class="diary-tab" [class.active]="activeTab() === 'plan'" (click)="activeTab.set('plan')">
+      <span class="mi mi-sm">restaurant_menu</span> Meu Plano
+    </button>
+  </div>
+
+  <!-- Navegador de data (só no diário) -->
+  @if (activeTab() === 'diary') {
   <div class="date-nav">
     <button class="date-arrow" (click)="changeDate(-1)">‹</button>
     <span class="date-label">{{ dateLabel }}</span>
     <button class="date-arrow" (click)="changeDate(1)" [disabled]="isToday">›</button>
   </div>
+  }
+
+  @if (activeTab() === 'diary') {
 
   <!-- Resumo de macros -->
   <div class="macro-overview">
@@ -148,6 +162,125 @@
     </div>
 
   </main>
+
+  } @else {
+
+  <!-- ══════════════ ABA: MEU PLANO ══════════════ -->
+  <main class="page-content">
+
+    @if (planLoading()) {
+      <div style="text-align:center; padding:40px 0; color:var(--text-hint)">
+        <span class="mi" style="font-size:36px; display:block; margin-bottom:8px">hourglass_top</span>
+        Carregando plano...
+      </div>
+    } @else if (!activePlan()) {
+      <div class="plan-empty-state">
+        <span class="mi" style="font-size:48px; color:var(--text-hint)">restaurant_menu</span>
+        <p>Nenhum plano alimentar ativo.</p>
+        <p style="font-size:13px; color:var(--text-hint); margin-bottom:16px">Gere um plano personalizado com IA.</p>
+        <button class="btn btn-primary" style="width:auto" (click)="goDietPlan()">
+          <span class="mi mi-sm">auto_awesome</span> Gerar plano com IA
+        </button>
+      </div>
+    } @else {
+
+      <!-- Cabeçalho do plano -->
+      <div class="plan-hero">
+        <div class="plan-hero-name">{{ activePlan()!.name }}</div>
+        <div class="plan-hero-goal">{{ activePlan()!.goal }}</div>
+        <div class="plan-hero-kcal">
+          <span class="plan-kcal-val">{{ activePlan()!.dailyCalories }}</span>
+          <span class="plan-kcal-lbl">kcal / dia</span>
+        </div>
+        <!-- Macros totais -->
+        <div class="plan-macro-row">
+          <div class="plan-macro-chip protein">
+            <span class="pmc-label">Proteína</span>
+            <span class="pmc-val">{{ planTotalProtein }}g</span>
+          </div>
+          <div class="plan-macro-chip carbs">
+            <span class="pmc-label">Carbs</span>
+            <span class="pmc-val">{{ planTotalCarbs }}g</span>
+          </div>
+          <div class="plan-macro-chip fat">
+            <span class="pmc-label">Gordura</span>
+            <span class="pmc-val">{{ planTotalFat }}g</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Refeições do plano -->
+      <p class="plan-section-title">Refeições do dia</p>
+
+      @for (meal of activePlan()!.meals; track meal.id) {
+        <div class="plan-meal-card">
+          <div class="plan-meal-header">
+            <div class="plan-meal-name-wrap">
+              <span class="plan-meal-name">{{ meal.name }}</span>
+              <span class="plan-meal-time">{{ meal.time }}</span>
+            </div>
+            <span class="plan-meal-kcal">{{ meal.calories }} kcal</span>
+          </div>
+
+          @if (meal.description) {
+            <div class="plan-meal-foods">
+              <span class="mi mi-sm" style="color:var(--text-hint)">lunch_dining</span>
+              <span class="plan-meal-desc">{{ meal.description }}</span>
+            </div>
+          }
+
+          <div class="plan-meal-macros">
+            <span class="macro-tag p">P {{ meal.proteins }}g</span>
+            <span class="macro-tag c">C {{ meal.carbs }}g</span>
+            <span class="macro-tag f">G {{ meal.fats }}g</span>
+          </div>
+        </div>
+      }
+
+      <!-- Restrições / orçamento se existirem -->
+      @if (activePlan()!.restrictions) {
+        <div class="plan-info-row">
+          <span class="mi mi-sm" style="color:var(--text-hint)">info</span>
+          <span style="font-size:13px; color:var(--text-secondary)">Restrições: {{ activePlan()!.restrictions }}</span>
+        </div>
+      }
+
+      <!-- Ações -->
+      <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap">
+        <button class="btn btn-outline" style="flex:1" (click)="goDietPlan()">
+          <span class="mi mi-sm">auto_awesome</span> Gerar novo plano
+        </button>
+        @if (inactivePlans.length) {
+          <button class="btn btn-outline" style="flex:1" (click)="showHistory.set(!showHistory())">
+            <span class="mi mi-sm">history</span> {{ showHistory() ? 'Fechar histórico' : 'Planos anteriores' }}
+          </button>
+        }
+      </div>
+
+      <!-- Histórico de planos -->
+      @if (showHistory() && inactivePlans.length) {
+        <p class="plan-section-title" style="margin-top:20px">Planos anteriores</p>
+        @for (old of inactivePlans; track old.id) {
+          <div class="plan-history-card">
+            <div class="phc-info">
+              <span class="phc-name">{{ old.name }}</span>
+              <span class="phc-meta">{{ old.dailyCalories }} kcal · {{ old.meals.length }} refeições</span>
+              <span class="phc-date">{{ old.createdAt | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <button class="btn btn-outline btn-sm phc-btn"
+              [disabled]="restoringId() === old.id"
+              (click)="restorePlan(old.id)">
+              @if (restoringId() === old.id) { <span class="spinner-sm"></span> }
+              @else { <span class="mi mi-sm">restore</span> Restaurar }
+            </button>
+          </div>
+        }
+      }
+    }
+
+  </main>
+
+  }
 
   <!-- Modal adicionar alimento -->
   @if (showAddModal()) {
