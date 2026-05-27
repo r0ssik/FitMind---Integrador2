@@ -144,8 +144,11 @@ public class ProgressService(AppDbContext context) : IProgressService
 
     public async Task AddWeightEntryAsync(Guid userId, AddWeightDto dto)
     {
+        var dateUtc = DateTime.SpecifyKind(dto.Date.Date, DateTimeKind.Utc);
+        var nextDayUtc = dateUtc.AddDays(1);
+
         var existing = await context.BodyMeasurements
-            .FirstOrDefaultAsync(m => m.UserId == userId && m.Date.Date == dto.Date.Date);
+            .FirstOrDefaultAsync(m => m.UserId == userId && m.Date >= dateUtc && m.Date < nextDayUtc);
 
         if (existing is not null)
         {
@@ -157,7 +160,7 @@ public class ProgressService(AppDbContext context) : IProgressService
             await context.BodyMeasurements.AddAsync(new BodyMeasurement
             {
                 UserId = userId,
-                Date = DateTime.SpecifyKind(dto.Date.Date, DateTimeKind.Utc),
+                Date = dateUtc,
                 Weight = dto.Value
             });
             await context.SaveChangesAsync();
