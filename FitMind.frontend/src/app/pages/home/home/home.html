@@ -13,7 +13,19 @@
           <span class="mi" style="font-size:20px">admin_panel_settings</span>
         </button>
       }
-      <button class="notif-btn" (click)="goNotifications()">🔔</button>
+      <button class="icon-btn notif-btn" (click)="goNotifications()">
+
+  <span class="mi">notifications</span>
+
+  @if (unreadNotifications() > 0) {
+
+    <span class="notif-badge">
+      {{ unreadNotifications() }}
+    </span>
+
+  }
+
+</button>
       <button class="avatar" (click)="goProfile()">{{ userInitials }}</button>
     </div>
   </header>

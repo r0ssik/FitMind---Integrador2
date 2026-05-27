@@ -6,7 +6,7 @@ export interface RegisterRequest {
   name: string; email: string; password: string;
   phone: string; birthDate: string; sex: string;
   weight: number; height: number; limitations: string;
-  goals: string[]; weeklyAvailability: number;
+  goals: string; weeklyAvailability: number;
 }
 
 export interface UserInfoDto { id: string; name: string; email: string; isAdmin: boolean; }
@@ -242,10 +242,14 @@ export interface UpdateChallengeProgressRequest { progress: number; }
 // ── Notification ─────────────────────────────────────────────────────────────
 
 export interface NotificationDto {
-  id: string; title: string; message: string; type: string;
-  isRead: boolean; createdAt: string; actionRoute?: string;
+  id: string;
+  title: string;
+  message: string;
+  type: string;
+  isRead: boolean;
+  createdAt: string;
+  actionRoute?: string;
 }
-
 // ── Achievement ───────────────────────────────────────────────────────────────
 
 export interface AchievementDto {

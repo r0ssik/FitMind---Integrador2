@@ -4,7 +4,13 @@ import { DatePipe } from '@angular/common';
 import { NotificationService } from '../../../services/notification.service';
 import { NotificationDto } from '../../../core/models/api.models';
 
-type NotifCategory = 'all' | 'workout' | 'diet' | 'water' | 'challenge';
+type NotifCategory =
+  | 'all'
+  | 'social'
+  | 'like'
+  | 'comment'
+  | 'follow'
+  | 'challenge';
 
 @Component({
   selector: 'app-notifications',
@@ -13,62 +19,200 @@ type NotifCategory = 'all' | 'workout' | 'diet' | 'water' | 'challenge';
   styleUrl: './notifications.scss',
 })
 export class Notifications implements OnInit {
-  activeFilter   = signal<NotifCategory>('all');
-  notifications  = signal<NotificationDto[]>([]);
-  loading        = signal(true);
+
+  activeFilter = signal<NotifCategory>('all');
+
+  notifications = signal<NotificationDto[]>([]);
+
+  loading = signal(true);
 
   filters: { key: NotifCategory; label: string; icon: string }[] = [
-    { key: 'all',       label: 'Todas',    icon: 'notifications'        },
-    { key: 'workout',   label: 'Treino',   icon: 'fitness_center'       },
-    { key: 'diet',      label: 'Dieta',    icon: 'restaurant'           },
-    { key: 'water',     label: 'Água',     icon: 'water_drop'           },
-    { key: 'challenge', label: 'Desafios', icon: 'emoji_events'         },
+    {
+      key: 'all',
+      label: 'Todas',
+      icon: 'notifications'
+    },
+
+    {
+      key: 'social',
+      label: 'Sociais',
+      icon: 'groups'
+    },
+
+    {
+      key: 'like',
+      label: 'Curtidas',
+      icon: 'favorite'
+    },
+
+    {
+      key: 'comment',
+      label: 'Comentários',
+      icon: 'chat'
+    },
+
+    {
+      key: 'follow',
+      label: 'Seguidores',
+      icon: 'person_add'
+    },
+
+    {
+      key: 'challenge',
+      label: 'Desafios',
+      icon: 'emoji_events'
+    }
   ];
 
   typeConfig: Record<string, { icon: string; color: string }> = {
-    workout:   { icon: 'fitness_center', color: '#4caf50' },
-    diet:      { icon: 'restaurant',     color: '#ff9800' },
-    water:     { icon: 'water_drop',     color: '#2196f3' },
-    challenge: { icon: 'emoji_events',   color: '#9c27b0' },
+
+    social: {
+      icon: 'groups',
+      color: '#22c55e'
+    },
+
+    like: {
+      icon: 'favorite',
+      color: '#ef4444'
+    },
+
+    comment: {
+      icon: 'chat',
+      color: '#3b82f6'
+    },
+
+    follow: {
+      icon: 'person_add',
+      color: '#a855f7'
+    },
+
+    challenge: {
+      icon: 'emoji_events',
+      color: '#f59e0b'
+    },
+
+    workout: {
+      icon: 'fitness_center',
+      color: '#22c55e'
+    },
+
+    diet: {
+      icon: 'restaurant',
+      color: '#f97316'
+    },
+
+    water: {
+      icon: 'water_drop',
+      color: '#06b6d4'
+    },
+
+    achievement: {
+      icon: 'military_tech',
+      color: '#eab308'
+    }
   };
 
-  constructor(private router: Router, private notificationService: NotificationService) {}
+  constructor(
+    private router: Router,
+    private notificationService: NotificationService
+  ) {}
 
   ngOnInit(): void {
     this.notificationService.getAll().subscribe({
-      next:  list => { this.notifications.set(list); this.loading.set(false); },
-      error: ()   => this.loading.set(false),
+      next: list => {
+
+        // padroniza tudo para lowercase
+        const normalized = list.map(n => ({
+          ...n,
+          type: n.type.toLowerCase()
+        }));
+
+        console.log(normalized);
+
+        this.notifications.set(normalized);
+
+        this.loading.set(false);
+      },
+
+      error: () => {
+        this.loading.set(false);
+      },
     });
   }
 
   get filtered(): NotificationDto[] {
+
     const f = this.activeFilter();
-    return f === 'all' ? this.notifications() : this.notifications().filter(n => n.type === f);
+
+    if (f === 'all') {
+      return this.notifications();
+    }
+
+    return this.notifications().filter(
+      n => n.type.toLowerCase() === f
+    );
   }
 
-  get unreadCount(): number { return this.notifications().filter(n => !n.isRead).length; }
+  get unreadCount(): number {
+    return this.notifications().filter(n => !n.isRead).length;
+  }
 
   markRead(id: string): void {
-    this.notificationService.markRead(id).subscribe({ error: () => {} });
-    this.notifications.update(list => list.map(n => n.id === id ? { ...n, isRead: true } : n));
+
+    this.notificationService.markRead(id)
+      .subscribe({ error: () => {} });
+
+    this.notifications.update(list =>
+      list.map(n =>
+        n.id === id
+          ? { ...n, isRead: true }
+          : n
+      )
+    );
   }
 
   markAllRead(): void {
-    this.notificationService.markAllRead().subscribe({ error: () => {} });
-    this.notifications.update(list => list.map(n => ({ ...n, isRead: true })));
+
+    this.notificationService.markAllRead()
+      .subscribe({ error: () => {} });
+
+    this.notifications.update(list =>
+      list.map(n => ({
+        ...n,
+        isRead: true
+      }))
+    );
   }
 
   dismiss(id: string): void {
-    this.notifications.update(list => list.filter(n => n.id !== id));
+
+    this.notifications.update(list =>
+      list.filter(n => n.id !== id)
+    );
   }
 
   navigate(notif: NotificationDto): void {
+
     this.markRead(notif.id);
-    if (notif.actionRoute) this.router.navigate([notif.actionRoute]);
+
+    if (notif.actionRoute) {
+      this.router.navigate([notif.actionRoute]);
+    }
   }
 
-  typeIcon(type: string): string  { return this.typeConfig[type]?.icon  ?? 'notifications'; }
-  typeColor(type: string): string { return this.typeConfig[type]?.color ?? '#666'; }
+  typeIcon(type: string): string {
 
-  goBack(): void { this.router.navigate(['/home']); }
+    return this.typeConfig[type?.toLowerCase()]?.icon
+      ?? 'notifications';
+  }
+
+  typeColor(type: string): string {
+
+    return this.typeConfig[type?.toLowerCase()]?.color
+      ?? '#666';
+  }
+
+  goBack(): void {
+    this.router.navigate(['/home']);
+  }
 }

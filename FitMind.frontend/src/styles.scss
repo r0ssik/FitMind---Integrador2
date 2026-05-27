@@ -1,6 +1,53 @@
 @use '@angular/material' as mat;
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined');
 
 @include mat.core();
+
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+
+  width: 100%;
+  height: 100%;
+
+  background: #0b0b0c;
+  color: #ffffff;
+
+  font-family: Inter, Arial, sans-serif;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+.mi {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+:root {
+  --bg-primary: #0b0b0c;
+  --card-bg: #18181b;
+  --border-color: rgba(255,255,255,.08);
+
+  --text-primary: #ffffff;
+  --text-secondary: #b4b4b8;
+  --text-hint: #71717a;
+}
+
+
 
 $fitmind-primary: mat.define-theme((
   color: (

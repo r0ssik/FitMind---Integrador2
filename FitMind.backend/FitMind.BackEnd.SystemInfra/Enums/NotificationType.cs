@@ -1,11 +1,12 @@
-namespace FitMind.BackEnd.SystemInfra.Enums;
-
 public enum NotificationType
 {
+    Social,
+    Like,
+    Comment,
+    Follow,
+    Challenge,
     Workout,
     Diet,
-    Social,
-    Achievement,
-    Challenge,
-    System
+    Water,
+    Achievement
 }

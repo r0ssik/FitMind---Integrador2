@@ -40,13 +40,26 @@ export class Auth {
     profile: Omit<RegisterRequest, 'password'> & { limitations?: string[] },
     password: string
   ): Promise<void> {
-    const body: RegisterRequest = {
-      name: profile.name, email: profile.email, password,
-      phone: profile.phone ?? '', birthDate: profile.birthDate ?? '',
-      sex: profile.sex ?? '', weight: +(profile.weight ?? 0), height: +(profile.height ?? 0),
-      limitations: Array.isArray(profile.limitations) ? profile.limitations.join(', ') : '',
-      goals: profile.goals ?? [], weeklyAvailability: profile.weeklyAvailability ?? 3,
-    };
+const body: RegisterRequest = {
+  name: profile.name,
+  email: profile.email,
+  password,
+  phone: profile.phone ?? '',
+  birthDate: profile.birthDate ?? '',
+  sex: profile.sex ?? '',
+  weight: +(profile.weight ?? 0),
+  height: +(profile.height ?? 0),
+
+  limitations: Array.isArray(profile.limitations)
+    ? profile.limitations.join(', ')
+    : '',
+
+  goals: Array.isArray(profile.goals)
+    ? profile.goals.join(', ')
+    : '',
+
+  weeklyAvailability: profile.weeklyAvailability ?? 3,
+};
     const res = await firstValueFrom(
       this.http.post<LoginResponse>(`${this.api}/auth/register`, body)
     );

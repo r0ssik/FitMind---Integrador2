@@ -3,6 +3,7 @@ using FitMind.BackEnd.Service.Interfaces;
 using FitMind.BackEnd.SystemInfra.ContextDb;
 using FitMind.BackEnd.SystemInfra.Entities;
 using Microsoft.EntityFrameworkCore;
+using FitMind.BackEnd.SystemInfra.Enums;
 
 namespace FitMind.BackEnd.Service.Services;
 
@@ -18,7 +19,6 @@ public class SocialService(AppDbContext context) : ISocialService
 
         if (onlyFollowing)
         {
-            // IDs de quem o usuário segue + o próprio usuário
             var followingIds = await context.Follows
                 .Where(f => f.FollowerId == currentUserId)
                 .Select(f => f.FollowingId)
@@ -52,27 +52,57 @@ public class SocialService(AppDbContext context) : ISocialService
         await context.SaveChangesAsync();
 
         await context.Entry(post).Reference(p => p.User).LoadAsync();
+
         return MapToDto(post, userId);
     }
 
     public async Task DeletePostAsync(Guid userId, Guid postId)
     {
-        var post = await context.Posts.FirstOrDefaultAsync(p => p.Id == postId && p.UserId == userId)
+        var post = await context.Posts
+            .FirstOrDefaultAsync(p => p.Id == postId && p.UserId == userId)
             ?? throw new KeyNotFoundException("Post não encontrado.");
 
         context.Posts.Remove(post);
+
         await context.SaveChangesAsync();
     }
 
     public async Task LikePostAsync(Guid userId, Guid postId)
     {
-        var postExists = await context.Posts.AnyAsync(p => p.Id == postId);
-        if (!postExists) throw new KeyNotFoundException("Post não encontrado.");
+        var post = await context.Posts
+            .Include(p => p.User)
+            .FirstOrDefaultAsync(p => p.Id == postId);
 
-        var exists = await context.PostLikes.AnyAsync(l => l.PostId == postId && l.UserId == userId);
-        if (exists) return;
+        if (post is null)
+            throw new KeyNotFoundException("Post não encontrado.");
 
-        await context.PostLikes.AddAsync(new PostLike { PostId = postId, UserId = userId });
+        var exists = await context.PostLikes
+            .AnyAsync(l => l.PostId == postId && l.UserId == userId);
+
+        if (exists)
+            return;
+
+        await context.PostLikes.AddAsync(new PostLike
+        {
+            PostId = postId,
+            UserId = userId
+        });
+
+        // não envia notificação para si mesmo
+        if (post.UserId != userId)
+        {
+            var user = await context.Users.FindAsync(userId);
+
+            await context.Notifications.AddAsync(new Notification
+            {
+                UserId = post.UserId,
+                Type = NotificationType.Like,
+                Title = "Nova curtida",
+                Body = $"{user!.Name} curtiu seu post.",
+                IsRead = false
+            });
+        }
+
         await context.SaveChangesAsync();
     }
 
@@ -89,26 +119,91 @@ public class SocialService(AppDbContext context) : ISocialService
             .Include(c => c.User)
             .Where(c => c.PostId == postId)
             .OrderBy(c => c.CreatedAt)
-            .Select(c => new CommentDto(c.Id, c.UserId, c.User.Name, c.Content, c.CreatedAt))
+            .Select(c => new CommentDto(
+                c.Id,
+                c.UserId,
+                c.User.Name,
+                c.Content,
+                c.CreatedAt
+            ))
             .ToListAsync();
     }
 
     public async Task<CommentDto> AddCommentAsync(Guid userId, Guid postId, CreateCommentDto dto)
     {
-        var comment = new Comment { PostId = postId, UserId = userId, Content = dto.Content };
+        var post = await context.Posts
+            .FirstOrDefaultAsync(p => p.Id == postId);
+
+        if (post is null)
+            throw new KeyNotFoundException("Post não encontrado.");
+
+        var comment = new Comment
+        {
+            PostId = postId,
+            UserId = userId,
+            Content = dto.Content
+        };
+
         await context.Comments.AddAsync(comment);
+
+        // não envia notificação para si mesmo
+        if (post.UserId != userId)
+        {
+            var user = await context.Users.FindAsync(userId);
+
+            await context.Notifications.AddAsync(new Notification
+            {
+                UserId = post.UserId,
+                Type = NotificationType.Comment,
+                Title = "Novo comentário",
+                Body = $"{user!.Name} comentou no seu post.",
+                IsRead = false
+            });
+        }
+
         await context.SaveChangesAsync();
 
-        await context.Entry(comment).Reference(c => c.User).LoadAsync();
-        return new CommentDto(comment.Id, comment.UserId, comment.User.Name, comment.Content, comment.CreatedAt);
+        await context.Entry(comment)
+            .Reference(c => c.User)
+            .LoadAsync();
+
+        return new CommentDto(
+            comment.Id,
+            comment.UserId,
+            comment.User.Name,
+            comment.Content,
+            comment.CreatedAt
+        );
     }
 
     public async Task FollowUserAsync(Guid followerId, Guid followingId)
     {
-        var exists = await context.Follows.AnyAsync(f => f.FollowerId == followerId && f.FollowingId == followingId);
-        if (exists) return;
+        var exists = await context.Follows
+            .AnyAsync(f => f.FollowerId == followerId && f.FollowingId == followingId);
 
-        await context.Follows.AddAsync(new Follow { FollowerId = followerId, FollowingId = followingId });
+        if (exists)
+            return;
+
+        await context.Follows.AddAsync(new Follow
+        {
+            FollowerId = followerId,
+            FollowingId = followingId
+        });
+
+        if (followerId != followingId)
+        {
+            var user = await context.Users.FindAsync(followerId);
+
+            await context.Notifications.AddAsync(new Notification
+            {
+                UserId = followingId,
+                Type = NotificationType.Follow,
+                Title = "Novo seguidor",
+                Body = $"{user!.Name} começou a seguir você.",
+                IsRead = false
+            });
+        }
+
         await context.SaveChangesAsync();
     }
 
@@ -120,8 +215,13 @@ public class SocialService(AppDbContext context) : ISocialService
     }
 
     private static PostDto MapToDto(Post p, Guid currentUserId) => new(
-        p.Id, p.UserId, p.User?.Name ?? string.Empty, p.User?.AvatarUrl,
-        p.Content, p.Tags, p.ImageUrl,
+        p.Id,
+        p.UserId,
+        p.User?.Name ?? string.Empty,
+        p.User?.AvatarUrl,
+        p.Content,
+        p.Tags,
+        p.ImageUrl,
         p.Likes?.Count ?? 0,
         p.Comments?.Count ?? 0,
         p.Likes?.Any(l => l.UserId == currentUserId) ?? false,

@@ -1,61 +1,158 @@
 <div class="page-layout">
+
   <header class="page-header">
-    <button class="back-btn" (click)="goBack()"><span class="mi">arrow_back</span></button>
+
+    <button class="back-btn" (click)="goBack()">
+      <span class="mi">arrow_back</span>
+    </button>
+
     <div class="header-center">
       <h1>Notificações</h1>
+
       @if (unreadCount > 0) {
-        <span class="badge">{{ unreadCount }}</span>
+        <span class="badge">
+          {{ unreadCount }}
+        </span>
       }
     </div>
+
     @if (unreadCount > 0) {
-      <button class="mark-all-btn" (click)="markAllRead()">Marcar todas</button>
+
+      <button
+        class="mark-all-btn"
+        (click)="markAllRead()"
+      >
+        Marcar todas
+      </button>
+
     } @else {
+
       <div style="width: 80px"></div>
+
     }
+
   </header>
 
-  <!-- Filtros -->
+  <!-- filtros -->
   <div class="filter-scroll">
+
     @for (f of filters; track f.key) {
+
       <button
         class="filter-chip"
         [class.active]="activeFilter() === f.key"
         (click)="activeFilter.set(f.key)"
       >
-        <span class="mi mi-sm">{{ f.icon }}</span> {{ f.label }}
+
+        <span class="mi mi-sm">
+          {{ f.icon }}
+        </span>
+
+        {{ f.label }}
+
       </button>
+
     }
+
   </div>
 
   <main class="page-content">
+
+    <!-- vazio -->
     @if (filtered.length === 0) {
+
       <div class="empty-state">
-        <span class="mi mi-xl" style="color:var(--text-hint)">notifications_off</span>
+
+        <span
+          class="mi mi-xl"
+          style="color: var(--text-hint)"
+        >
+          notifications_off
+        </span>
+
         <p>Nenhuma notificação aqui</p>
+
       </div>
+
     }
 
+    <!-- notificações -->
     @for (notif of filtered; track notif.id) {
-      <div class="notif-card" [class.unread]="!notif.isRead" (click)="markRead(notif.id)">
-        <div class="notif-icon" [style.background]="typeConfig[notif.type].color + '20'">
-          <span class="mi">{{ typeConfig[notif.type].icon }}</span>
-        </div>
+
+      <div
+        class="notif-card"
+        [class.unread]="!notif.isRead"
+        (click)="markRead(notif.id)"
+      >
+
+        <!-- ícone -->
+<div
+  class="notif-icon"
+  [style.background]="(typeConfig[notif.type.toLowerCase()]?.color || '#666') + '20'"
+>
+
+  <span class="mi">
+    {{ typeConfig[notif.type.toLowerCase()]?.icon || 'notifications' }}
+  </span>
+
+</div>
+        <!-- conteúdo -->
         <div class="notif-body">
+
           <div class="notif-header">
-            <span class="notif-title">{{ notif.title }}</span>
-            <span class="notif-time">{{ notif.createdAt | date:'HH:mm' }}</span>
+
+            <span class="notif-title">
+              {{ notif.title }}
+            </span>
+
+            <span class="notif-time">
+              {{ notif.createdAt | date:'HH:mm' }}
+            </span>
+
           </div>
-          <p class="notif-text">{{ notif.message }}</p>
+
+          <!-- mensagem -->
+          <p class="notif-text">
+            {{ notif.message }}
+          </p>
+
+          <!-- botão -->
           @if (notif.actionRoute) {
-            <button class="notif-action" (click)="$event.stopPropagation(); navigate(notif)">
-              {{ notif.actionRoute }} <span class="mi mi-sm">arrow_forward</span>
+
+            <button
+              class="notif-action"
+              (click)="$event.stopPropagation(); navigate(notif)"
+            >
+
+              Abrir
+
+              <span class="mi mi-sm">
+                arrow_forward
+              </span>
+
             </button>
+
           }
+
         </div>
-        <button class="dismiss-btn" (click)="$event.stopPropagation(); dismiss(notif.id)" title="Dispensar">
-          <span class="mi mi-sm">close</span>
+
+        <!-- fechar -->
+        <button
+          class="dismiss-btn"
+          (click)="$event.stopPropagation(); dismiss(notif.id)"
+          title="Dispensar"
+        >
+
+          <span class="mi mi-sm">
+            close
+          </span>
+
         </button>
+
       </div>
+
     }
+
   </main>
+
 </div>

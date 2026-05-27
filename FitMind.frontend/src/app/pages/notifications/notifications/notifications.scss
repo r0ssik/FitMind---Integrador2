@@ -1,0 +1,326 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* =========================
+   PAGE
+========================= */
+
+.page-layout {
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+}
+
+.header-center {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-center h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.back-btn,
+.mark-all-btn,
+.dismiss-btn,
+.filter-chip,
+.notif-action {
+  border: none;
+  cursor: pointer;
+  transition: .2s;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+
+.back-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+
+  background: transparent;
+  color: var(--text);
+}
+
+.back-btn:hover {
+  background: rgba(255,255,255,.06);
+}
+
+.mark-all-btn {
+  padding: 10px 16px;
+  border-radius: 12px;
+
+  background: #22c55e;
+  color: white;
+  font-weight: 600;
+}
+
+.mark-all-btn:hover {
+  opacity: .9;
+}
+
+/* =========================
+   FILTERS
+========================= */
+
+.filter-scroll {
+  display: flex;
+  gap: 12px;
+
+  padding: 20px 24px;
+  overflow-x: auto;
+
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+}
+
+.filter-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 12px 18px;
+  border-radius: 999px;
+
+  background: var(--card-2);
+  color: var(--text);
+
+  border: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.filter-chip.active {
+  background: rgba(34,197,94,.15);
+  border-color: #22c55e;
+  color: #22c55e;
+}
+
+/* =========================
+   CONTENT
+========================= */
+
+.page-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  padding: 24px;
+}
+
+/* =========================
+   NOTIFICATION CARD
+========================= */
+
+.notif-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+
+  padding: 22px;
+  border-radius: 24px;
+
+  background: var(--card);
+  border: 1px solid var(--border);
+
+  transition: .2s;
+}
+
+.notif-card:hover {
+  transform: translateY(-2px);
+}
+
+.notif-card.unread {
+  border-left: 4px solid #22c55e;
+}
+
+/* =========================
+   ICON
+========================= */
+
+.notif-icon {
+  min-width: 56px;
+  height: 56px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 18px;
+
+  font-size: 26px;
+  color: #22c55e;
+}
+
+/* =========================
+   BODY
+========================= */
+
+.notif-body {
+  flex: 1;
+}
+
+.notif-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 6px;
+}
+
+.notif-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.notif-time {
+  font-size: .9rem;
+  opacity: .7;
+  color: var(--text);
+}
+
+.notif-text {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text-secondary);
+}
+
+/* =========================
+   ACTION
+========================= */
+
+.notif-action {
+  margin-top: 14px;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 10px 14px;
+  border-radius: 12px;
+
+  background: rgba(34,197,94,.15);
+  color: #22c55e;
+
+  font-weight: 600;
+}
+
+.notif-action:hover {
+  opacity: .9;
+}
+
+/* =========================
+   DISMISS
+========================= */
+
+.dismiss-btn {
+  background: transparent;
+  color: var(--text-secondary);
+
+  font-size: 20px;
+}
+
+.dismiss-btn:hover {
+  color: #ef4444;
+}
+
+/* =========================
+   EMPTY STATE
+========================= */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  padding: 80px 24px;
+
+  opacity: .7;
+}
+
+.empty-state p {
+  margin-top: 12px;
+  font-size: 1rem;
+}
+
+/* =========================
+   BADGE
+========================= */
+
+.badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 24px;
+  height: 24px;
+  padding: 0 8px;
+
+  border-radius: 999px;
+
+  background: #22c55e;
+  color: white;
+
+  font-size: .85rem;
+  font-weight: 700;
+}
+
+/* =========================
+   MATERIAL ICONS
+========================= */
+
+.mi {
+  font-family: 'Material Symbols Rounded';
+}
+
+.mi-sm {
+  font-size: 18px;
+}
+
+.mi-xl {
+  font-size: 56px;
+}
+
+/* =========================
+   LIGHT MODE
+========================= */
+
+:root {
+  --bg: #f4f4f5;
+  --card: #ffffff;
+  --card-2: #f1f5f9;
+  --text: #111827;
+  --text-secondary: #4b5563;
+  --border: #e5e7eb;
+}
+
+/* =========================
+   DARK MODE
+========================= */
+
+.dark {
+  --bg: #050505;
+  --card: #111111;
+  --card-2: #18181b;
+  --text: #f5f5f5;
+  --text-secondary: #a1a1aa;
+  --border: #27272a;
+}
