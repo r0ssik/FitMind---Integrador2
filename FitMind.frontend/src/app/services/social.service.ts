@@ -10,8 +10,10 @@ export class SocialService {
 
   constructor(private http: HttpClient) {}
 
-  getFeed(page = 1, pageSize = 20): Observable<PostDto[]> {
-    return this.http.get<PostDto[]>(`${this.api}/feed`, { params: { page, pageSize } });
+  getFeed(page = 1, pageSize = 20, onlyFollowing = false): Observable<PostDto[]> {
+    return this.http.get<PostDto[]>(`${this.api}/feed`, {
+      params: { page, pageSize, onlyFollowing },
+    });
   }
 
   createPost(body: CreatePostRequest): Observable<PostDto> {

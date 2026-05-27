@@ -105,6 +105,8 @@
   gap: 12px;
   margin-bottom: 20px;
   padding: 16px 0;
+  // Allow CSS order property to reorder items
+  flex-direction: row;
 }
 
 .podium-item {
@@ -311,6 +313,42 @@
   .ps-lbl  { font-size: 10px; color: var(--text-secondary); text-transform: uppercase; }
 
   &.pos .ps-val { color: var(--primary-dark); }
+}
+
+// ── Progress modal ────────────────────────────────────────────────────────────
+
+.quick-add-row {
+  display: flex;
+  gap: 8px;
+}
+
+.quick-add-btn {
+  flex: 1;
+  width: auto !important;
+  padding: 8px 4px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.prog-input {
+  width: 100%;
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  padding: 10px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  outline: none;
+  box-sizing: border-box;
+
+  &:focus { border-color: var(--primary); }
+}
+
+.prog-preview {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
 }
 
 // ── Chart reuse ───────────────────────────────────────────────────────────────

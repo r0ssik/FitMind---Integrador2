@@ -8,12 +8,28 @@ namespace FitMind.BackEnd.Service.Services;
 
 public class SocialService(AppDbContext context) : ISocialService
 {
-    public async Task<IEnumerable<PostDto>> GetFeedAsync(Guid currentUserId, int page = 1, int pageSize = 20)
+    public async Task<IEnumerable<PostDto>> GetFeedAsync(Guid currentUserId, int page = 1, int pageSize = 20, bool onlyFollowing = false)
     {
-        var posts = await context.Posts
+        var query = context.Posts
             .Include(p => p.User)
             .Include(p => p.Likes)
             .Include(p => p.Comments)
+            .AsQueryable();
+
+        if (onlyFollowing)
+        {
+            // IDs de quem o usuário segue + o próprio usuário
+            var followingIds = await context.Follows
+                .Where(f => f.FollowerId == currentUserId)
+                .Select(f => f.FollowingId)
+                .ToListAsync();
+
+            followingIds.Add(currentUserId);
+
+            query = query.Where(p => followingIds.Contains(p.UserId));
+        }
+
+        var posts = await query
             .OrderByDescending(p => p.CreatedAt)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)

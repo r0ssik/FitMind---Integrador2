@@ -4,7 +4,7 @@ namespace FitMind.BackEnd.Service.Interfaces;
 
 public interface ISocialService
 {
-    Task<IEnumerable<PostDto>> GetFeedAsync(Guid currentUserId, int page = 1, int pageSize = 20);
+    Task<IEnumerable<PostDto>> GetFeedAsync(Guid currentUserId, int page = 1, int pageSize = 20, bool onlyFollowing = false);
     Task<PostDto> CreatePostAsync(Guid userId, CreatePostDto dto);
     Task DeletePostAsync(Guid userId, Guid postId);
     Task LikePostAsync(Guid userId, Guid postId);

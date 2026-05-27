@@ -21,18 +21,28 @@ interface PostWithComments extends PostDto {
 export class Social implements OnInit {
   constructor(private auth: Auth, private router: Router, private socialService: SocialService) {}
 
-  filter      = signal<FeedFilter>('all');
-  newPostText = signal('');
-  showNewPost = signal(false);
-  posting     = signal(false);
-  newComment  = signal<Record<string, string>>({});
-  loading     = signal(true);
+  filter       = signal<FeedFilter>('all');
+  newPostText  = signal('');
+  newPostTag   = signal<string | null>(null);
+  showNewPost  = signal(false);
+  posting      = signal(false);
+  newComment   = signal<Record<string, string>>({});
+  loading      = signal(true);
 
-  posts = signal<PostWithComments[]>([]);
+  readonly postTags = [
+    { value: 'Treino',    icon: 'fitness_center'   },
+    { value: 'Dieta',     icon: 'restaurant'       },
+    { value: 'Desafio',   icon: 'emoji_events'     },
+    { value: 'Conquista', icon: 'military_tech'    },
+  ];
+
+  posts    = signal<PostWithComments[]>([]);
+  // allPosts guarda o feed completo para filtrar desafios localmente
+  allPosts = signal<PostWithComments[]>([]);
 
   filtered = computed(() => {
     const f = this.filter();
-    if (f === 'challenges') return this.posts().filter(p => (p.tags ?? '').includes('Desafio'));
+    if (f === 'challenges') return this.allPosts().filter(p => (p.tags ?? '').includes('Desafio'));
     return this.posts();
   });
 
@@ -43,9 +53,24 @@ export class Social implements OnInit {
   }
 
   ngOnInit(): void {
-    this.socialService.getFeed(1, 20).subscribe({
+    // Carrega o feed completo (para "Todos" e filtro de "Desafios")
+    this.loadFeed('all');
+  }
+
+  setFilter(f: FeedFilter): void {
+    if (this.filter() === f) return;
+    this.filter.set(f);
+    if (f === 'challenges') return; // usa allPosts já carregado
+    this.loadFeed(f);
+  }
+
+  private loadFeed(f: 'all' | 'following'): void {
+    this.loading.set(true);
+    this.socialService.getFeed(1, 20, f === 'following').subscribe({
       next: posts => {
-        this.posts.set(posts.map(p => ({ ...p, loadedComments: [], showComments: false })));
+        const mapped = posts.map(p => ({ ...p, loadedComments: [], showComments: false }));
+        this.posts.set(mapped);
+        if (f === 'all') this.allPosts.set(mapped); // cache para filtro de desafios
         this.loading.set(false);
       },
       error: () => this.loading.set(false),
@@ -102,14 +127,31 @@ export class Social implements OnInit {
     });
   }
 
+  togglePostTag(tag: string): void {
+    this.newPostTag.set(this.newPostTag() === tag ? null : tag);
+  }
+
+  closeNewPost(): void {
+    this.showNewPost.set(false);
+    this.newPostText.set('');
+    this.newPostTag.set(null);
+  }
+
   submitPost(): void {
     const text = this.newPostText().trim();
     if (!text) return;
     this.posting.set(true);
-    this.socialService.createPost({ content: text }).subscribe({
+    this.socialService.createPost({
+      content: text,
+      tags: this.newPostTag() ?? undefined,
+    }).subscribe({
       next: post => {
-        this.posts.update(list => [{ ...post, loadedComments: [], showComments: false }, ...list]);
+        const mapped = { ...post, loadedComments: [], showComments: false };
+        this.posts.update(list => [mapped, ...list]);
+        // Atualiza allPosts para que o filtro de Desafios reflita imediatamente
+        this.allPosts.update(list => [mapped, ...list]);
         this.newPostText.set('');
+        this.newPostTag.set(null);
         this.showNewPost.set(false);
         this.posting.set(false);
       },

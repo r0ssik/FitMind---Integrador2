@@ -12,10 +12,13 @@ namespace FitMind.BackEnd.API.Controllers;
 public class SocialController(ISocialService socialService) : ControllerBase
 {
     [HttpGet("feed")]
-    public async Task<IActionResult> GetFeed([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+    public async Task<IActionResult> GetFeed(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] bool onlyFollowing = false)
     {
         var userId = User.GetUserId();
-        return Ok(await socialService.GetFeedAsync(userId, page, pageSize));
+        return Ok(await socialService.GetFeedAsync(userId, page, pageSize, onlyFollowing));
     }
 
     [HttpPost("posts")]

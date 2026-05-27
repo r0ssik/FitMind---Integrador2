@@ -229,6 +229,53 @@
   &:not(:disabled):hover { background: var(--primary-dark); }
 }
 
+// ── Tag chips no modal ────────────────────────────────────────────────────────
+
+.post-tag-section {
+  margin-top: 12px;
+}
+
+.post-tag-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.post-tag-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.post-tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  background: var(--bg);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.18s;
+
+  &:hover {
+    border-color: var(--primary);
+    color: var(--primary-dark);
+    background: var(--primary-light, rgba(76,175,80,.08));
+  }
+
+  &.selected {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: white;
+  }
+}
+
 // ── New post modal ────────────────────────────────────────────────────────────
 
 .new-post-author {

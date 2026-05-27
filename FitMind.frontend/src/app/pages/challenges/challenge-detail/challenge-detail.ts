@@ -1,5 +1,6 @@
 import { Component, signal, computed, OnInit } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ChallengeService } from '../../../services/challenge.service';
 import { Auth } from '../../../services/auth';
@@ -7,7 +8,7 @@ import { ChallengeDto } from '../../../core/models/api.models';
 
 @Component({
   selector: 'app-challenge-detail',
-  imports: [DecimalPipe],
+  imports: [DecimalPipe, FormsModule],
   templateUrl: './challenge-detail.html',
   styleUrl:    './challenge-detail.scss',
 })
@@ -19,30 +20,37 @@ export class ChallengeDetail implements OnInit {
     private auth: Auth,
   ) {}
 
-  activeTab  = signal<'ranking' | 'progress' | 'participants'>('ranking');
-  challenge  = signal<ChallengeDto | null>(null);
-  showInvite = signal(false);
-  linkCopied = signal(false);
-  loading    = signal(true);
-  error      = signal('');
+  challenge   = signal<ChallengeDto | null>(null);
+  showInvite  = signal(false);
+  linkCopied  = signal(false);
+  loading     = signal(true);
+  error       = signal('');
+
+  // ── Registrar progresso ───────────────────────────────────────────────────────
+  showProgress  = signal(false);
+  progressInput = signal(0);
+  savingProgress = signal(false);
+  progressSaved  = signal(false);
 
   get inviteLink(): string { return `${window.location.origin}/challenges/${this.challenge()?.id}`; }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id') ?? '';
+    this.loadChallenge(id);
+  }
+
+  private loadChallenge(id: string): void {
     this.challengeService.getById(id).subscribe({
       next:  c => { this.challenge.set(c); this.loading.set(false); },
       error: () => { this.error.set('Desafio não encontrado.'); this.loading.set(false); },
     });
   }
 
-  // ── Helpers ───────────────────────────────────────────────────────────────────
+  // ── Computed ──────────────────────────────────────────────────────────────────
 
   isMe(userId: string): boolean {
     return this.auth.currentUser()?.id === userId;
   }
-
-  // ── Computed ──────────────────────────────────────────────────────────────────
 
   myProgress = computed(() => {
     const c = this.challenge();
@@ -71,34 +79,46 @@ export class ChallengeDetail implements OnInit {
     return idx >= 0 ? idx + 1 : 0;
   });
 
-  // ── Progress chart ────────────────────────────────────────────────────────────
+  // ── Registrar progresso ───────────────────────────────────────────────────────
 
-  get progressHistory(): number[] {
-    return this.ranking().map(p => p.currentProgress);
+  openProgress(): void {
+    this.progressInput.set(this.myProgress()?.currentProgress ?? 0);
+    this.progressSaved.set(false);
+    this.showProgress.set(true);
   }
 
-  miniBarRects = computed(() => {
-    const data  = this.progressHistory;
-    const maxV  = Math.max(...data, 1);
-    const total = data.length || 1;
-    const bw    = 320 / total - 3;
-    return data.map((val, i) => ({
-      x:       +(i * (320 / total) + 1).toFixed(1),
-      y:       +(80 - (val / maxV) * 72).toFixed(1),
-      w:       +bw.toFixed(1),
-      h:       +((val / maxV) * 72).toFixed(1),
-      value:   val,
-      opacity: +(0.5 + (i / total) * 0.5).toFixed(2),
-    }));
-  });
+  addQuick(amount: number): void {
+    const current = this.progressInput();
+    const goal = this.challenge()?.goal ?? 999999;
+    this.progressInput.set(Math.min(current + amount, goal));
+  }
+
+  saveProgress(): void {
+    const c = this.challenge();
+    const val = this.progressInput();
+    if (!c || val < 0) return;
+
+    this.savingProgress.set(true);
+    this.challengeService.updateProgress(c.id, { progress: val }).subscribe({
+      next: () => {
+        this.savingProgress.set(false);
+        this.progressSaved.set(true);
+        this.showProgress.set(false);
+        // Recarrega o desafio para atualizar ranking e progresso
+        this.loadChallenge(c.id);
+        setTimeout(() => this.progressSaved.set(false), 3000);
+      },
+      error: () => this.savingProgress.set(false),
+    });
+  }
 
   // ── Actions ───────────────────────────────────────────────────────────────────
 
   joinChallenge(): void {
-    const id = this.challenge()?.id;
-    if (!id) return;
-    this.challengeService.join(id).subscribe({
-      next:  () => this.challengeService.getById(id).subscribe({ next: c => this.challenge.set(c), error: () => {} }),
+    const c = this.challenge();
+    if (!c) return;
+    this.challengeService.join(c.id).subscribe({
+      next: () => this.loadChallenge(c.id),
       error: () => {},
     });
   }
@@ -118,10 +138,6 @@ export class ChallengeDetail implements OnInit {
 
   pct(current: number): number {
     return Math.min((current / (this.challenge()?.goal ?? 1)) * 100, 100);
-  }
-
-  formatDate(iso: string): string {
-    return new Date(iso).toLocaleDateString('pt-BR');
   }
 
   goBack(): void { this.router.navigate(['/home']); }

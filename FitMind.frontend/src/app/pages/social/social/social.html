@@ -12,9 +12,9 @@
 
   <!-- Filter tabs -->
   <div class="tabs">
-    <button class="tab" [class.active]="filter() === 'all'"        (click)="filter.set('all')">Todos</button>
-    <button class="tab" [class.active]="filter() === 'following'"  (click)="filter.set('following')">Seguindo</button>
-    <button class="tab" [class.active]="filter() === 'challenges'" (click)="filter.set('challenges')">Desafios</button>
+    <button class="tab" [class.active]="filter() === 'all'"        (click)="setFilter('all')">Todos</button>
+    <button class="tab" [class.active]="filter() === 'following'"  (click)="setFilter('following')">Seguindo</button>
+    <button class="tab" [class.active]="filter() === 'challenges'" (click)="setFilter('challenges')">Desafios</button>
   </div>
 
   <main class="page-content" style="padding-top:12px">
@@ -107,7 +107,7 @@
 
   <!-- ── New post modal ─────────────────────────────────────────────────────── -->
   @if (showNewPost()) {
-    <div class="modal-overlay" (click)="showNewPost.set(false)">
+    <div class="modal-overlay" (click)="closeNewPost()">
       <div class="modal-sheet" (click)="$event.stopPropagation()">
         <div class="modal-handle"></div>
         <p class="modal-title">Novo post</p>
@@ -124,8 +124,24 @@
                   (input)="newPostText.set($any($event.target).value)">
         </textarea>
 
-        <div style="display:flex; gap:10px; margin-top:10px">
-          <button class="btn btn-outline" (click)="showNewPost.set(false)">Cancelar</button>
+        <!-- Seletor de categoria/tag -->
+        <div class="post-tag-section">
+          <span class="post-tag-label">Categoria <span style="color:var(--text-hint)">(opcional)</span></span>
+          <div class="post-tag-chips">
+            @for (t of postTags; track t.value) {
+              <button type="button"
+                class="post-tag-chip"
+                [class.selected]="newPostTag() === t.value"
+                (click)="togglePostTag(t.value)">
+                <span class="mi mi-sm">{{ t.icon }}</span>
+                {{ t.value }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:14px">
+          <button class="btn btn-outline" (click)="closeNewPost()">Cancelar</button>
           <button class="btn btn-primary" [disabled]="!newPostText().trim() || posting()"
                   (click)="submitPost()">
             @if (posting()) { <span class="spinner"></span> Publicando... }
