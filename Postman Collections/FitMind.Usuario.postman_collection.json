@@ -778,7 +778,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"content\": \"Treino concluído! 💪\",\n  \"tags\": [\"treino\", \"fitness\"],\n  \"imageUrl\": \"\"\n}"
+              "raw": "{\n  \"content\": \"Treino concluído! 💪\",\n  \"tags\": \"treino,fitness\",\n  \"imageUrl\": \"\"\n}"
             }
           }
         },

@@ -41,12 +41,17 @@ public class HistoryService(AppDbContext context) : IHistoryService
 
     public async Task<IEnumerable<DietHistoryDto>> GetDietHistoryAsync(Guid userId, int days = 30)
     {
-        var since = DateTime.UtcNow.Date.AddDays(-days);
+        var since = DateTime.SpecifyKind(DateTime.UtcNow.Date.AddDays(-days), DateTimeKind.Utc);
         var settings = await context.UserSettings.FirstOrDefaultAsync(s => s.UserId == userId);
         int calorieGoal = settings?.CalorieGoal ?? 2000;
 
-        var entries = await context.FoodDiaryEntries
+        // Traz as linhas brutas e agrupa em memória — EF Core não traduz
+        // GroupBy+Select com variável externa (calorieGoal) para SQL.
+        var raw = await context.FoodDiaryEntries
             .Where(e => e.UserId == userId && e.Date >= since)
+            .ToListAsync();
+
+        return raw
             .GroupBy(e => e.Date.Date)
             .Select(g => new DietHistoryDto(
                 g.Key,
@@ -56,9 +61,7 @@ public class HistoryService(AppDbContext context) : IHistoryService
                 g.Sum(e => e.Carbs),
                 g.Sum(e => e.Fats)))
             .OrderByDescending(d => d.Date)
-            .ToListAsync();
-
-        return entries;
+            .ToList();
     }
 
     private async Task<IEnumerable<AchievementHistoryDto>> GetAchievementHistoryAsync(Guid userId)

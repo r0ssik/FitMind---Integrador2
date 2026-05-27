@@ -50,6 +50,9 @@ public class SocialService(AppDbContext context) : ISocialService
 
     public async Task LikePostAsync(Guid userId, Guid postId)
     {
+        var postExists = await context.Posts.AnyAsync(p => p.Id == postId);
+        if (!postExists) throw new KeyNotFoundException("Post não encontrado.");
+
         var exists = await context.PostLikes.AnyAsync(l => l.PostId == postId && l.UserId == userId);
         if (exists) return;
 

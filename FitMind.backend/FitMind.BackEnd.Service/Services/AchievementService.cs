@@ -89,7 +89,7 @@ public class AchievementService(AppDbContext context) : IAchievementService
         var challenges = await context.ChallengeParticipants.CountAsync(p => p.UserId == userId);
         var maxDuration = await context.WorkoutSessions
             .Where(s => s.UserId == userId)
-            .Select(s => s.DurationMinutes).DefaultIfEmpty(0).MaxAsync();
+            .MaxAsync(s => (int?)s.DurationMinutes) ?? 0;
 
         var earlyWorkout = await context.WorkoutSessions
             .AnyAsync(s => s.UserId == userId && s.Date.Hour < 7);
