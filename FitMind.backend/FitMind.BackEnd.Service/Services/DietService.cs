@@ -73,8 +73,10 @@ public class DietService(AppDbContext context) : IDietService
 
     public async Task<IEnumerable<object>> GetDiaryByDateAsync(Guid userId, DateTime date)
     {
+        var dateUtc    = DateTime.SpecifyKind(date.Date, DateTimeKind.Utc);
+        var nextDayUtc = dateUtc.AddDays(1);
         return await context.FoodDiaryEntries
-            .Where(e => e.UserId == userId && e.Date.Date == date.Date)
+            .Where(e => e.UserId == userId && e.Date >= dateUtc && e.Date < nextDayUtc)
             .OrderBy(e => e.MealType)
             .Select(e => (object)new
             {

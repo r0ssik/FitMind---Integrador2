@@ -17,7 +17,7 @@
           <span class="setting-desc">Lembretes de treino e progresso</span>
         </div>
         <label class="toggle" [class.on]="notifWorkout()"
-               (click)="notifWorkout.update(v => !v)">
+               (click)="toggle('notifWorkout', notifWorkout)">
           <span class="toggle-knob"></span>
         </label>
       </div>
@@ -27,7 +27,7 @@
           <span class="setting-desc">Metas calóricas e horários das refeições</span>
         </div>
         <label class="toggle" [class.on]="notifDiet()"
-               (click)="notifDiet.update(v => !v)">
+               (click)="toggle('notifDiet', notifDiet)">
           <span class="toggle-knob"></span>
         </label>
       </div>
@@ -37,7 +37,7 @@
           <span class="setting-desc">Lembretes para beber água</span>
         </div>
         <label class="toggle" [class.on]="notifWater()"
-               (click)="notifWater.update(v => !v)">
+               (click)="toggle('notifWater', notifWater)">
           <span class="toggle-knob"></span>
         </label>
       </div>
@@ -47,7 +47,7 @@
           <span class="setting-desc">Atualizações de ranking e prazo</span>
         </div>
         <label class="toggle" [class.on]="notifChallenge()"
-               (click)="notifChallenge.update(v => !v)">
+               (click)="toggle('notifChallenge', notifChallenge)">
           <span class="toggle-knob"></span>
         </label>
       </div>
@@ -57,7 +57,7 @@
           <span class="setting-desc">Curtidas, comentários e novos seguidores</span>
         </div>
         <label class="toggle" [class.on]="notifSocial()"
-               (click)="notifSocial.update(v => !v)">
+               (click)="toggle('notifSocial', notifSocial)">
           <span class="toggle-knob"></span>
         </label>
       </div>
@@ -67,7 +67,7 @@
           <span class="setting-desc">Novas medalhas e metas atingidas</span>
         </div>
         <label class="toggle" [class.on]="notifAchievement()"
-               (click)="notifAchievement.update(v => !v)">
+               (click)="toggle('notifAchievement', notifAchievement)">
           <span class="toggle-knob"></span>
         </label>
       </div>
@@ -82,7 +82,7 @@
           <span class="setting-desc">Outros usuários podem encontrar você</span>
         </div>
         <label class="toggle" [class.on]="publicProfile()"
-               (click)="publicProfile.update(v => !v)">
+               (click)="toggle('publicProfile', publicProfile)">
           <span class="toggle-knob"></span>
         </label>
       </div>
@@ -92,7 +92,7 @@
           <span class="setting-desc">Seus treinos aparecem no feed de seguidores</span>
         </div>
         <label class="toggle" [class.on]="showActivity()"
-               (click)="showActivity.update(v => !v)">
+               (click)="toggle('showActivity', showActivity)">
           <span class="toggle-knob"></span>
         </label>
       </div>
@@ -102,7 +102,7 @@
           <span class="setting-desc">Exibir peso corporal no perfil</span>
         </div>
         <label class="toggle" [class.on]="showWeight()"
-               (click)="showWeight.update(v => !v)">
+               (click)="toggle('showWeight', showWeight)">
           <span class="toggle-knob"></span>
         </label>
       </div>
@@ -114,9 +114,9 @@
       <div class="setting-row" style="border:none; flex-direction:column; align-items:flex-start; gap:10px">
         <span class="setting-label">Tema</span>
         <div class="theme-pills">
-          <button class="theme-pill" [class.active]="theme() === 'light'"  (click)="theme.set('light')">Claro</button>
-          <button class="theme-pill" [class.active]="theme() === 'dark'"   (click)="theme.set('dark')">Escuro</button>
-          <button class="theme-pill" [class.active]="theme() === 'system'" (click)="theme.set('system')">Sistema</button>
+          <button class="theme-pill" [class.active]="theme() === 'light'"  (click)="setTheme('light')">Claro</button>
+          <button class="theme-pill" [class.active]="theme() === 'dark'"   (click)="setTheme('dark')">Escuro</button>
+          <button class="theme-pill" [class.active]="theme() === 'system'" (click)="setTheme('system')">Sistema</button>
         </div>
       </div>
     </div>
@@ -130,7 +130,7 @@
           <span class="setting-desc">Selecione o idioma de exibição</span>
         </div>
         <select class="lang-select" [value]="lang()"
-                (change)="lang.set($any($event.target).value)">
+                (change)="setLang($any($event.target).value)">
           <option value="pt">Português</option>
           <option value="en">English</option>
         </select>
@@ -152,17 +152,19 @@
     </div>
 
     <!-- ── Admin ─────────────────────────────────────────────────────────── -->
-    <p class="settings-section-title"><span class="mi mi-sm">admin_panel_settings</span> Administração</p>
-    <div class="settings-card">
-      <button class="setting-link" (click)="goAdmin()">
-        <span style="display:flex;align-items:center;gap:8px"><span class="mi mi-sm">analytics</span> Painel administrativo</span>
-        <span class="mi mi-sm" style="color:var(--text-hint)">chevron_right</span>
-      </button>
-      <button class="setting-link" style="border:none" (click)="goAdminUsers()">
-        <span style="display:flex;align-items:center;gap:8px"><span class="mi mi-sm">group</span> Gestão de usuários</span>
-        <span class="mi mi-sm" style="color:var(--text-hint)">chevron_right</span>
-      </button>
-    </div>
+    @if (isAdmin) {
+      <p class="settings-section-title"><span class="mi mi-sm">admin_panel_settings</span> Administração</p>
+      <div class="settings-card">
+        <button class="setting-link" (click)="goAdmin()">
+          <span style="display:flex;align-items:center;gap:8px"><span class="mi mi-sm">analytics</span> Painel administrativo</span>
+          <span class="mi mi-sm" style="color:var(--text-hint)">chevron_right</span>
+        </button>
+        <button class="setting-link" style="border:none" (click)="goAdminUsers()">
+          <span style="display:flex;align-items:center;gap:8px"><span class="mi mi-sm">group</span> Gestão de usuários</span>
+          <span class="mi mi-sm" style="color:var(--text-hint)">chevron_right</span>
+        </button>
+      </div>
+    }
 
   </main>
 

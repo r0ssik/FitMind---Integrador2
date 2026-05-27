@@ -41,7 +41,7 @@
           </div>
           <div class="pd-item">
             <span class="pd-label">Sexo</span>
-            <span class="pd-val">{{ user()?.sex || '—' }}</span>
+            <span class="pd-val">{{ sexLabel }}</span>
           </div>
           <div class="pd-item">
             <span class="pd-label">Peso</span>
@@ -109,11 +109,12 @@
 
         <div class="form-group">
           <label>Sexo</label>
-          <select [value]="fSex()" (change)="fSex.set($any($event.target).value)">
-            <option value="">Selecionar</option>
-            <option value="Masculino">Masculino</option>
-            <option value="Feminino">Feminino</option>
-            <option value="Prefiro não dizer">Prefiro não dizer</option>
+          <select (change)="fSex.set($any($event.target).value)">
+            <option value="" [selected]="!fSex()">Selecionar</option>
+            <option value="Male"        [selected]="fSex() === 'Male'">Masculino</option>
+            <option value="Female"      [selected]="fSex() === 'Female'">Feminino</option>
+            <option value="NonBinary"   [selected]="fSex() === 'NonBinary'">Não binário</option>
+            <option value="NotInformed" [selected]="fSex() === 'NotInformed'">Prefiro não dizer</option>
           </select>
         </div>
 

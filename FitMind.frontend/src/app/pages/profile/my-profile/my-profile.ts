@@ -1,4 +1,4 @@
-import { Component, signal, computed, inject, OnInit } from '@angular/core';
+import { Component, signal, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Auth } from '../../../services/auth';
 import { UserService } from '../../../services/user.service';
@@ -48,6 +48,16 @@ export class MyProfile implements OnInit {
     return n.split(' ').map((x: string) => x[0]).slice(0, 2).join('').toUpperCase();
   }
 
+  /** Exibe o sexo em português no modo de leitura. */
+  get sexLabel(): string {
+    const map: Record<string, string> = {
+      Male: 'Masculino', Female: 'Feminino',
+      NonBinary: 'Não binário', NotInformed: 'Prefiro não dizer',
+    };
+    const v = this.user()?.sex ?? '';
+    return map[v] ?? (v || '—');
+  }
+
   ngOnInit(): void {}
 
   startEdit(): void {
@@ -77,11 +87,18 @@ export class MyProfile implements OnInit {
       weight:      this.fWeight() ? +this.fWeight() : undefined,
       height:      this.fHeight() ? +this.fHeight() : undefined,
       limitations: this.limitations().join(', ') || undefined,
+      sex:         this.fSex()   || undefined,
+      birthDate:   this.fBirth() || undefined,
     }).subscribe({
       next: updated => {
         this.auth.updateUserSignal(updated);
         this.saving.set(false);
         this.saved.set(true);
+        // Re-fetch fresh data from server to garantir que o signal reflita o BD
+        this.userService.getMe().subscribe({
+          next: fresh => this.auth.updateUserSignal(fresh),
+          error: () => {}
+        });
         setTimeout(() => { this.editing.set(false); this.saved.set(false); }, 1200);
       },
       error: () => {

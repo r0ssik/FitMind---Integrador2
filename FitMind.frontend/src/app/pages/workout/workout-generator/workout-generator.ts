@@ -75,7 +75,36 @@ export class WorkoutGenerator {
   }
 
   savePlan(): void {
-    this.router.navigate(['/workout-plans']);
+    const plan = this.generatedPlan();
+    if (!plan) { this.router.navigate(['/workout-plans']); return; }
+
+    this.loading.set(true);
+    this.workoutService.createPlan({
+      name:            plan.name,
+      goal:            this.mapGoal(plan.goal),
+      daysPerWeek:     plan.daysPerWeek,
+      weeks:           plan.weeks,
+      experienceLevel: 'Intermediate',
+      location:        this.form.value.location,
+    }).subscribe({
+      next: () => this.router.navigate(['/workout-plans']),
+      error: () => {
+        this.loading.set(false);
+        this.error.set('Erro ao salvar plano. Tente novamente.');
+      },
+    });
+  }
+
+  /** Maps any free-text goal string (including Portuguese AI output) to a valid WorkoutGoal enum name. */
+  private mapGoal(raw: string): string {
+    const lower = (raw ?? '').toLowerCase();
+    if (/emagrec|perda|weight.?loss|loss/.test(lower))              return 'WeightLoss';
+    if (/musculo|massa|hipertrofia|muscle|gain/.test(lower))        return 'MuscleGain';
+    if (/resist|endur|cardio|aerob|condiciona/.test(lower))         return 'Endurance';
+    if (/flex|mobility|mobilidade|alongamento/.test(lower))         return 'Flexibility';
+    // Enum names themselves pass through untouched
+    if (['WeightLoss','MuscleGain','Endurance','Flexibility','GeneralHealth'].includes(raw)) return raw;
+    return 'GeneralHealth';
   }
 
   regenerate(): void {

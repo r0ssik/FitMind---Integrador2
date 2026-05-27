@@ -1,5 +1,6 @@
 using FitMind.BackEnd.Service.Dtos.User;
 using FitMind.BackEnd.Service.Interfaces;
+using FitMind.BackEnd.SystemInfra.Enums;
 using FitMind.BackEnd.SystemInfra.Repositories;
 
 namespace FitMind.BackEnd.Service.Services;
@@ -31,6 +32,10 @@ public class UserService(UserRepository userRepository) : IUserService
         if (dto.Weight.HasValue) user.Weight = dto.Weight.Value;
         if (dto.Height.HasValue) user.Height = dto.Height.Value;
         if (dto.Limitations is not null) user.Limitations = dto.Limitations;
+        if (dto.Sex is not null && Enum.TryParse<UserSex>(dto.Sex, ignoreCase: true, out var sex))
+            user.Sex = sex;
+        if (dto.BirthDate.HasValue)
+            user.BirthDate = DateTime.SpecifyKind(dto.BirthDate.Value.Date, DateTimeKind.Utc);
 
         userRepository.Update(user);
         await userRepository.SaveChangesAsync();

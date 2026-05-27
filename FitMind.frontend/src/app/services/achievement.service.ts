@@ -14,7 +14,7 @@ export class AchievementService {
     return this.http.get<AchievementDto[]>(this.api);
   }
 
-  checkAndUnlock(): Observable<AchievementDto[]> {
-    return this.http.post<AchievementDto[]>(`${this.api}/check`, {});
+  checkAndUnlock(): Observable<void> {
+    return this.http.post<void>(`${this.api}/check`, {});
   }
 }

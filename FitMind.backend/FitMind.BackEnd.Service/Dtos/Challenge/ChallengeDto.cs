@@ -16,7 +16,8 @@ public record ChallengeDto(
     int ParticipantCount,
     List<ChallengeParticipantDto> Participants,
     decimal? MyProgress,
-    bool IsParticipating
+    bool IsParticipating,
+    string? Icon
 );
 
 public record ChallengeParticipantDto(

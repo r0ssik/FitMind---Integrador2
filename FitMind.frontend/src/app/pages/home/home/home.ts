@@ -34,6 +34,10 @@ export class Home implements OnInit {
     return name.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase();
   }
 
+  get isAdmin(): boolean {
+    return this.auth.currentUser()?.isAdmin ?? false;
+  }
+
   get workoutDone():     number { return this.dashboard()?.todayWorkoutDone  ?? 0; }
   get workoutTotal():    number { return this.dashboard()?.todayWorkoutTotal ?? 0; }
   get workoutProgress(): number {
@@ -94,6 +98,9 @@ export class Home implements OnInit {
     cups[index] = !cups[index];
     this.waterCups.set(cups);
     const count = cups.filter(c => c).length;
+    // Atualiza o signal water para que waterDone e waterProgress reflitam imediatamente
+    const current = this.water();
+    if (current) this.water.set({ ...current, cups: count });
     this.waterService.setCups({ cups: count }).subscribe({ error: () => {} });
   }
 
@@ -115,9 +122,12 @@ export class Home implements OnInit {
     return Math.min((c.myProgress / c.goal) * 100, 100);
   }
 
+  goChallenge(id: string): void { this.router.navigate(['/challenges', id]); }
+
   logout():           void { this.auth.logout(); }
   goProfile():        void { this.router.navigate(['/profile']); }
   goNotifications():  void { this.router.navigate(['/notifications']); }
+  goAdmin():          void { this.router.navigate(['/admin']); }
 
   navigate(section: string): void {
     const map: Record<string, string> = {

@@ -1,4 +1,4 @@
-import { Component, signal, OnInit } from '@angular/core';
+import { Component, signal, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Auth } from '../../../services/auth';
 import { SettingsService } from '../../../services/settings.service';
@@ -35,6 +35,10 @@ export class Settings implements OnInit {
 
   showLogoutConfirm = signal(false);
 
+  get isAdmin(): boolean {
+    return this.auth.currentUser()?.isAdmin ?? false;
+  }
+
   ngOnInit(): void {
     this.settingsService.get().subscribe({
       next: s => {
@@ -50,6 +54,7 @@ export class Settings implements OnInit {
         this.theme.set((s.theme as 'light' | 'dark' | 'system') ?? 'system');
         this.lang.set((s.language as 'pt' | 'en') ?? 'pt');
         this.loading.set(false);
+        this.applyTheme(this.theme());
       },
       error: () => this.loading.set(false),
     });
@@ -67,7 +72,22 @@ export class Settings implements OnInit {
 
   setTheme(t: 'light' | 'dark' | 'system'): void {
     this.theme.set(t);
+    this.applyTheme(t);
     this.saveField('theme', t);
+  }
+
+  applyTheme(t: 'light' | 'dark' | 'system'): void {
+    const root = document.documentElement;
+    if (t === 'dark') {
+      root.setAttribute('data-theme', 'dark');
+      localStorage.setItem('fitmind_theme', 'dark');
+    } else if (t === 'light') {
+      root.setAttribute('data-theme', 'light');
+      localStorage.setItem('fitmind_theme', 'light');
+    } else {
+      root.removeAttribute('data-theme');
+      localStorage.removeItem('fitmind_theme');
+    }
   }
 
   setLang(l: 'pt' | 'en'): void {

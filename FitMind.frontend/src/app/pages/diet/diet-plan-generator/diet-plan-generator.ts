@@ -87,7 +87,24 @@ export class DietPlanGenerator {
 
   regenerate(): void { this.generated.set(false); this.plan.set(null); }
 
-  savePlan(): void { this.router.navigate(['/food-diary']); }
+  savePlan(): void {
+    const plan = this.plan();
+    if (!plan) { this.router.navigate(['/food-diary']); return; }
+
+    this.loading.set(true);
+    this.dietService.createPlan({
+      name:         plan.name,
+      goal:         plan.goal,
+      budget:       this.form.value.budget ?? '',
+      restrictions: this.selectedRestrictions().filter(r => r !== 'Nenhuma').join(', '),
+    }).subscribe({
+      next: () => this.router.navigate(['/food-diary']),
+      error: () => {
+        this.loading.set(false);
+        this.error.set('Erro ao salvar plano. Tente novamente.');
+      },
+    });
+  }
 
   goBack(): void { this.router.navigate(['/food-diary']); }
 }

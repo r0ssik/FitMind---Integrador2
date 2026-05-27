@@ -31,12 +31,14 @@ public class ProgressService(AppDbContext context) : IProgressService
         int thisMonth = sessions.Count(s => s.Date.Month == now.Month && s.Date.Year == now.Year);
         double avgMin = sessions.Count > 0 ? sessions.Average(s => s.DurationMinutes) : 0;
 
-        int streak = CalcStreak(sessions.Select(s => s.Date.Date).Distinct().ToList());
+        var distinctDates = sessions.Select(s => s.Date.Date).Distinct().ToList();
+        int streak     = CalcStreak(distinctDates);
+        int bestStreak = CalcBestStreak(distinctDates);
 
         var settings = await context.UserSettings.FirstOrDefaultAsync(s => s.UserId == userId);
         int calorieGoal = settings?.CalorieGoal ?? 2000;
 
-        var weekStart = now.Date.AddDays(-(int)now.DayOfWeek);
+        var weekStart = DateTime.SpecifyKind(now.Date.AddDays(-(int)now.DayOfWeek), DateTimeKind.Utc);
         var weekCalories = await context.FoodDiaryEntries
             .Where(e => e.UserId == userId && e.Date >= weekStart)
             .SumAsync(e => (int?)e.Calories) ?? 0;
@@ -44,7 +46,7 @@ public class ProgressService(AppDbContext context) : IProgressService
         return new ProgressStatsDto(
             currentWeight, startWeight, delta,
             measurements.LastOrDefault()?.BodyFatPercentage,
-            totalWorkouts, thisMonth, streak, streak,
+            totalWorkouts, thisMonth, streak, bestStreak,
             Math.Round(avgMin, 0), weekCalories, calorieGoal);
     }
 
@@ -82,20 +84,21 @@ public class ProgressService(AppDbContext context) : IProgressService
 
     public async Task<DashboardProgressDto> GetDashboardAsync(Guid userId)
     {
-        var today = DateTime.UtcNow.Date;
+        var today = DateTime.SpecifyKind(DateTime.UtcNow.Date, DateTimeKind.Utc);
         var settings = await context.UserSettings.FirstOrDefaultAsync(s => s.UserId == userId);
         int calorieGoal = settings?.CalorieGoal ?? 2000;
         int waterGoal   = settings?.WaterGoalCups ?? 8;
 
         // Today's workout session
         var todaySession = await context.WorkoutSessions
-            .Where(s => s.UserId == userId && s.Date.Date == today)
+            .Where(s => s.UserId == userId && s.Date >= today && s.Date < today.AddDays(1))
             .OrderByDescending(s => s.CreatedAt)
             .FirstOrDefaultAsync();
 
-        // Active plan's today's day
+        // Active plan's today's day (exercises must be included to count them)
         var activePlan = await context.WorkoutPlans
             .Include(p => p.Days)
+                .ThenInclude(d => d.Exercises)
             .FirstOrDefaultAsync(p => p.UserId == userId && p.IsActive);
 
         string? dayName = null;
@@ -107,16 +110,17 @@ public class ProgressService(AppDbContext context) : IProgressService
                 d.DayName.Contains(dayOfWeek, StringComparison.OrdinalIgnoreCase));
             dayName = workoutDay?.Focus;
             total = workoutDay?.Exercises.Count ?? 0;
+            done  = todaySession?.ExercisesTotal ?? 0;
         }
 
         // Today's calories
         int todayCalories = await context.FoodDiaryEntries
-            .Where(e => e.UserId == userId && e.Date.Date == today)
+            .Where(e => e.UserId == userId && e.Date >= today && e.Date < today.AddDays(1))
             .SumAsync(e => (int?)e.Calories) ?? 0;
 
         // Today's water
         var water = await context.WaterIntakes
-            .FirstOrDefaultAsync(w => w.UserId == userId && w.Date.Date == today);
+            .FirstOrDefaultAsync(w => w.UserId == userId && w.Date >= today && w.Date < today.AddDays(1));
 
         // Weight delta this month
 
@@ -167,16 +171,31 @@ public class ProgressService(AppDbContext context) : IProgressService
         }
     }
 
-    private static int CalcStreak(List<DateTime> dates)
+    private static int CalcStreak(List<DateTime> distinctDates)
     {
         int streak = 0;
         var day = DateTime.UtcNow.Date;
-        var sorted = dates.OrderByDescending(d => d).ToList();
+        var sorted = distinctDates.OrderByDescending(d => d).ToList();
         foreach (var d in sorted)
         {
             if (d == day) { streak++; day = day.AddDays(-1); }
             else if (d < day) break;
         }
         return streak;
+    }
+
+    private static int CalcBestStreak(List<DateTime> distinctDates)
+    {
+        if (distinctDates.Count == 0) return 0;
+        var sorted = distinctDates.OrderBy(d => d).ToList();
+        int best = 1, current = 1;
+        for (int i = 1; i < sorted.Count; i++)
+        {
+            var diff = (sorted[i] - sorted[i - 1]).Days;
+            if (diff == 1)      { current++; if (current > best) best = current; }
+            else if (diff > 1)  { current = 1; }
+            // diff == 0: duplicate date (already Distinct), skip
+        }
+        return best;
     }
 }

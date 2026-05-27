@@ -16,5 +16,9 @@ public record LogWorkoutSessionDto(
     DateTime Date,
     int DurationMinutes,
     string? Feeling,
-    string? Notes
+    string? Notes,
+    string? WorkoutDayName,
+    string? WorkoutFocus,
+    int ExercisesTotal,
+    int SetsTotal
 );

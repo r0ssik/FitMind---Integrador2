@@ -9,5 +9,6 @@ public record AchievementDto(
     int Points,
     bool Unlocked,
     DateTime? UnlockedAt,
-    int? Progress   // 0-100 for locked ones with partial progress
+    int? Progress,  // 0-100 for locked ones with partial progress
+    bool Rare       // true for high-value achievements (>= 300 points)
 );

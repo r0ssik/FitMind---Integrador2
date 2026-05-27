@@ -74,7 +74,11 @@ public class WorkoutService(AppDbContext context) : IWorkoutService
             Date = DateTime.SpecifyKind(dto.Date, DateTimeKind.Utc),
             DurationMinutes = dto.DurationMinutes,
             Feeling = dto.Feeling,
-            Notes = dto.Notes
+            Notes = dto.Notes,
+            WorkoutDayName = dto.WorkoutDayName,
+            WorkoutFocus = dto.WorkoutFocus,
+            ExercisesTotal = dto.ExercisesTotal,
+            SetsTotal = dto.SetsTotal
         };
 
         await context.WorkoutSessions.AddAsync(session);

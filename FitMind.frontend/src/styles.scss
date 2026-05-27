@@ -37,6 +37,33 @@ $fitmind-primary: mat.define-theme((
   --radius-lg: 20px;
 }
 
+// ── Dark mode ────────────────────────────────────────────────────────────────
+[data-theme="dark"] {
+  --text-primary:   #f0f0f0;
+  --text-secondary: #a0a0a0;
+  --text-hint:      #666666;
+  --bg:             #121212;
+  --bg-card:        #1e1e1e;
+  --border:         #2c2c2c;
+  --shadow:         0 2px 12px rgba(0, 0, 0, 0.5);
+  --shadow-md:      0 4px 24px rgba(0, 0, 0, 0.65);
+  --primary-light:  #1b3a1c;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --text-primary:   #f0f0f0;
+    --text-secondary: #a0a0a0;
+    --text-hint:      #666666;
+    --bg:             #121212;
+    --bg-card:        #1e1e1e;
+    --border:         #2c2c2c;
+    --shadow:         0 2px 12px rgba(0, 0, 0, 0.5);
+    --shadow-md:      0 4px 24px rgba(0, 0, 0, 0.65);
+    --primary-light:  #1b3a1c;
+  }
+}
+
 // ── Material Symbols utility ─────────────────────────────────────────────────
 .mi {
   font-family: 'Material Symbols Rounded';
@@ -3016,5 +3043,125 @@ a {
     background: #e3f2fd;
     color: var(--secondary-dark);
     border: 1px solid #90caf9;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// Dark mode — class-level overrides
+// Replaces hardcoded #fff / white / #fafafa throughout global styles.
+// Component-scoped overrides use `html[data-theme="dark"]` (specificity 0,2,1)
+// to beat Angular's _ngcontent attribute selectors (specificity 0,2,0).
+// ══════════════════════════════════════════════════════════════════════════════
+
+[data-theme="dark"] {
+  // ── Auth ────────────────────────────────────────────────────────────────────
+  .auth-layout {
+    background: linear-gradient(135deg, #0f1f10 0%, #0a1520 100%);
+  }
+
+  .auth-card { background: var(--bg-card); }
+
+  // ── Forms ───────────────────────────────────────────────────────────────────
+  .form-group input,
+  .form-group select {
+    background: var(--bg);
+    &:focus { background: var(--bg-card); }
+  }
+
+  .btn-google {
+    background: var(--bg-card);
+    &:hover { background: var(--bg); border-color: var(--border); }
+  }
+
+  .step-circle { background: var(--bg-card); }
+
+  // ── Navigation ──────────────────────────────────────────────────────────────
+  .home-header   { background: var(--bg-card); }
+  .bottom-nav    { background: var(--bg-card); }
+  .page-header   { background: var(--bg-card); }
+  .filter-scroll { background: var(--bg-card); }
+  .filter-chip   { background: var(--bg-card); }
+  .tabs          { background: var(--bg-card); }
+
+  // ── Cards & containers ──────────────────────────────────────────────────────
+  .notif-card     { background: var(--bg-card); }
+  .day-card       { background: var(--bg-card); }
+  .day-header:hover { background: var(--bg); }
+  .history-card   { background: var(--bg-card); }
+  .chip           { background: var(--bg-card); }
+  .progress-label { background: var(--bg-card); }
+  .ex-card        { background: var(--bg-card); }
+  .ex-card-header:hover { background: var(--bg); }
+  .finish-card    { background: var(--bg-card); }
+  .stats-strip    { background: var(--bg-card); }
+  .calendar-card  { background: var(--bg-card); }
+  .modal-sheet    { background: var(--bg-card); }
+  .meal-type-chip { background: var(--bg-card); }
+  .portion-card   { background: var(--bg-card); }
+  .cart-section   { background: var(--bg-card); }
+  .cart-totals    { background: var(--bg); }
+  .drop-zone      { background: var(--bg-card); }
+  .detected-card  { background: var(--bg-card); }
+
+  // ── Exercise row separator ───────────────────────────────────────────────────
+  .exercise-row { border-bottom-color: var(--border); }
+
+  // ── Workout detail ──────────────────────────────────────────────────────────
+  .set-check  { background: var(--bg); }
+  .effort-btn { background: var(--bg-card); }
+  .day-btn    { background: var(--bg-card); }
+
+  // ── Water tracker ────────────────────────────────────────────────────────────
+  .cup { background: var(--bg); }
+
+  // ── Search ───────────────────────────────────────────────────────────────────
+  .search-input-wrap {
+    background: var(--bg);
+    &:focus-within { background: var(--bg-card); }
+  }
+  .search-results  { background: var(--bg-card); }
+  .quick-food-btn:hover { background: var(--bg); }
+}
+
+// Component-scoped overrides — html prefix gives specificity (0,2,1)
+// which beats Angular ViewEncapsulation's [_ngcontent-xxx] at (0,2,0).
+html[data-theme="dark"] {
+  // ── Home header (home.scss) ──────────────────────────────────────────────────
+  .user-header     { background: var(--bg-card); }
+  .greeting        { color: var(--text-secondary); }
+  .user-name       { color: var(--text-primary); }
+  .notif-btn       { background: var(--bg-card); }
+  .notif-btn:hover { background: var(--bg); }
+
+  // ── Achievements (achievements.scss) ─────────────────────────────────────────
+  .achiev-summary     { background: var(--bg-card); }
+  .achiev-card.locked { background: var(--bg-card); }
+
+  // ── Settings (settings.scss) ─────────────────────────────────────────────────
+  .theme-pill  { background: var(--bg-card); }
+  .lang-select { background: var(--bg-card); }
+
+  // ── Social (social.scss) ──────────────────────────────────────────────────────
+  .comment-input:focus     { background: var(--bg-card); }
+  .new-post-textarea       { background: var(--bg); }
+  .new-post-textarea:focus { background: var(--bg-card); }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    // ── Navigation ────────────────────────────────────────────────────────────
+    .home-header   { background: var(--bg-card); }
+    .bottom-nav    { background: var(--bg-card); }
+    .page-header   { background: var(--bg-card); }
+    .filter-scroll { background: var(--bg-card); }
+    .filter-chip   { background: var(--bg-card); }
+    .tabs          { background: var(--bg-card); }
+
+    // ── Cards ─────────────────────────────────────────────────────────────────
+    .notif-card  { background: var(--bg-card); }
+    .day-card    { background: var(--bg-card); }
+    .ex-card     { background: var(--bg-card); }
+    .finish-card { background: var(--bg-card); }
+    .modal-sheet { background: var(--bg-card); }
   }
 }

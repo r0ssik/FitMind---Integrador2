@@ -24,7 +24,7 @@ public class AchievementService(AppDbContext context) : IAchievementService
             var progress = ua is null ? CalcProgress(a, stats) : (int?)null;
             return new AchievementDto(
                 a.Id, a.Name, a.Description, a.Category, a.Icon, a.Points,
-                ua is not null, ua?.UnlockedAt, progress);
+                ua is not null, ua?.UnlockedAt, progress, a.Points >= 300);
         });
     }
 
@@ -72,17 +72,17 @@ public class AchievementService(AppDbContext context) : IAchievementService
         var now = DateTime.UtcNow;
         var totalWorkouts = await context.WorkoutSessions.CountAsync(s => s.UserId == userId);
 
-        var sessions = await context.WorkoutSessions
+        var rawDates = await context.WorkoutSessions
             .Where(s => s.UserId == userId)
-            .OrderByDescending(s => s.Date)
-            .Select(s => s.Date.Date)
+            .Select(s => s.Date)
             .ToListAsync();
 
         int streak = 0;
         var day = now.Date;
-        foreach (var _ in sessions.Distinct())
+        var distinctDates = rawDates.Select(d => d.Date).Distinct().OrderByDescending(d => d).ToList();
+        foreach (var d in distinctDates)
         {
-            if (sessions.Contains(day)) { streak++; day = day.AddDays(-1); }
+            if (d == day) { streak++; day = day.AddDays(-1); }
             else break;
         }
 

@@ -7,5 +7,7 @@ public record UpdateUserDto(
     string? AvatarUrl,
     decimal? Weight,
     decimal? Height,
-    string? Limitations
+    string? Limitations,
+    string? Sex,          // enum name: Male | Female | NonBinary | NotInformed
+    DateTime? BirthDate
 );

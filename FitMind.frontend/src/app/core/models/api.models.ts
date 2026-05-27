@@ -4,7 +4,7 @@ export interface LoginRequest { email: string; password: string; }
 
 export interface RegisterRequest {
   name: string; email: string; password: string;
-  phone: string; birthDate: string; sex: number;
+  phone: string; birthDate: string; sex: string;
   weight: number; height: number; limitations: string;
   goals: string[]; weeklyAvailability: number;
 }
@@ -31,6 +31,8 @@ export interface UserDto {
 export interface UpdateUserDto {
   name?: string; phone?: string; bio?: string; avatarUrl?: string;
   weight?: number; height?: number; limitations?: string;
+  sex?: string;       // enum name: Male | Female | NonBinary | NotInformed
+  birthDate?: string; // ISO date: YYYY-MM-DD
 }
 
 // ── Workout ──────────────────────────────────────────────────────────────────
@@ -58,6 +60,8 @@ export interface CreateWorkoutPlanRequest {
 export interface LogWorkoutSessionRequest {
   workoutPlanId?: string; date: string; durationMinutes: number;
   feeling?: string; notes?: string;
+  workoutDayName?: string; workoutFocus?: string;
+  exercisesTotal?: number; setsTotal?: number;
 }
 
 export interface WorkoutHistoryDto {

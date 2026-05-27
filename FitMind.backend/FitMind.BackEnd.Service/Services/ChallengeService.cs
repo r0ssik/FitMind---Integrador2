@@ -105,8 +105,17 @@ public class ChallengeService(AppDbContext context) : IChallengeService
                 i + 1))
             .ToList();
 
-        var myPart = c.Participants.FirstOrDefault(p => p.UserId == currentUserId);
+        var myPart  = c.Participants.FirstOrDefault(p => p.UserId == currentUserId);
         int daysLeft = Math.Max(0, (c.EndDate.Date - DateTime.UtcNow.Date).Days);
+        var icon = c.Type.ToString() switch
+        {
+            "Workout"  => "fitness_center",
+            "Steps"    => "directions_walk",
+            "Water"    => "water_drop",
+            "Weight"   => "monitor_weight",
+            "Calories" => "local_fire_department",
+            _          => "emoji_events"
+        };
 
         return new ChallengeDto(
             c.Id, c.Name, c.Description, c.Type, c.Goal, c.Unit,
@@ -115,7 +124,8 @@ public class ChallengeService(AppDbContext context) : IChallengeService
             c.Participants.Count,
             ranked,
             myPart?.CurrentProgress,
-            myPart is not null);
+            myPart is not null,
+            icon);
     }
 
     private static string Initials(string? name) =>

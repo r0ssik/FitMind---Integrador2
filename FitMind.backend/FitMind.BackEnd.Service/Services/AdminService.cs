@@ -10,18 +10,20 @@ public class AdminService(AppDbContext context) : IAdminService
     public async Task<DashboardStatsDto> GetDashboardStatsAsync()
     {
         var now = DateTime.UtcNow;
-        var todayStart = now.Date;
-        var weekStart = todayStart.AddDays(-6);
+        var todayStart = DateTime.SpecifyKind(now.Date, DateTimeKind.Utc);
+        var weekStart  = todayStart.AddDays(-6);
 
+        var tomorrowStart = todayStart.AddDays(1);
         var totalUsers = await context.Users.CountAsync(u => !u.IsAdmin);
-        var workoutsToday = await context.WorkoutSessions.CountAsync(s => s.Date >= todayStart);
+        var workoutsToday = await context.WorkoutSessions
+            .CountAsync(s => s.Date >= todayStart && s.Date < tomorrowStart);
         var activeChallenges = await context.Challenges.CountAsync(c => c.EndDate >= now);
         var openReports = await context.Reports.CountAsync(r => r.Status == "pending");
         var newThisWeek = await context.Users.CountAsync(u => !u.IsAdmin && u.CreatedAt >= weekStart);
 
         // Active today: users who logged a workout session today
         var activeToday = await context.WorkoutSessions
-            .Where(s => s.Date >= todayStart)
+            .Where(s => s.Date >= todayStart && s.Date < tomorrowStart)
             .Select(s => s.UserId)
             .Distinct()
             .CountAsync();

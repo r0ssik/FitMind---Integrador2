@@ -8,6 +8,11 @@
     </div>
     <img src="logo.png" class="home-logo">
     <div class="user-actions">
+      @if (isAdmin) {
+        <button class="notif-btn" (click)="goAdmin()" title="Painel Admin">
+          <span class="mi" style="font-size:20px">admin_panel_settings</span>
+        </button>
+      }
       <button class="notif-btn" (click)="goNotifications()">🔔</button>
       <button class="avatar" (click)="goProfile()">{{ userInitials }}</button>
     </div>
@@ -121,7 +126,7 @@
           <span class="widget-icon mi">emoji_events</span>
         </div>
         @for (c of challenges(); track c.id) {
-          <div class="challenge-item">
+          <div class="challenge-item" (click)="goChallenge(c.id)" style="cursor:pointer">
             <span class="challenge-icon mi">{{ c.icon ?? 'emoji_events' }}</span>
             <div class="challenge-info">
               <div class="challenge-name">{{ c.name }}</div>

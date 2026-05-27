@@ -179,6 +179,10 @@ export class WorkoutDetail implements OnInit, OnDestroy {
       date:            new Date().toISOString(),
       durationMinutes,
       feeling:         dominantEffort ?? undefined,
+      workoutDayName:  this.workoutName().split(' — ')[0],
+      workoutFocus:    this.workoutName().split(' — ')[1] ?? undefined,
+      exercisesTotal:  this.exercises().length,
+      setsTotal:       this.totalSets(),
     }).subscribe({ error: () => {}, complete: () => this.saving.set(false) });
   }
 
