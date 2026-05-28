@@ -275,6 +275,10 @@ export class Home implements OnInit {
     this.router.navigate(['/admin']);
   }
 
+  goWaterHistory(): void {
+    this.router.navigate(['/hydration']);
+  }
+
   navigate(section: string): void {
 
     const map: Record<string, string> = {

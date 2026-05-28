@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ChallengeService } from '../../../services/challenge.service';
 import { Auth } from '../../../services/auth';
-import { ChallengeDto } from '../../../core/models/api.models';
+import { ChallengeDto, ChallengeParticipantDto } from '../../../core/models/api.models';
 
 @Component({
   selector: 'app-challenge-detail',
@@ -49,14 +49,29 @@ export class ChallengeDetail implements OnInit {
   // ── Computed ──────────────────────────────────────────────────────────────────
 
   isMe(userId: string): boolean {
-    return this.auth.currentUser()?.id === userId;
+    const myId = this.auth.currentUser()?.id;
+    return !!myId && myId.toLowerCase() === userId?.toLowerCase();
   }
 
-  myProgress = computed(() => {
+  myProgress = computed((): ChallengeParticipantDto | null => {
     const c = this.challenge();
     const me = this.auth.currentUser();
-    if (!c || !me) return null;
-    return c.participants.find(p => p.userId === me.id) ?? null;
+    if (!c || !me || !c.isParticipating) return null;
+
+    const meId = me.id.toLowerCase();
+    const found = c.participants.find(p => p.userId.toLowerCase() === meId);
+    if (found) return found;
+
+    // Participating but 0 progress — not in ranking list yet
+    const initials = me.name.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase();
+    return {
+      userId: me.id,
+      name: me.name,
+      initials,
+      currentProgress: c.myProgress ?? 0,
+      progressPercent: 0,
+      rank: c.participants.length + 1,
+    };
   });
 
   myPct = computed(() => {
@@ -75,7 +90,8 @@ export class ChallengeDetail implements OnInit {
   myRank = computed(() => {
     const me = this.auth.currentUser();
     if (!me) return 0;
-    const idx = this.ranking().findIndex(p => p.userId === me.id);
+    const meId = me.id.toLowerCase();
+    const idx = this.ranking().findIndex(p => p.userId.toLowerCase() === meId);
     return idx >= 0 ? idx + 1 : 0;
   });
 

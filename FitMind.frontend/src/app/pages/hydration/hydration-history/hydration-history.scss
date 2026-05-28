@@ -1,0 +1,227 @@
+// ── Stats strip ───────────────────────────────────────────────────────────────
+.stats-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.stat-box {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+
+  &.accent {
+    border-color: #1e88e5;
+    background: rgba(30, 136, 229, 0.08);
+
+    .sb-val { color: #1e88e5; }
+  }
+}
+
+.sb-val {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.sb-lbl {
+  font-size: 10px;
+  color: var(--text-hint);
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+// ── Section card ──────────────────────────────────────────────────────────────
+.section-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-hint);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+
+// ── Bar chart ─────────────────────────────────────────────────────────────────
+.bar-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 72px;
+  padding-bottom: 4px;
+}
+
+.bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  height: 100%;
+  cursor: default;
+}
+
+.bar-wrap {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  background: var(--bg);
+  border-radius: 3px 3px 0 0;
+  overflow: hidden;
+}
+
+.bar-fill {
+  width: 100%;
+  border-radius: 3px 3px 0 0;
+  transition: height 0.3s ease;
+  min-height: 2px;
+}
+
+.bar-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #1e88e5;
+  flex-shrink: 0;
+}
+
+.chart-legend {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  flex-wrap: wrap;
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 2px;
+}
+
+// ── Daily list ────────────────────────────────────────────────────────────────
+.day-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px 8px;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-bottom: none;
+  border-radius: var(--radius) var(--radius) 0 0;
+  margin-top: 10px;
+  gap: 10px;
+
+  &.goal-met {
+    border-color: rgba(30, 136, 229, 0.4);
+  }
+}
+
+.day-progress {
+  height: 4px;
+  background: var(--border);
+  border-radius: 0 0 var(--radius) var(--radius);
+  border: 1.5px solid var(--border);
+  border-top: none;
+  overflow: hidden;
+  margin-bottom: 0;
+
+  .day-progress-fill {
+    height: 100%;
+    border-radius: 0 0 var(--radius) var(--radius);
+    transition: width 0.4s ease;
+  }
+}
+
+.goal-met + .day-progress {
+  border-color: rgba(30, 136, 229, 0.4);
+}
+
+.day-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.day-icon { font-size: 22px; flex-shrink: 0; }
+
+.day-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.day-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.cup-dots {
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+}
+
+.cup-dot {
+  width: 8px;
+  height: 10px;
+  border-radius: 2px;
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  transition: all 0.15s;
+
+  &.filled {
+    background: #1e88e5;
+    border-color: #1e88e5;
+  }
+}
+
+.day-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.day-cups {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-secondary);
+
+  &.full { color: #1e88e5; }
+}
+
+.day-unit {
+  font-size: 11px;
+  color: var(--text-hint);
+}
+
+.goal-check {
+  color: #1e88e5;
+  font-size: 18px;
+  margin-left: 2px;
+}

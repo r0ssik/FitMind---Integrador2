@@ -34,6 +34,7 @@ export const routes: Routes = [
   { path: 'profile/:id',               ...guarded(() => import('./pages/profile/user-profile/user-profile').then(m => m.UserProfile)) },
   { path: 'settings',                  ...guarded(() => import('./pages/settings/settings/settings').then(m => m.Settings)) },
   { path: 'history',                   ...guarded(() => import('./pages/history/history/history').then(m => m.History)) },
+  { path: 'hydration',                 ...guarded(() => import('./pages/hydration/hydration-history/hydration-history').then(m => m.HydrationHistory)) },
   { path: 'admin',                     ...guarded(() => import('./pages/admin/admin-dashboard/admin-dashboard').then(m => m.AdminDashboard)) },
   { path: 'admin/users',               ...guarded(() => import('./pages/admin/admin-users/admin-users').then(m => m.AdminUsers)) },
 

@@ -76,7 +76,7 @@
 
       <!-- Água -->
       <div class="widget">
-        <div class="widget-header">
+        <div class="widget-header" (click)="goWaterHistory()" style="cursor:pointer" title="Ver histórico">
           <span class="widget-title">Hidratação</span>
           <span class="widget-icon mi">water_drop</span>
         </div>
@@ -92,6 +92,9 @@
         <div class="progress-bar" style="margin-top: 10px">
           <div class="progress-fill" [style.width.%]="waterProgress" style="background: var(--secondary)"></div>
         </div>
+        <button class="btn btn-outline btn-sm" style="width:100%;margin-top:10px;font-size:12px" (click)="goWaterHistory()">
+          <span class="mi mi-sm">history</span> Ver histórico
+        </button>
       </div>
 
       <!-- Progresso rápido -->

@@ -50,7 +50,7 @@
           <div class="progress-fill" [style.width.%]="myPct()"></div>
         </div>
         <div class="mp-sub">
-          <span>{{ myPct() | number:'1.0-0':'pt' }}% concluído</span>
+          <span>{{ myPct() | number:'1.0-0' }}% concluído</span>
           <span>{{ c.daysLeft }} dias restantes</span>
         </div>
         @if (progressSaved()) {

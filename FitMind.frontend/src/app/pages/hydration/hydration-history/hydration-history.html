@@ -1,0 +1,113 @@
+<div class="page-layout">
+
+  <header class="page-header">
+    <button class="back-btn" (click)="goBack()"><span class="mi">arrow_back</span></button>
+    <h1>Hidratação</h1>
+    <div style="width:40px"></div>
+  </header>
+
+  @if (loading()) {
+    <div class="empty-state" style="padding:60px 0">
+      <span class="spinner"></span>
+    </div>
+
+  } @else {
+
+    <main class="page-content">
+
+      <!-- ── Stats strip ──────────────────────────────────────────────────────── -->
+      <div class="stats-strip">
+        <div class="stat-box">
+          <span class="sb-val">{{ avgCups() | number:'1.1-1' }}</span>
+          <span class="sb-lbl">média/dia</span>
+        </div>
+        <div class="stat-box accent">
+          <span class="sb-val">{{ daysAtGoal() }}</span>
+          <span class="sb-lbl">dias na meta</span>
+        </div>
+        <div class="stat-box">
+          <span class="sb-val">{{ streak() }}</span>
+          <span class="sb-lbl">sequência atual</span>
+        </div>
+        @if (bestDay()) {
+          <div class="stat-box">
+            <span class="sb-val">{{ bestDay()!.cups }}</span>
+            <span class="sb-lbl">melhor dia</span>
+          </div>
+        }
+      </div>
+
+      <!-- ── Bar chart ────────────────────────────────────────────────────────── -->
+      @if (chartData().length) {
+        <div class="section-card">
+          <p class="section-title">Últimos {{ chartData().length }} dias</p>
+          <div class="bar-chart">
+            @for (d of chartData(); track d.date) {
+              <div class="bar-col" [title]="dayLabel(d.date) + ': ' + d.cups + '/' + d.goal + ' copos'">
+                <div class="bar-wrap">
+                  <div class="bar-fill"
+                       [style.height.%]="pct(d.cups, d.goal)"
+                       [style.background]="barColor(d)">
+                  </div>
+                </div>
+                @if (d.cups >= d.goal) {
+                  <div class="bar-dot"></div>
+                }
+              </div>
+            }
+          </div>
+          <div class="chart-legend">
+            <span class="legend-dot" style="background:#1e88e5"></span><span>Meta atingida</span>
+            <span class="legend-dot" style="background:#64b5f6"></span><span>Parcial</span>
+            <span class="legend-dot" style="background:var(--border)"></span><span>Sem registro</span>
+          </div>
+        </div>
+      }
+
+      <!-- ── Daily list ────────────────────────────────────────────────────────── -->
+      <p class="section-title" style="padding: 0 4px; margin-bottom: 8px">Registros diários</p>
+
+      @if (!sortedHistory().length) {
+        <div class="empty-state" style="padding:32px 0">
+          <span class="mi mi-xl" style="color:var(--text-hint)">water_drop</span>
+          <p>Nenhum registro ainda.<br>Comece registrando sua hidratação hoje!</p>
+        </div>
+      }
+
+      @for (day of sortedHistory(); track day.date) {
+        <div class="day-row" [class.goal-met]="day.cups >= day.goal">
+          <div class="day-left">
+            <span class="mi day-icon" [style.color]="day.cups >= day.goal ? '#1e88e5' : 'var(--text-hint)'">
+              water_drop
+            </span>
+            <div class="day-info">
+              <span class="day-label">{{ dayLabel(day.date) }}</span>
+              <div class="cup-dots">
+                @for (idx of range(day.goal); track idx) {
+                  <div class="cup-dot" [class.filled]="idx < day.cups"></div>
+                }
+              </div>
+            </div>
+          </div>
+          <div class="day-right">
+            <span class="day-cups" [class.full]="day.cups >= day.goal">
+              {{ day.cups }}/{{ day.goal }}
+            </span>
+            <span class="day-unit">copos</span>
+            @if (day.cups >= day.goal) {
+              <span class="mi mi-sm goal-check">check_circle</span>
+            }
+          </div>
+        </div>
+        <div class="day-progress">
+          <div class="day-progress-fill"
+               [style.width.%]="pct(day.cups, day.goal)"
+               [style.background]="barColor(day)">
+          </div>
+        </div>
+      }
+
+    </main>
+  }
+
+</div>
