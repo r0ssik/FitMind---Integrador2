@@ -114,9 +114,8 @@
       <div class="setting-row" style="border:none; flex-direction:column; align-items:flex-start; gap:10px">
         <span class="setting-label">Tema</span>
         <div class="theme-pills">
-          <button class="theme-pill" [class.active]="theme() === 'light'"  (click)="setTheme('light')">Claro</button>
-          <button class="theme-pill" [class.active]="theme() === 'dark'"   (click)="setTheme('dark')">Escuro</button>
-          <button class="theme-pill" [class.active]="theme() === 'system'" (click)="setTheme('system')">Sistema</button>
+          <button class="theme-pill" [class.active]="theme() === 'light'" (click)="setTheme('light')">Claro</button>
+          <button class="theme-pill" [class.active]="theme() === 'dark'"  (click)="setTheme('dark')">Escuro</button>
         </div>
       </div>
     </div>

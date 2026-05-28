@@ -30,7 +30,7 @@ export class Settings implements OnInit {
   showActivity   = signal(true);
   showWeight     = signal(false);
 
-  theme = signal<'light' | 'dark' | 'system'>('system');
+  theme = signal<'light' | 'dark'>('light');
   lang  = signal<'pt' | 'en'>('pt');
 
   showLogoutConfirm = signal(false);
@@ -51,7 +51,7 @@ export class Settings implements OnInit {
         this.publicProfile.set(s.publicProfile);
         this.showActivity.set(s.showActivity);
         this.showWeight.set(s.showWeight);
-        this.theme.set((s.theme as 'light' | 'dark' | 'system') ?? 'system');
+        this.theme.set((s.theme === 'dark' ? 'dark' : 'light'));
         this.lang.set((s.language as 'pt' | 'en') ?? 'pt');
         this.loading.set(false);
         this.applyTheme(this.theme());
@@ -70,24 +70,16 @@ export class Settings implements OnInit {
     this.saveField(field, next);
   }
 
-  setTheme(t: 'light' | 'dark' | 'system'): void {
+  setTheme(t: 'light' | 'dark'): void {
     this.theme.set(t);
     this.applyTheme(t);
     this.saveField('theme', t);
   }
 
-  applyTheme(t: 'light' | 'dark' | 'system'): void {
+  applyTheme(t: 'light' | 'dark'): void {
     const root = document.documentElement;
-    if (t === 'dark') {
-      root.setAttribute('data-theme', 'dark');
-      localStorage.setItem('fitmind_theme', 'dark');
-    } else if (t === 'light') {
-      root.setAttribute('data-theme', 'light');
-      localStorage.setItem('fitmind_theme', 'light');
-    } else {
-      root.removeAttribute('data-theme');
-      localStorage.removeItem('fitmind_theme');
-    }
+    root.setAttribute('data-theme', t);
+    localStorage.setItem('fitmind_theme', t);
   }
 
   setLang(l: 'pt' | 'en'): void {

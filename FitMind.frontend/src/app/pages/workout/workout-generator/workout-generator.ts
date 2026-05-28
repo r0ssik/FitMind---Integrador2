@@ -50,17 +50,21 @@ export class WorkoutGenerator {
     if (!this.selectedLimitations().length) this.selectedLimitations.set(['Nenhuma']);
   }
 
-  async generate(): Promise<void> {
+  generate(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
-    this.loading.set(true);
+
+    // Reseta estado anterior para permitir nova geração sem sair da página
+    this.generated.set(false);
+    this.generatedPlan.set(null);
     this.error.set('');
+    this.loading.set(true);
 
     this.workoutService.generateWithAi({
-      daysPerWeek:     this.form.value.daysPerWeek,
+      daysPerWeek:       this.form.value.daysPerWeek,
       minutesPerSession: this.form.value.timePerSession,
-      location:        this.form.value.location,
-      preferences:     this.selectedPrefs(),
-      limitations:     this.selectedLimitations().filter(l => l !== 'Nenhuma'),
+      location:          this.form.value.location,
+      preferences:       this.selectedPrefs(),
+      limitations:       this.selectedLimitations().filter(l => l !== 'Nenhuma'),
     }).subscribe({
       next: plan => {
         this.generatedPlan.set(plan);
@@ -123,8 +127,10 @@ export class WorkoutGenerator {
   }
 
   regenerate(): void {
+    this.loading.set(false);       // garante que o botão não fica preso desabilitado
     this.generated.set(false);
     this.generatedPlan.set(null);
+    this.error.set('');
   }
 
   goBack(): void { this.router.navigate(['/workout-plans']); }

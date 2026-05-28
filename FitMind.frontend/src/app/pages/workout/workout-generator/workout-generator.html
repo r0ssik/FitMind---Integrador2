@@ -7,6 +7,12 @@
 
   <main class="page-content">
 
+    @if (error()) {
+      <div class="alert alert-error" style="margin-bottom:14px">
+        <span class="mi mi-sm">error_outline</span> {{ error() }}
+      </div>
+    }
+
     @if (!generated()) {
       <!-- Formulário -->
       <div class="ai-banner">
