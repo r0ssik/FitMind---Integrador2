@@ -390,7 +390,7 @@ a {
       font-weight: 700;
       border: 2px solid var(--border);
       color: var(--text-hint);
-      background: white;
+      background: var(--bg-card);
       transition: all 0.3s;
     }
 
@@ -872,7 +872,7 @@ a {
   bottom: 0;
   left: 0;
   right: 0;
-  background: white;
+  background: var(--bg-card);
   display: flex;
   border-top: 1px solid var(--border);
   padding: 8px 0 env(safe-area-inset-bottom, 8px);
@@ -913,7 +913,7 @@ a {
 }
 
 .page-header {
-  background: white;
+  background: var(--bg-card);
   padding: 14px 16px;
   display: flex;
   align-items: center;
@@ -957,7 +957,7 @@ a {
   gap: 8px;
   padding: 10px 16px;
   overflow-x: auto;
-  background: white;
+  background: var(--bg-card);
   border-bottom: 1px solid var(--border);
   scrollbar-width: none;
 
@@ -969,7 +969,7 @@ a {
   padding: 6px 14px;
   border-radius: 20px;
   border: 1.5px solid var(--border);
-  background: white;
+  background: var(--bg-card);
   font-size: 13px;
   font-weight: 500;
   color: var(--text-secondary);
@@ -989,7 +989,7 @@ a {
 
 .tabs {
   display: flex;
-  background: white;
+  background: var(--bg-card);
   border-bottom: 1px solid var(--border);
 }
 
@@ -1065,7 +1065,7 @@ a {
 .notif-card {
   display: flex;
   gap: 12px;
-  background: white;
+  background: var(--bg-card);
   border-radius: var(--radius);
   padding: 14px;
   margin-bottom: 10px;
@@ -1348,7 +1348,7 @@ a {
     padding: 10px 4px;
     border-radius: var(--radius-sm);
     border: 1.5px solid var(--border);
-    background: white;
+    background: var(--bg-card);
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
@@ -1375,7 +1375,7 @@ a {
   padding: 7px 14px;
   border-radius: 20px;
   border: 1.5px solid var(--border);
-  background: white;
+  background: var(--bg-card);
   font-size: 13px;
   font-weight: 500;
   color: var(--text-secondary);
@@ -1524,7 +1524,7 @@ a {
 }
 
 .ex-card {
-  background: white;
+  background: var(--bg-card);
   border-radius: var(--radius);
   margin-bottom: 10px;
   box-shadow: var(--shadow);
@@ -1543,7 +1543,7 @@ a {
   user-select: none;
   transition: background 0.15s;
 
-  &:hover { background: #fafafa; }
+  &:hover { background: var(--bg); }
 }
 
 .ex-card-info { display: flex; flex-direction: column; gap: 3px; }
@@ -1574,11 +1574,11 @@ a {
 .ex-tip-row {
   margin: 0 16px 10px;
   padding: 10px 12px;
-  background: #fffde7;
+  background: rgba(255, 214, 0, 0.12);
   border-left: 3px solid #ffd600;
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   font-size: 13px;
-  color: #795548;
+  color: var(--text-secondary);
 }
 
 .video-link {
@@ -1657,7 +1657,7 @@ a {
   height: 30px;
   border-radius: 50%;
   border: 2px solid var(--border);
-  background: white;
+  background: var(--bg-card);
   cursor: pointer;
   font-size: 14px;
   font-weight: 700;
@@ -1698,7 +1698,7 @@ a {
   padding: 7px 12px;
   border-radius: 20px;
   border: 1.5px solid var(--border);
-  background: white;
+  background: var(--bg-card);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -1733,7 +1733,7 @@ a {
 }
 
 .finish-card {
-  background: white;
+  background: var(--bg-card);
   border-radius: var(--radius-lg);
   padding: 36px 28px;
   text-align: center;
@@ -1762,7 +1762,7 @@ a {
 
 .stats-strip {
   display: flex;
-  background: white;
+  background: var(--bg-card);
   border-bottom: 1px solid var(--border);
   padding: 12px 0;
 }
@@ -2381,7 +2381,7 @@ a {
 }
 
 .modal-sheet {
-  background: white;
+  background: var(--bg-card);
   width: 100%;
   border-radius: 20px 20px 0 0;
   padding: 16px 20px 32px;
