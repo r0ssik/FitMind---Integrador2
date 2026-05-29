@@ -96,6 +96,7 @@ export interface AiGenerateWorkoutRequest {
 export interface MealDto {
   id: string; name: string; time: string; calories: number;
   proteins: number; carbs: number; fats: number; description?: string;
+  dayOfWeek?: number; // null/undefined = todos os dias; 0=Seg … 6=Dom
 }
 
 export interface DietPlanDto {
@@ -107,6 +108,7 @@ export interface DietPlanDto {
 export interface CreateMealRequest {
   name: string; time: string; calories: number;
   proteins: number; carbs: number; fats: number; description?: string;
+  dayOfWeek?: number; // null/undefined = todos os dias; 0=Seg … 6=Dom
 }
 
 export interface CreateDietPlanRequest {

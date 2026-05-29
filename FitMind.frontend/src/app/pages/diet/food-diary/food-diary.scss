@@ -236,6 +236,48 @@
   padding: 10px 0 4px;
 }
 
+// ── Day nav ───────────────────────────────────────────────────────────────────
+.plan-day-nav {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 14px;
+  background: var(--bg);
+  border-radius: var(--radius);
+  padding: 4px;
+}
+
+.plan-day-btn {
+  flex: 1;
+  padding: 7px 2px;
+  border: none;
+  border-radius: calc(var(--radius) - 2px);
+  background: transparent;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.18s;
+  position: relative;
+
+  &.active {
+    background: var(--bg-card);
+    color: var(--primary-dark);
+    box-shadow: 0 1px 4px rgba(0,0,0,.12);
+  }
+
+  &.today:not(.active)::after {
+    content: '';
+    position: absolute;
+    bottom: 3px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--primary);
+  }
+}
+
 // ── Macro tags (shared) ───────────────────────────────────────────────────────
 .macro-tag {
   font-size: 11px;

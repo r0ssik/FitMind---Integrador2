@@ -189,10 +189,10 @@
         <div class="plan-hero-name">{{ activePlan()!.name }}</div>
         <div class="plan-hero-goal">{{ activePlan()!.goal }}</div>
         <div class="plan-hero-kcal">
-          <span class="plan-kcal-val">{{ activePlan()!.dailyCalories }}</span>
+          <span class="plan-kcal-val">{{ planTotalCalories }}</span>
           <span class="plan-kcal-lbl">kcal / dia</span>
         </div>
-        <!-- Macros totais -->
+        <!-- Macros do dia selecionado -->
         <div class="plan-macro-row">
           <div class="plan-macro-chip protein">
             <span class="pmc-label">Proteína</span>
@@ -209,10 +209,33 @@
         </div>
       </div>
 
-      <!-- Refeições do plano -->
-      <p class="plan-section-title">Refeições do dia</p>
+      <!-- ── Seletor de dia da semana ────────────────────────────────────────── -->
+      <div class="plan-day-nav">
+        @for (short of planDayShort; track $index; let i = $index) {
+          <button
+            class="plan-day-btn"
+            [class.active]="planDay() === i"
+            [class.today]="todayDayIndex() === i"
+            (click)="planDay.set(i)"
+            [title]="planDayNames[i]">
+            {{ short }}
+          </button>
+        }
+      </div>
 
-      @for (meal of activePlan()!.meals; track meal.id) {
+      <!-- Refeições do dia selecionado -->
+      <p class="plan-section-title" style="margin-bottom:8px">
+        {{ planDayNames[planDay()] }} — refeições
+      </p>
+
+      @if (!planDayMeals().length) {
+        <div style="text-align:center;padding:24px 0;color:var(--text-hint);font-size:14px">
+          <span class="mi" style="font-size:36px;display:block;margin-bottom:8px">restaurant_menu</span>
+          Nenhuma refeição para este dia.
+        </div>
+      }
+
+      @for (meal of planDayMeals(); track meal.id) {
         <div class="plan-meal-card">
           <div class="plan-meal-header">
             <div class="plan-meal-name-wrap">

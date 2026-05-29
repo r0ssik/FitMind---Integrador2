@@ -99,6 +99,7 @@ export class DietPlanGenerator {
       restrictions:   this.selectedRestrictions().filter(r => r !== 'Nenhuma').join(', '),
       dailyCalories:  plan.dailyCalories ?? 0,
       isAiGenerated:  true,
+      // dayOfWeek omitido → null no backend → aparece em todos os dias da semana
       meals: (plan.meals ?? []).map(m => ({
         name:        m.name,
         time:        m.time,

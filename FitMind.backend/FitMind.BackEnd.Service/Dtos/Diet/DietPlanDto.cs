@@ -24,7 +24,8 @@ public record MealDto(
     decimal Proteins,
     decimal Carbs,
     decimal Fats,
-    string? Description
+    string? Description,
+    int? DayOfWeek        // null = todos os dias; 0=Seg … 6=Dom
 );
 
 public record CreateDietPlanDto(
@@ -45,7 +46,8 @@ public record CreateMealDto(
     decimal Proteins,
     decimal Carbs,
     decimal Fats,
-    string? Description
+    string? Description,
+    int? DayOfWeek = null   // null = todos os dias; 0=Seg … 6=Dom
 );
 
 public record LogFoodEntryDto(

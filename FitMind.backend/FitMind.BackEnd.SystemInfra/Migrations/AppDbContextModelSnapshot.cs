@@ -469,6 +469,9 @@ namespace FitMind.BackEnd.SystemInfra.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
+                    b.Property<int?>("DayOfWeek")
+                        .HasColumnType("integer");
+
                     b.Property<Guid>("DietPlanId")
                         .HasColumnType("uuid");
 

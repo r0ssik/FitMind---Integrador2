@@ -1,5 +1,5 @@
 import { Component, signal, computed, OnInit } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { DietService } from '../../../services/diet.service';
 import { SettingsService } from '../../../services/settings.service';
@@ -17,7 +17,7 @@ interface MealEntry {
 
 @Component({
   selector: 'app-food-diary',
-  imports: [DatePipe],
+  imports: [DatePipe, DecimalPipe],
   templateUrl: './food-diary.html',
   styleUrl: './food-diary.scss',
 })
@@ -32,6 +32,25 @@ export class FoodDiary implements OnInit {
   planLoading   = signal(false);
   showHistory   = signal(false);
   restoringId   = signal<string | null>(null);
+
+  // ── Seletor de dia do plano (0=Seg … 6=Dom) ─────────────────────────────────
+  readonly planDayNames  = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
+  readonly planDayShort  = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+  planDay = signal<number>(this.todayDayIndex());
+
+  /** Refeições do plano para o dia selecionado.
+   *  Refeições sem dayOfWeek (null/undefined) aparecem em todos os dias. */
+  planDayMeals = computed(() => {
+    const day  = this.planDay();
+    const plan = this.activePlan();
+    if (!plan) return [];
+    return plan.meals.filter(m => m.dayOfWeek === null || m.dayOfWeek === undefined || m.dayOfWeek === day);
+  });
+
+  todayDayIndex(): number {
+    // JS: 0=Dom,1=Seg…6=Sáb → queremos 0=Seg…6=Dom
+    return (new Date().getDay() + 6) % 7;
+  }
 
   kcalGoal    = 2000;
   proteinGoal = 150;
@@ -103,19 +122,19 @@ export class FoodDiary implements OnInit {
   }
 
   get planTotalCalories(): number {
-    return this.activePlan()?.dailyCalories ?? 0;
+    return this.planDayMeals().reduce((s, m) => s + m.calories, 0) || this.activePlan()?.dailyCalories || 0;
   }
 
   get planTotalProtein(): number {
-    return Math.round((this.activePlan()?.meals ?? []).reduce((s, m) => s + m.proteins, 0));
+    return Math.round(this.planDayMeals().reduce((s, m) => s + m.proteins, 0));
   }
 
   get planTotalCarbs(): number {
-    return Math.round((this.activePlan()?.meals ?? []).reduce((s, m) => s + m.carbs, 0));
+    return Math.round(this.planDayMeals().reduce((s, m) => s + m.carbs, 0));
   }
 
   get planTotalFat(): number {
-    return Math.round((this.activePlan()?.meals ?? []).reduce((s, m) => s + m.fats, 0));
+    return Math.round(this.planDayMeals().reduce((s, m) => s + m.fats, 0));
   }
 
   private loadDiary(): void {

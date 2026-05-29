@@ -59,6 +59,7 @@ public class DietService(AppDbContext context) : IDietService
                 Carbs       = m.Carbs,
                 Fats        = m.Fats,
                 Description = m.Description,
+                DayOfWeek   = m.DayOfWeek,
             }).ToList();
         }
 
@@ -126,7 +127,7 @@ public class DietService(AppDbContext context) : IDietService
         p.Id, p.Name, p.Goal, p.Budget, p.Restrictions, p.DailyCalories,
         p.IsAiGenerated, p.CreatedAt,
         p.Meals.Select(m => new MealDto(
-            m.Id, m.Name, m.Time, m.Calories, m.Proteins, m.Carbs, m.Fats, m.Description
+            m.Id, m.Name, m.Time, m.Calories, m.Proteins, m.Carbs, m.Fats, m.Description, m.DayOfWeek
         )).ToList()
     );
 }
