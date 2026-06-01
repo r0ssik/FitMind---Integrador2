@@ -115,7 +115,7 @@ public class AiGeneratorService(AppDbContext context) : IAiGeneratorService
             plan.IsAiGenerated,
             plan.CreatedAt,
             plan.Meals.Select(m => new MealDto(
-                m.Id, m.Name, m.Time, m.Calories, m.Proteins, m.Carbs, m.Fats, null)
+                m.Id, m.Name, m.Time, m.Calories, m.Proteins, m.Carbs, m.Fats, null, m.DayOfWeek)
             ).ToList());
     }
 
