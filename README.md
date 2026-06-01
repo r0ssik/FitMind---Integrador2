@@ -109,7 +109,7 @@ dotnet run --project FitMind.BackEnd.API
 cd FitMind---Integrador2/FitMind.frontend
 
 # 1. Instale as dependências
-npm install
+ npm install --legacy-peer-deps
 
 # 2. Instale o Angular CLI globalmente (se ainda não tiver)
 npm install -g @angular/cli
