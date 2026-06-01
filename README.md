@@ -2,7 +2,7 @@
 
 > Plataforma web de saúde e bem-estar com Inteligência Artificial.
 >
-> Projeto Integrador — Sistemas de Informação 2026
+> Projeto Integrador - Sistemas de Informação 2026
 > Prof. Dr. Abraão Rodrigues
 
 **Equipe:** Emily Kaori Modro Mekaru · Gabriel Rodrigues Rossik · João Gabriel Barros Rodrigues
