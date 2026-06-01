@@ -68,7 +68,7 @@ ngOnInit(): void {
   const gs = Array.isArray(u.goals)
     ? u.goals
     : (u.goals
-        ? u.goals.split(',').map(g => g.trim()).filter(Boolean)
+        ? (() => { try { const p = JSON.parse(u.goals as string); return Array.isArray(p) ? p : u.goals!.split(',').map((g: string) => g.trim()).filter(Boolean); } catch { return u.goals!.split(',').map((g: string) => g.trim()).filter(Boolean); } })()
         : []);
 
   this.goals.set(gs);
