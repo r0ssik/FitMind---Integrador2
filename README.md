@@ -239,7 +239,7 @@ FitMind---Integrador2/
 
 ---
 
-## Rodando os testes
+## Rodando os testes (Ainda não implementados)
 
 ```bash
 # Backend (xUnit)
