@@ -35,10 +35,12 @@ export class MyProfile implements OnInit {
   goals       = signal<string[]>([]);
   limitations = signal<string[]>([]);
 
-  readonly allGoals = [
-    'Perder peso', 'Ganhar massa', 'Definição muscular',
-    'Melhorar condicionamento', 'Saúde geral', 'Reduzir estresse',
-  ];
+readonly allGoals = [
+  'Emagrecer',
+  'Hipertrofia',
+  'Saúde Geral',
+  'Condicionamento',
+];
 
   readonly allLimitations = [
     'Problema no joelho', 'Problema nas costas', 'Problema no ombro',
@@ -65,13 +67,31 @@ ngOnInit(): void {
 
   if (!u) return;
 
-  const gs = Array.isArray(u.goals)
-    ? u.goals
-    : (u.goals
-        ? (() => { try { const p = JSON.parse(u.goals as string); return Array.isArray(p) ? p : u.goals!.split(',').map((g: string) => g.trim()).filter(Boolean); } catch { return u.goals!.split(',').map((g: string) => g.trim()).filter(Boolean); } })()
-        : []);
+const gs = Array.isArray(u.goals)
+  ? u.goals
+  : (u.goals
+      ? (() => {
+          try {
+            const p = JSON.parse(u.goals as string);
+            return Array.isArray(p)
+              ? p
+              : u.goals!.split(',').map((g: string) => g.trim()).filter(Boolean);
+          } catch {
+            return u.goals!.split(',').map((g: string) => g.trim()).filter(Boolean);
+          }
+        })()
+      : []);
 
-  this.goals.set(gs);
+const goalMap: Record<string, string> = {
+  emagrecer: 'Emagrecer',
+  hipertrofia: 'Hipertrofia',
+  saude: 'Saúde Geral',
+  condicionamento: 'Condicionamento'
+};
+
+this.goals.set(
+  gs.map((g: string) => goalMap[g] ?? g)
+);
 
   const lims = Array.isArray(u.limitations)
     ? u.limitations
@@ -113,7 +133,14 @@ ngOnInit(): void {
       weight:      this.fWeight() ? +this.fWeight() : undefined,
       height:      this.fHeight() ? +this.fHeight() : undefined,
       limitations: this.limitations().join(', ') || undefined,
-      goals:       this.goals().join(', ') || undefined,
+      goals: this.goals()
+  .map(g => ({
+    'Emagrecer': 'emagrecer',
+    'Hipertrofia': 'hipertrofia',
+    'Saúde Geral': 'saude',
+    'Condicionamento': 'condicionamento'
+  }[g] ?? g))
+  .join(', ') || undefined,
       sex:         this.fSex()   || undefined,
       birthDate:   this.fBirth() || undefined,
     }).subscribe({
