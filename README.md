@@ -2,7 +2,7 @@
 
 > Plataforma web de saúde e bem-estar com Inteligência Artificial.
 >
-> Projeto Integrador — Sistemas de Informação 2026
+> Projeto Integrador - Sistemas de Informação 2026
 > Prof. Dr. Abraão Rodrigues
 
 **Equipe:** Emily Kaori Modro Mekaru · Gabriel Rodrigues Rossik · João Gabriel Barros Rodrigues
@@ -109,7 +109,7 @@ dotnet run --project FitMind.BackEnd.API
 cd FitMind---Integrador2/FitMind.frontend
 
 # 1. Instale as dependências
-npm install
+ npm install --legacy-peer-deps
 
 # 2. Instale o Angular CLI globalmente (se ainda não tiver)
 npm install -g @angular/cli
@@ -239,7 +239,7 @@ FitMind---Integrador2/
 
 ---
 
-## Rodando os testes
+## Rodando os testes (Ainda não implementados)
 
 ```bash
 # Backend (xUnit)
