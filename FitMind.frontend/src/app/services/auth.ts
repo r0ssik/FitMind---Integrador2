@@ -52,11 +52,11 @@ const body: RegisterRequest = {
 
   limitations: Array.isArray(profile.limitations)
     ? profile.limitations.join(', ')
-    : '',
+    : (profile.limitations ?? ''),
 
   goals: Array.isArray(profile.goals)
-    ? profile.goals.join(', ')
-    : '',
+    ? profile.goals
+    : [],
 
   weeklyAvailability: profile.weeklyAvailability ?? 3,
 };

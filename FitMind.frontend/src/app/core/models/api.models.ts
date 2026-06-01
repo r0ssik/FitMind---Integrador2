@@ -6,7 +6,7 @@ export interface RegisterRequest {
   name: string; email: string; password: string;
   phone: string; birthDate: string; sex: string;
   weight: number; height: number; limitations: string;
-  goals: string; weeklyAvailability: number;
+  goals: string[]; weeklyAvailability: number;
 }
 
 export interface UserInfoDto { id: string; name: string; email: string; isAdmin: boolean; }
