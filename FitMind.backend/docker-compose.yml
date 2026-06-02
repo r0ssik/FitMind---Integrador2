@@ -11,8 +11,10 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Host=fitmind-db;Database=fitmind;Username=fitmind_user;Password=fitmind_pass
     depends_on:
-      - fitmind-db
+      fitmind-db:
+        condition: service_healthy
     networks:
       - fitmind-network
 
@@ -28,6 +30,11 @@ services:
       - fitmind-pgdata:/var/lib/postgresql/data
     networks:
       - fitmind-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fitmind_user -d fitmind"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
 volumes:
   fitmind-pgdata:
