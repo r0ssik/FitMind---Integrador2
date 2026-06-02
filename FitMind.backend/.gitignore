@@ -44,7 +44,6 @@ coverage*.info
 coveragereport/
 
 ## Secrets / environment
-appsettings.Development.json
 appsettings.Local.json
 .env
 *.pfx
