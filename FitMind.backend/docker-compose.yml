@@ -1,6 +1,21 @@
 version: '3.8'
 
 services:
+
+  # ── Frontend (Angular + Nginx) ─────────────────────────────────────────────
+  fitmind-frontend:
+    build:
+      context: ../FitMind.frontend
+      dockerfile: Dockerfile
+    ports:
+      - "4200:80"
+    depends_on:
+      fitmind-api:
+        condition: service_started
+    networks:
+      - fitmind-network
+
+  # ── Backend (ASP.NET Core) ─────────────────────────────────────────────────
   fitmind-api:
     image: fitmind-api
     build:
@@ -18,6 +33,7 @@ services:
     networks:
       - fitmind-network
 
+  # ── Banco de Dados (PostgreSQL) ────────────────────────────────────────────
   fitmind-db:
     image: postgres:16-alpine
     environment:

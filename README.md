@@ -2,7 +2,7 @@
 
 > Plataforma web de saúde e bem-estar com Inteligência Artificial.
 >
-> Projeto Integrador - Sistemas de Informação 2026
+> Projeto Integrador — Sistemas de Informação 2026
 > Prof. Dr. Abraão Rodrigues
 
 **Equipe:** Emily Kaori Modro Mekaru · Gabriel Rodrigues Rossik · João Gabriel Barros Rodrigues
@@ -31,88 +31,116 @@ O FitMind é uma aplicação web focada em saúde e bem-estar que oferece:
 | Backend | ASP.NET Core 8 · C# · Entity Framework Core |
 | Banco de dados | PostgreSQL 16 |
 | IA | Google Gemini 2.0 Flash |
-| Infraestrutura | Docker · Docker Compose |
+| Infraestrutura | Docker · Docker Compose · Nginx |
 
 ---
 
-## Pré-requisitos
+## Formas de execução
 
-Instale as ferramentas abaixo antes de continuar. Links para download estão em cada item.
-
-### Para rodar o Backend
-
-| Ferramenta | Versão mínima | Download |
-|-----------|--------------|---------|
-| [.NET SDK](https://dotnet.microsoft.com/download) | 8.0 | https://dotnet.microsoft.com/download |
-| [PostgreSQL](https://www.postgresql.org/download/) | 15 ou superior | https://www.postgresql.org/download/ |
-| **OU** [Docker Desktop](https://www.docker.com/products/docker-desktop/) | Qualquer | https://www.docker.com/products/docker-desktop/ |
-
-> **Recomendado:** use o Docker. Ele sobe o banco automaticamente sem precisar instalar o PostgreSQL separado.
-
-### Para rodar o Frontend
-
-| Ferramenta | Versão mínima | Download |
-|-----------|--------------|---------|
-| [Node.js](https://nodejs.org/) | 18 LTS ou superior | https://nodejs.org/ |
-| [Angular CLI](https://angular.io/cli) | 21 | instalado via npm (ver abaixo) |
+| Modo | Quando usar | Comando |
+|------|------------|---------|
+| 🐳 **Docker (completo)** | Apresentação, entrega, demo | `docker-compose up --build` |
+| 💻 **Local (dev)** | Desenvolvimento diário com hot reload | `dotnet run` + `ng serve` |
 
 ---
 
-## Instalação e execução
+## 🐳 Opção 1 — Docker (tudo junto, um comando)
 
-### Opção 1 — Docker (recomendado)
+Sobe **frontend + backend + banco de dados** automaticamente.
 
-Sobe o backend + banco de dados com um único comando.
+### Pré-requisito
+
+| Ferramenta | Download |
+|-----------|---------|
+| [Docker Desktop](https://www.docker.com/products/docker-desktop/) | https://www.docker.com/products/docker-desktop/ |
+
+### Executar
 
 ```bash
 # 1. Clone o repositório
 git clone https://github.com/r0ssik/FitMind---Integrador2.git
 cd FitMind---Integrador2
 
-# 2. Suba o backend e o banco
+# 2. Suba tudo
 cd FitMind.backend
 docker-compose up --build
 ```
 
-A API estará disponível em `http://localhost:5000`.
-O Swagger (documentação interativa) em `http://localhost:5000/swagger`.
+### Acessos após subir
+
+| Serviço | URL |
+|---------|-----|
+| **Frontend** | http://localhost:4200 |
+| **API** | http://localhost:5000 |
+| **Swagger** | http://localhost:5000/swagger |
+
+> O frontend em produção chama `/api` e o Nginx faz proxy interno para o backend — sem CORS.
+
+### Parar os containers
+
+```bash
+docker-compose down
+```
+
+### Reconstruir do zero (limpar cache)
+
+```bash
+docker-compose down
+docker-compose build --no-cache
+docker-compose up
+```
 
 ---
 
-### Opção 2 — Manual (sem Docker)
+## 💻 Opção 2 — Local (desenvolvimento com hot reload)
 
-#### Backend
+Ideal para desenvolver — qualquer mudança no código recarrega automaticamente.
+
+### Pré-requisitos
+
+| Ferramenta | Versão | Download |
+|-----------|--------|---------|
+| [.NET SDK](https://dotnet.microsoft.com/download) | 8.0+ | https://dotnet.microsoft.com/download |
+| [Node.js](https://nodejs.org/) | 18 LTS+ | https://nodejs.org/ |
+| [PostgreSQL](https://www.postgresql.org/download/) | 15+ | https://www.postgresql.org/download/ |
+
+> **Dica:** Se não quiser instalar o PostgreSQL, use Docker só para o banco:
+> ```bash
+> cd FitMind.backend
+> docker-compose up fitmind-db
+> ```
+> Depois rode o backend e frontend localmente.
+
+### Backend
 
 ```bash
 # 1. Clone o repositório
 git clone https://github.com/r0ssik/FitMind---Integrador2.git
 cd FitMind---Integrador2/FitMind.backend
 
-# 2. Configure a string de conexão
+# 2. Configure a string de conexão (se não usar Docker para o banco)
 # Edite FitMind.BackEnd.API/appsettings.json:
 # "DefaultConnection": "Host=localhost;Database=fitmind;Username=SEU_USER;Password=SUA_SENHA"
 
-# 3. Restaure os pacotes e rode
-dotnet restore
+# 3. Rode
 dotnet run --project FitMind.BackEnd.API
 ```
 
-> As migrações do banco são aplicadas **automaticamente** na primeira execução em ambiente Development.
-> O banco também é populado com dados iniciais (seed) automaticamente.
+> ✅ As migrações e o seed são aplicados **automaticamente** no startup em Development.
 
----
+API disponível em `http://localhost:5000` · Swagger em `http://localhost:5000/swagger`
 
-#### Frontend
+### Frontend
 
 ```bash
-# Em outro terminal, vá para a pasta do frontend
+# Em outro terminal
 cd FitMind---Integrador2/FitMind.frontend
 
-# 1. Instale as dependências
- npm install --legacy-peer-deps
-
-# 2. Instale o Angular CLI globalmente (se ainda não tiver)
+# 1. Instale o Angular CLI (se ainda não tiver)
 npm install -g @angular/cli
+
+# 2. Instale as dependências
+npm install --legacy-peer-deps
 
 # 3. Inicie o servidor de desenvolvimento
 ng serve
@@ -120,13 +148,13 @@ ng serve
 
 Acesse `http://localhost:4200` no navegador.
 
-> O frontend aponta para `http://localhost:5000/api` por padrão (configurado em `src/environments/environment.ts`).
+> O frontend em desenvolvimento aponta para `http://localhost:5000/api` (configurado em `src/environments/environment.ts`).
 
 ---
 
 ## Configuração da IA (opcional)
 
-Por padrão, a IA roda em **modo mock** — gera planos de treino e dieta com dados pré-definidos, sem precisar de chave da API do Google.
+Por padrão a IA roda em **modo mock** — gera planos com dados pré-definidos, sem chave da API.
 
 Para usar a IA real:
 
@@ -142,40 +170,28 @@ Para usar a IA real:
 
 ---
 
-## Testando o projeto
+## Credenciais de teste
 
-### Conta de administrador
+O seed cria automaticamente dois usuários na primeira execução:
 
-Após o primeiro `dotnet run`, o seed cria automaticamente um usuário admin:
+| Tipo | E-mail | Senha |
+|------|--------|-------|
+| **Administrador** | `admin@fitmind.com` | `Admin@123` |
+| **Usuário comum** | `usuario@fitmind.com` | `Usuario@123` |
 
-| Campo | Valor |
-|-------|-------|
-| E-mail | `admin@fitmind.com` |
-| Senha | `Admin@123` |
+---
 
-### Conta de usuário comum
+## Testando via Swagger
 
-Crie uma conta normalmente em `/register` ou use as credenciais do seed (se disponível).
-
-### Testando via Swagger
-
-Com o backend rodando, acesse `http://localhost:5000/swagger` para testar todos os endpoints diretamente no navegador.
-
-1. Clique em `POST /api/auth/login`
-2. Execute com as credenciais do admin
+1. Acesse `http://localhost:5000/swagger`
+2. Execute `POST /api/auth/login` com as credenciais do admin
 3. Copie o `accessToken` da resposta
-4. Clique em **Authorize** (canto superior direito) e cole `Bearer <accessToken>`
-5. Agora todos os endpoints estão liberados para teste
+4. Clique em **Authorize** → cole `Bearer <accessToken>`
+5. Todos os endpoints ficam liberados para teste
 
-### Testando via Postman
+## Testando via Postman
 
-A coleção do Postman com todos os endpoints está disponível em:
-
-```
-Postman Collections/
-```
-
-Importe o arquivo `.json` no Postman e configure a variável `{{base_url}}` como `http://localhost:5000/api`.
+Importe o arquivo em `Postman Collections/` e configure a variável `{{base_url}}` como `http://localhost:5000/api`.
 
 ---
 
@@ -189,8 +205,7 @@ FitMind---Integrador2/
 │   ├── FitMind.BackEnd.SystemInfra/  ← Banco de dados, entidades, repositórios
 │   ├── FitMind.BackEnd.IoC/          ← Injeção de dependências
 │   ├── FitMind.BackEnd.Test/         ← Testes (xUnit)
-│   ├── docker-compose.yml
-│   └── FitMind.BackEnd.sln
+│   └── docker-compose.yml            ← Frontend + Backend + Banco
 ├── FitMind.frontend/
 │   ├── src/
 │   │   ├── app/
@@ -198,6 +213,8 @@ FitMind---Integrador2/
 │   │   │   ├── pages/        ← Telas da aplicação
 │   │   │   └── services/     ← Comunicação com a API
 │   │   └── environments/
+│   ├── Dockerfile            ← Build Angular + Nginx
+│   ├── nginx.conf            ← Proxy /api → backend, SPA fallback
 │   └── package.json
 ├── Postman Collections/
 └── README.md
@@ -239,7 +256,7 @@ FitMind---Integrador2/
 
 ---
 
-## Rodando os testes (Ainda não implementados)
+## Rodando os testes
 
 ```bash
 # Backend (xUnit)
@@ -257,11 +274,14 @@ ng test
 
 | Problema | Solução |
 |---------|---------|
-| Porta 5000 ou 4200 já em uso | Encerre o processo que usa a porta ou altere a porta no `launchSettings.json` / `angular.json` |
-| Erro de conexão com banco | Verifique a string de conexão em `appsettings.json` |
+| Porta 5432 já em uso no Docker | O PostgreSQL local está ocupando a porta. O Docker usa 5433 externamente — não conflita com o app, só com ferramentas externas |
+| Porta 5000 ou 4200 já em uso | Encerre o processo na porta ou altere em `launchSettings.json` / `angular.json` |
+| Container da API não conecta ao banco | Certifique-se de rodar `docker-compose up --build` a partir da pasta `FitMind.backend` |
+| Erro de conexão com banco (local) | Verifique a string de conexão em `appsettings.json` |
 | `ng` não reconhecido | Execute `npm install -g @angular/cli` |
 | `dotnet` não reconhecido | Instale o .NET SDK 8 e reinicie o terminal |
-| IA retornando mock | Verifique se `Gemini:UseMock` está `false` e se a `ApiKey` está preenchida |
-| `coluna "DayOfWeek" da relação "Meals" não existe` | Execute `dotnet ef database update --project FitMind.BackEnd.SystemInfra --startup-project FitMind.BackEnd.API` |
-| `FileLoadException: Uma política de Controle de Aplicativo bloqueou este arquivo` | Abra o PowerShell na pasta do projeto e execute `Get-ChildItem -Recurse \| Unblock-File`. Se persistir, clone o repositório fora da pasta OneDrive |
-| `InvalidDataException: Could not parse the JSON file` (appsettings) | O arquivo `appsettings.Development.json` está vazio — adicione `{}` como conteúdo mínimo |
+| IA retornando mock | Verifique se `Gemini:UseMock` está `false` e `ApiKey` preenchida |
+| `coluna "DayOfWeek" não existe` | Execute `dotnet ef database update --project FitMind.BackEnd.SystemInfra --startup-project FitMind.BackEnd.API` |
+| `FileLoadException: DLL bloqueada` | PowerShell na pasta: `Get-ChildItem -Recurse \| Unblock-File`. Se persistir, clone fora do OneDrive |
+| `InvalidDataException` ao iniciar | `appsettings.Development.json` está vazio — adicione `{}` como conteúdo mínimo |
+| Build Docker falha com "budget exceeded" | Já corrigido — limite de CSS aumentado em `angular.json` |
