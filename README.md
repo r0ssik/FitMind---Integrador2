@@ -1,4 +1,4 @@
-# FitMind 🏋️
+# FitMind 
 
 > Plataforma web de saúde e bem-estar com Inteligência Artificial.
 >
@@ -7,7 +7,7 @@
 
 **Equipe:** Emily Kaori Modro Mekaru · Gabriel Rodrigues Rossik · João Gabriel Barros Rodrigues
 
-🔗 **Repositório:** https://github.com/r0ssik/FitMind---Integrador2
+**Repositório:** https://github.com/r0ssik/FitMind---Integrador2
 
 ---
 
